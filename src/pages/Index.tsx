@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useGameState } from '@/hooks/useGameState';
 import { useYandexGames } from '@/hooks/useYandexGames';
 import ClickerScene from '@/components/game/ClickerScene';
@@ -21,15 +21,17 @@ const TABS: { id: Tab; label: string; emoji: string }[] = [
 export default function Index() {
   const [tab, setTab] = useState<Tab>('game');
 
-  const saveProgressRef = useRef<((data: Record<string, unknown>) => void) | null>(null);
-
   const {
     state, handleClick, buyBoost, unlockBoostAd,
     getActiveMultiplier, getBoostTimeLeft,
     selectSkin, buySkin, unlockSkinAd, loadCloudState,
     claimAdOffer, getAdCooldownLeft, setAdCooldown,
-  } = useGameState((s) => {
-    saveProgressRef.current?.({
+  } = useGameState();
+
+  const { adStatus, showRewardedAd, showFullscreenAd, submitScore, saveProgress, loadProgress, ready } = useYandexGames();
+
+  const doSaveProgress = useCallback((s: typeof state) => {
+    saveProgress({
       coins: s.coins,
       totalClicks: s.totalClicks,
       totalCoinsEarned: s.totalCoinsEarned,
@@ -41,12 +43,7 @@ export default function Index() {
       adCooldowns: s.adCooldowns,
       savedAt: Date.now(),
     });
-  });
-
-  const { adStatus, showRewardedAd, showFullscreenAd, submitScore, saveProgress, loadProgress, ready } = useYandexGames();
-
-  // Подключаем saveProgress к ref после инициализации
-  useEffect(() => { saveProgressRef.current = saveProgress; }, [saveProgress]);
+  }, [saveProgress]);
 
   const [, setTick] = useState(0);
   useEffect(() => {
@@ -156,7 +153,7 @@ export default function Index() {
   /* Rewarded ad для бустеров */
   const handleBoostAd = (boostId: string, duration: number) => {
     showRewardedAd(
-      () => unlockBoostAd(boostId, duration),
+      () => unlockBoostAd(boostId, duration, doSaveProgress),
     );
   };
 
@@ -271,7 +268,8 @@ export default function Index() {
         )}
         {tab === 'boosts' && (
           <BoostersPage coins={state.coins} adStatus={adStatus}
-            getBoostTimeLeft={getBoostTimeLeft} buyBoost={buyBoost}
+            getBoostTimeLeft={getBoostTimeLeft}
+            buyBoost={(id, cost, dur) => buyBoost(id, cost, dur, doSaveProgress)}
             onShowRewardedAd={handleBoostAd} />
         )}
         {tab === 'ads' && (

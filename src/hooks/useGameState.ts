@@ -94,23 +94,12 @@ function getMultiplierFromBoosts(boosts: ActiveBoost[]): number {
   return mult;
 }
 
-export function useGameState(onBoostsSave?: (s: GameState) => void) {
+export function useGameState() {
   const [state, setState] = useState<GameState>(loadState);
 
   // Ref для актуального state — нужен в интервалах без зависимостей
   const stateRef = useRef(state);
   useEffect(() => { stateRef.current = state; }, [state]);
-
-  const onBoostsSaveRef = useRef(onBoostsSave);
-  onBoostsSaveRef.current = onBoostsSave;
-
-  // Мгновенное сохранение при изменении бустов
-  const prevBoostsRef2 = useRef(state.activeBoosts);
-  useEffect(() => {
-    if (state.activeBoosts === prevBoostsRef2.current) return;
-    prevBoostsRef2.current = state.activeBoosts;
-    onBoostsSaveRef.current?.(state);
-  }, [state.activeBoosts]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const clickTimestamps = useRef<number[]>([]);
   const autoClickRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -209,7 +198,7 @@ export function useGameState(onBoostsSave?: (s: GameState) => void) {
   }, []);
 
   // --- Покупка буста ---
-  const buyBoost = useCallback((boostId: string, cost: number, duration: number) => {
+  const buyBoost = useCallback((boostId: string, cost: number, duration: number, onSaved?: (s: GameState) => void) => {
     setState(s => {
       if (s.coins < cost) return s;
       const now = Date.now();
@@ -219,11 +208,13 @@ export function useGameState(onBoostsSave?: (s: GameState) => void) {
             ? { ...b, expiresAt: Math.max(b.expiresAt, now) + duration * 1000 }
             : b)
         : [...s.activeBoosts, { boostId, expiresAt: now + duration * 1000 }];
-      return { ...s, coins: s.coins - cost, activeBoosts: newBoosts };
+      const newState = { ...s, coins: s.coins - cost, activeBoosts: newBoosts };
+      if (onSaved) setTimeout(() => onSaved(newState), 0);
+      return newState;
     });
   }, []);
 
-  const unlockBoostAd = useCallback((boostId: string, duration: number) => {
+  const unlockBoostAd = useCallback((boostId: string, duration: number, onSaved?: (s: GameState) => void) => {
     setState(s => {
       const now = Date.now();
       const existing = s.activeBoosts.find(b => b.boostId === boostId);
@@ -232,7 +223,9 @@ export function useGameState(onBoostsSave?: (s: GameState) => void) {
             ? { ...b, expiresAt: Math.max(b.expiresAt, now) + duration * 1000 }
             : b)
         : [...s.activeBoosts, { boostId, expiresAt: now + duration * 1000 }];
-      return { ...s, activeBoosts: newBoosts };
+      const newState = { ...s, activeBoosts: newBoosts };
+      if (onSaved) setTimeout(() => onSaved(newState), 0);
+      return newState;
     });
   }, []);
 
