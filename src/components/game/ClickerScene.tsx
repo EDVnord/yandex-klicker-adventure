@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef } from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
 import type { Skin } from '@/data/skins';
 import type { Achievement } from '@/types/game';
 import AchievementToast from './AchievementToast';
@@ -13,11 +13,13 @@ interface Props {
   skin: Skin;
   achievements: Achievement[];
   onClick: () => void;
+  isAutoActive?: boolean; // активен ли авто-робот
 }
 
-export default function ClickerScene({ coins, totalClicks, clicksPerSecond, multiplier, skin, achievements, onClick }: Props) {
+export default function ClickerScene({ coins, totalClicks, clicksPerSecond, multiplier, skin, achievements, onClick, isAutoActive = false }: Props) {
   const [particles, setParticles] = useState<CoinParticle[]>([]);
   const [isClicking, setIsClicking] = useState(false);
+  const [autoPulse, setAutoPulse] = useState(false);
   const particleId = useRef(0);
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -26,6 +28,24 @@ export default function ClickerScene({ coins, totalClicks, clicksPerSecond, mult
     if (n >= 1_000)     return `${(n / 1_000).toFixed(1)}К`;
     return n.toString();
   };
+
+  // Пульсация для автоклика — мигает каждые 400мс синхронно с интервалом робота
+  useEffect(() => {
+    if (!isAutoActive) { setAutoPulse(false); return; }
+    const t = setInterval(() => {
+      setAutoPulse(true);
+      setTimeout(() => setAutoPulse(false), 160);
+    }, 400);
+    return () => clearInterval(t);
+  }, [isAutoActive]);
+
+  const spawnParticle = useCallback((x: number, y: number) => {
+    const id = particleId.current++;
+    const pool = multiplier >= 10 ? ['💎','💎','⭐'] : multiplier >= 5 ? ['🌟','⚡'] : ['⚡','🪙'];
+    const label = pool[Math.floor(Math.random() * pool.length)];
+    setParticles(p => [...p, { id, x, y, label }]);
+    setTimeout(() => setParticles(p => p.filter(pp => pp.id !== id)), 750);
+  }, [multiplier]);
 
   const handleClick = useCallback((e: React.MouseEvent | React.TouchEvent) => {
     e.preventDefault();
@@ -37,15 +57,13 @@ export default function ClickerScene({ coins, totalClicks, clicksPerSecond, mult
       x = ((clientX - rect.left) / rect.width) * 100;
       y = ((clientY - rect.top) / rect.height) * 100;
     }
-    const id = particleId.current++;
-    const pool = multiplier >= 10 ? ['💎','💎','⭐'] : multiplier >= 5 ? ['🌟','⚡'] : ['⚡','🪙'];
-    const label = pool[Math.floor(Math.random() * pool.length)];
-    setParticles(p => [...p, { id, x, y, label }]);
-    setTimeout(() => setParticles(p => p.filter(pp => pp.id !== id)), 750);
+    spawnParticle(x, y);
     setIsClicking(true);
     setTimeout(() => setIsClicking(false), 160);
     onClick();
-  }, [onClick, multiplier]);
+  }, [onClick, spawnParticle]);
+
+  const isActive = isClicking || autoPulse;
 
   return (
     <div className="flex flex-col items-center gap-4 px-4">
@@ -64,15 +82,22 @@ export default function ClickerScene({ coins, totalClicks, clicksPerSecond, mult
         ))}
       </div>
 
-      {/* Multiplier */}
-      {multiplier > 1 && (
-        <div
-          className="animate-bounce-in flex items-center gap-2 px-5 py-2 font-game text-base"
-          style={{ background: 'linear-gradient(90deg,#E61919,#ff4444)', borderRadius: 4, boxShadow: '0 4px 0 #8f0e0e', color: '#fff' }}
-        >
-          🔥 МНОЖИТЕЛЬ x{multiplier} АКТИВЕН!
-        </div>
-      )}
+      {/* Статус бустов */}
+      <div className="flex flex-col items-center gap-1.5 w-full max-w-sm">
+        {multiplier > 1 && (
+          <div className="animate-bounce-in w-full flex items-center justify-center gap-2 px-5 py-2 font-game text-base"
+            style={{ background: 'linear-gradient(90deg,#E61919,#ff4444)', borderRadius: 4, boxShadow: '0 4px 0 #8f0e0e', color: '#fff' }}>
+            🔥 МНОЖИТЕЛЬ x{multiplier} АКТИВЕН!
+          </div>
+        )}
+        {isAutoActive && (
+          <div className="w-full flex items-center justify-center gap-2 px-5 py-1.5 font-game text-sm"
+            style={{ background: 'linear-gradient(90deg,#FF8C00,#FFB74D)', borderRadius: 4, boxShadow: '0 3px 0 #a35800', color: '#111',
+              animation: 'autoPulseBar 0.4s ease-in-out infinite alternate' }}>
+            🤖 АВТО-РОБОТ АКТИВЕН!
+          </div>
+        )}
+      </div>
 
       {/* Character zone */}
       <div ref={containerRef} className="relative cursor-pointer select-none touch-none"
@@ -80,22 +105,40 @@ export default function ClickerScene({ coins, totalClicks, clicksPerSecond, mult
 
         {/* Ground shadow */}
         <div className="absolute bottom-0 left-1/2 -translate-x-1/2"
-          style={{ width: 180, height: 16, background: 'radial-gradient(ellipse,rgba(0,0,0,0.55) 0%,transparent 70%)', borderRadius: '50%' }} />
+          style={{ width: 180, height: 16,
+            background: 'radial-gradient(ellipse,rgba(0,0,0,0.55) 0%,transparent 70%)',
+            borderRadius: '50%',
+            transform: isActive ? 'scaleX(1.1)' : 'scaleX(1)',
+            transition: 'transform 0.15s',
+          }} />
 
         {/* Skin image */}
         <div className="absolute inset-x-6 top-0 bottom-8" style={{
-          animation: isClicking ? 'click-burst 0.3s ease-out' : 'float-rblx 2.8s ease-in-out infinite',
-          filter: isClicking ? `drop-shadow(0 0 24px ${skin.borderColor})` : `drop-shadow(0 8px 14px rgba(0,0,0,0.7))`,
+          animation: isActive
+            ? 'click-burst 0.15s ease-out'
+            : isAutoActive
+              ? 'autoFloat 0.4s ease-in-out infinite alternate'
+              : 'float-rblx 2.8s ease-in-out infinite',
+          filter: isActive
+            ? `drop-shadow(0 0 28px ${skin.borderColor})`
+            : isAutoActive
+              ? `drop-shadow(0 0 12px #FFB74D88)`
+              : `drop-shadow(0 8px 14px rgba(0,0,0,0.7))`,
         }}>
           <div style={{
             width: '100%', height: '100%',
-            border: `3px solid ${skin.borderColor}88`,
+            border: isAutoActive
+              ? '3px solid #FFB74D88'
+              : `3px solid ${skin.borderColor}88`,
             borderRadius: 6,
             overflow: 'hidden',
             background: '#0F1923',
-            boxShadow: isClicking
+            boxShadow: isActive
               ? `0 0 32px ${skin.glowColor}, inset 0 0 20px ${skin.glowColor}`
-              : `0 0 0 2px ${skin.borderColor}22, 0 2px 16px rgba(0,0,0,0.5)`,
+              : isAutoActive
+                ? '0 0 16px rgba(255,183,77,0.4)'
+                : `0 0 0 2px ${skin.borderColor}22, 0 2px 16px rgba(0,0,0,0.5)`,
+            transition: 'box-shadow 0.15s, border-color 0.3s',
           }}>
             <img src={skin.img} alt={skin.name}
               style={{ width: '100%', height: '100%', objectFit: 'cover', imageRendering: 'pixelated' }}
@@ -104,7 +147,8 @@ export default function ClickerScene({ coins, totalClicks, clicksPerSecond, mult
           </div>
           {/* Name tag */}
           <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 whitespace-nowrap"
-            style={{ background: '#000c', border: `1px solid ${skin.borderColor}55`, borderRadius: 3, padding: '2px 8px', fontSize: '0.68rem', fontWeight: 800, color: '#fff', letterSpacing: '0.05em' }}>
+            style={{ background: '#000c', border: `1px solid ${isAutoActive ? '#FFB74D55' : skin.borderColor + '55'}`,
+              borderRadius: 3, padding: '2px 8px', fontSize: '0.68rem', fontWeight: 800, color: '#fff', letterSpacing: '0.05em' }}>
             {skin.tag}
           </div>
         </div>
@@ -137,8 +181,18 @@ export default function ClickerScene({ coins, totalClicks, clicksPerSecond, mult
         <span className="font-game text-base" style={{ color: '#FFD700' }}>{formatCoins(coins)} монет</span>
       </div>
 
-      {/* Achievement toast — под кнопкой, не перекрывает статистику */}
       <AchievementToast achievements={achievements} />
+
+      <style>{`
+        @keyframes autoFloat {
+          from { transform: translateY(0px) scale(1); }
+          to   { transform: translateY(-8px) scale(1.03); }
+        }
+        @keyframes autoPulseBar {
+          from { opacity: 0.8; }
+          to   { opacity: 1; }
+        }
+      `}</style>
     </div>
   );
 }

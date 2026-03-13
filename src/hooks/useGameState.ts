@@ -232,7 +232,7 @@ export function useGameState() {
     });
   }, []);
 
-  const claimAdOffer = useCallback((offerId: string, rewardType: string, rewardValue: number, cooldownMs = 4 * 60 * 60 * 1000) => {
+  const claimAdOffer = useCallback((offerId: string, rewardType: string, rewardValue: number, cooldownMs = 5 * 60 * 1000) => {
     setState(s => {
       const now = Date.now();
       const cooldownEnds = s.adCooldowns[offerId] ?? 0;

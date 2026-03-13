@@ -286,7 +286,7 @@ export default function AdOffersPage({
       description: 'Получи 10 000 монет прямо сейчас!',
       rewardType: 'coins',
       rewardValue: 10_000,
-      cooldownLabel: '4 часа',
+      cooldownLabel: '5 мин',
       color: '#FFD700',
     },
     {
@@ -296,7 +296,7 @@ export default function AdOffersPage({
       description: 'Активируй Турбо-клик ×3 на 60 секунд бесплатно!',
       rewardType: 'boost',
       rewardValue: 60,
-      cooldownLabel: '4 часа',
+      cooldownLabel: '5 мин',
       color: '#FFD700',
     },
     {
@@ -306,7 +306,7 @@ export default function AdOffersPage({
       description: '×5 монет за клик на 30 секунд — за рекламу!',
       rewardType: 'boost',
       rewardValue: 30,
-      cooldownLabel: '4 часа',
+      cooldownLabel: '10 мин',
       color: '#FF6BC8',
     },
     {
@@ -316,7 +316,7 @@ export default function AdOffersPage({
       description: '×10 монет на 20 секунд — очень редко!',
       rewardType: 'boost',
       rewardValue: 20,
-      cooldownLabel: '6 часов',
+      cooldownLabel: '15 мин',
       color: '#69F0AE',
     },
   ];

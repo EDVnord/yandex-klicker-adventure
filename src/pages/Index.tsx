@@ -186,7 +186,8 @@ export default function Index() {
           <div className="py-5">
             <ClickerScene coins={state.coins} totalClicks={state.totalClicks}
               clicksPerSecond={state.clicksPerSecond} multiplier={multiplier}
-              skin={currentSkin} achievements={state.achievements} onClick={handleClickWithAd} />
+              skin={currentSkin} achievements={state.achievements} onClick={handleClickWithAd}
+              isAutoActive={state.activeBoosts.some(b => b.boostId === 'robot' && b.expiresAt > Date.now())} />
           </div>
         )}
         {tab === 'skins' && (
