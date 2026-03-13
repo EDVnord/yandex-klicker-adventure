@@ -11,13 +11,12 @@ interface Props {
 }
 
 const SPIN_PRIZES = [
-  { emoji: '🪙', label: '5 000',      type: 'coins', value: 5_000,   weight: 30, color: '#FFD700' },
-  { emoji: '⚡',  label: 'Турбо 30с', type: 'turbo', value: 30,      weight: 20, color: '#FFD700' },
-  { emoji: '🪙', label: '15 000',     type: 'coins', value: 15_000,  weight: 20, color: '#4FC3F7' },
-  { emoji: '🚀', label: 'Мега 20с',   type: 'mega',  value: 20,      weight: 15, color: '#FF6BC8' },
-  { emoji: '🪙', label: '50 000',     type: 'coins', value: 50_000,  weight: 10, color: '#a855f7' },
-  { emoji: '⭐',  label: 'Звезда 15с', type: 'star', value: 15,      weight: 4,  color: '#69F0AE' },
-  { emoji: '💎', label: '200 000',    type: 'coins', value: 200_000, weight: 1,  color: '#f0abfc' },
+  { emoji: '🪙', label: '500',        type: 'coins', value: 500,    weight: 35, color: '#FFD700' },
+  { emoji: '⚡',  label: 'Турбо 30с', type: 'turbo', value: 30,     weight: 25, color: '#FFD700' },
+  { emoji: '🪙', label: '1 500',      type: 'coins', value: 1_500,  weight: 20, color: '#4FC3F7' },
+  { emoji: '🚀', label: 'Мега 20с',   type: 'mega',  value: 20,     weight: 12, color: '#FF6BC8' },
+  { emoji: '🪙', label: '3 000',      type: 'coins', value: 3_000,  weight: 6,  color: '#a855f7' },
+  { emoji: '⭐',  label: 'Звезда 15с', type: 'star', value: 15,     weight: 2,  color: '#69F0AE' },
 ];
 
 function weightedRandom() {
@@ -208,7 +207,7 @@ function Jackpot({ show, onHide }: { show: boolean; onHide: () => void }) {
           marginTop: 6,
         }}>ДЖЕКПОТ!</div>
         <div style={{ color: '#f0abfc', fontWeight: 900, fontSize: 18, marginTop: 4 }}>
-          +200 000 монет 🎉
+          Звёздный дождь ×10! 🎉
         </div>
       </div>
 
@@ -273,7 +272,7 @@ export default function AdOffersPage({
     const prize = pendingPrize.current;
     setWinPrize(prize);
     setShowWin(true);
-    if (prize.value === 200_000) {
+    if (prize.type === 'star') {
       setTimeout(() => setShowJackpot(true), 300);
     }
   };

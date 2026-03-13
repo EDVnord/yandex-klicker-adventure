@@ -267,13 +267,14 @@ export function useGameState() {
       let newState = { ...s, adCooldowns: { ...s.adCooldowns, [offerId]: now + cooldownMs } };
       if (rewardType === 'coins') {
         newState = { ...newState, coins: s.coins + rewardValue, totalCoinsEarned: s.totalCoinsEarned + rewardValue };
-      } else if (rewardType === 'boost') {
-        const existing = s.activeBoosts.find(b => b.boostId === offerId);
+      } else if (rewardType === 'boost' || rewardType === 'turbo' || rewardType === 'mega' || rewardType === 'star') {
+        const boostId = rewardType === 'boost' ? offerId : rewardType;
+        const existing = s.activeBoosts.find(b => b.boostId === boostId);
         const newBoosts = existing
-          ? s.activeBoosts.map(b => b.boostId === offerId
+          ? s.activeBoosts.map(b => b.boostId === boostId
               ? { ...b, expiresAt: Math.max(b.expiresAt, now) + rewardValue * 1000 }
               : b)
-          : [...s.activeBoosts, { boostId: offerId, expiresAt: now + rewardValue * 1000 }];
+          : [...s.activeBoosts, { boostId, expiresAt: now + rewardValue * 1000 }];
         newState = { ...newState, activeBoosts: newBoosts };
       } else if (rewardType === 'cpc') {
         newState = { ...newState, coins: s.coins + rewardValue, totalCoinsEarned: s.totalCoinsEarned + rewardValue };
