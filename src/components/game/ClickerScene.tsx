@@ -158,11 +158,17 @@ export default function ClickerScene({ lang, coins, totalClicks, clicksPerSecond
                 : `0 0 0 2px ${skin.borderColor}22, 0 2px 16px rgba(0,0,0,0.5)`,
             transition: 'box-shadow 0.15s, border-color 0.3s',
           }}>
-            <img src={skin.img} alt={skin.name}
-              style={{ width: '100%', height: '100%', objectFit: 'cover', imageRendering: 'pixelated', pointerEvents: 'none' }}
-              draggable={false}
-              onContextMenu={e => e.preventDefault()}
-            />
+            <div style={{
+              width: '100%', height: '100%',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              background: `radial-gradient(circle at 60% 35%, ${skin.borderColor}33, #0a0f1a 70%)`,
+              fontSize: 130,
+              lineHeight: 1,
+              userSelect: 'none',
+              pointerEvents: 'none',
+            }}>
+              {skin.emoji}
+            </div>
           </div>
           {/* Name tag */}
           <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 whitespace-nowrap"

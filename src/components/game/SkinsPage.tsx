@@ -68,17 +68,15 @@ export default function SkinsPage({ lang, coins, currentSkinId, unlockedSkins, o
               </div>
 
               {/* Image */}
-              <div className="w-full aspect-square rounded overflow-hidden relative"
+              <div className="w-full aspect-square rounded overflow-hidden relative flex items-center justify-center"
                 style={{
                   border: `2px solid ${rarityColor}44`,
-                  background: '#0F1923',
+                  background: `radial-gradient(circle at 60% 40%, ${rarityColor}22, #0F1923 70%)`,
                   filter: unlocked ? 'none' : 'grayscale(0.7) brightness(0.6)',
                 }}>
-                <img src={skin.img} alt={skin.name}
-                  style={{ width: '100%', height: '100%', objectFit: 'cover', imageRendering: 'pixelated', userSelect: 'none', WebkitUserSelect: 'none', pointerEvents: 'none' }}
-                  draggable={false}
-                  onContextMenu={e => e.preventDefault()}
-                />
+                <span style={{ fontSize: 72, lineHeight: 1, userSelect: 'none', pointerEvents: 'none' }}>
+                  {skin.emoji}
+                </span>
                 {!unlocked && (
                   <div className="absolute inset-0 flex items-center justify-center"
                     style={{ background: 'rgba(0,0,0,0.4)' }}>
