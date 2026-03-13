@@ -86,7 +86,13 @@ export default function SkinsPage({ coins, currentSkinId, unlockedSkins, onSelec
 
               {/* Name & desc */}
               <div>
-                <div className="font-game text-base text-white leading-none">{skin.emoji} {skin.name}</div>
+                <div className="font-game text-base text-white leading-none flex items-center justify-between">
+                  <span>{skin.emoji} {skin.name}</span>
+                  <span className="text-xs font-black px-1.5 py-0.5 rounded"
+                    style={{ background: rarityColor + '22', color: rarityColor, border: `1px solid ${rarityColor}55` }}>
+                    ×{skin.clickMultiplier}
+                  </span>
+                </div>
                 <div className="text-[11px] font-semibold mt-0.5 leading-tight" style={{ color: '#4a5768' }}>
                   {skin.description}
                 </div>

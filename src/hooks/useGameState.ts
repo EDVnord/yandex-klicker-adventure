@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import type { GameState, ActiveBoost } from '@/types/game';
 import { ACHIEVEMENTS } from '@/data/gameData';
+import { SKINS } from '@/data/skins';
 
 const STORAGE_KEY = 'roboclick_save_v3';
 
@@ -134,8 +135,9 @@ export function useGameState() {
   const handleClickImpl = (isAuto: boolean) => {
     if (!isAuto) clickTimestamps.current.push(Date.now());
     setState(s => {
+      const skinMult = SKINS.find(sk => sk.id === s.currentSkinId)?.clickMultiplier ?? 1;
       const mult = getMultiplierFromBoosts(s.activeBoosts);
-      const earned = s.coinsPerClick * mult;
+      const earned = s.coinsPerClick * mult * skinMult;
       const newCoins = s.coins + earned;
       const newTotal = s.totalClicks + (isAuto ? 0 : 1);
       const newTotalEarned = s.totalCoinsEarned + earned;
