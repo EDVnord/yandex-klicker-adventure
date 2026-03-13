@@ -286,7 +286,7 @@ export default function AdOffersPage({
       description: 'Получи 10 000 монет прямо сейчас!',
       rewardType: 'coins',
       rewardValue: 10_000,
-      cooldownLabel: '5 мин',
+      cooldownSec: 5 * 60,
       color: '#FFD700',
     },
     {
@@ -296,7 +296,7 @@ export default function AdOffersPage({
       description: 'Активируй Турбо-клик ×3 на 60 секунд бесплатно!',
       rewardType: 'boost',
       rewardValue: 60,
-      cooldownLabel: '5 мин',
+      cooldownSec: 5 * 60,
       color: '#FFD700',
     },
     {
@@ -306,7 +306,7 @@ export default function AdOffersPage({
       description: '×5 монет за клик на 30 секунд — за рекламу!',
       rewardType: 'boost',
       rewardValue: 30,
-      cooldownLabel: '10 мин',
+      cooldownSec: 10 * 60,
       color: '#FF6BC8',
     },
     {
@@ -316,7 +316,7 @@ export default function AdOffersPage({
       description: '×10 монет на 20 секунд — очень редко!',
       rewardType: 'boost',
       rewardValue: 20,
-      cooldownLabel: '15 мин',
+      cooldownSec: 15 * 60,
       color: '#69F0AE',
     },
   ];
@@ -412,9 +412,21 @@ export default function AdOffersPage({
                 <div className="font-game text-lg text-white leading-none">{offer.title}</div>
                 <p className="text-sm mt-0.5 font-semibold" style={{ color: '#4a5768' }}>{offer.description}</p>
                 {!ready && (
-                  <div className="mt-1 flex items-center gap-1 text-sm font-bold" style={{ color: offer.color }}>
-                    <Icon name="Clock" size={13} /> {formatCooldown(cd)} до следующего
-                  </div>
+                  <>
+                    <div className="mt-1 flex items-center gap-1 text-sm font-bold" style={{ color: offer.color }}>
+                      <Icon name="Clock" size={13} /> {formatCooldown(cd)} до следующего
+                    </div>
+                    <div className="mt-1.5 w-full rounded-full overflow-hidden" style={{ height: 5, background: '#1C2333' }}>
+                      <div style={{
+                        height: '100%',
+                        width: `${((offer.cooldownSec - cd) / offer.cooldownSec) * 100}%`,
+                        background: offer.color,
+                        borderRadius: 9999,
+                        transition: 'width 1s linear',
+                        boxShadow: `0 0 6px ${offer.color}88`,
+                      }} />
+                    </div>
+                  </>
                 )}
               </div>
             </div>
