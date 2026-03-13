@@ -170,17 +170,26 @@ export default function ClickerScene({ coins, totalClicks, clicksPerSecond, mult
           <span key={p.id} className="coin-float" style={{ left: `${p.x}%`, top: `${p.y}%` }}>{p.label}</span>
         ))}
 
-        {/* Hint */}
-        {totalClicks === 0 && (
-          <div className="absolute -bottom-10 left-1/2 -translate-x-1/2 whitespace-nowrap text-xs font-bold tracking-widest"
-            style={{ color: '#3d4a60' }}>
-            ▼ НАЖИМАЙ НА ПЕРСОНАЖА! ▼
-          </div>
-        )}
       </div>
 
+      {/* Hint — over button, visible only on first launch */}
+      {totalClicks === 0 && (
+        <div className="text-xs font-bold tracking-widest mt-2"
+          style={{ color: '#3d4a60' }}>
+          ▼ НАЖИМАЙ НА ПЕРСОНАЖА ИЛИ КНОПКУ! ▼
+        </div>
+      )}
+
+      {/* Skin multiplier badge */}
+      {skin.clickMultiplier > 1 && (
+        <div className="flex items-center gap-1.5 px-3 py-1 font-game text-sm mt-1"
+          style={{ background: skin.borderColor + '22', border: `1px solid ${skin.borderColor}55`, borderRadius: 4, color: skin.borderColor }}>
+          {skin.emoji} ×{skin.clickMultiplier} ЗА КЛИК
+        </div>
+      )}
+
       {/* Big click button */}
-      <button className="rblx-btn rblx-btn-blue btn-click-pulse mt-4"
+      <button className="rblx-btn rblx-btn-blue btn-click-pulse mt-3"
         style={{ fontSize: '1.35rem', padding: '14px 52px', borderRadius: 5 }}
         onClick={handleClick} onTouchStart={handleClick}>
         🪙 ТЫК! {multiplier > 1 ? `+${multiplier}` : '+1'}
