@@ -187,30 +187,25 @@ export default function Index() {
           style={{ background: '#1C2333', border: '2px solid #2D3A50', borderRadius: 4 }}>
           <div className="w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-black"
             style={{ background: '#FFD700', color: '#111' }}>R$</div>
-          <span style={{ color: '#FFD700' }}>{state.coins.toLocaleString('ru')}</span>
+          <span style={{ color: '#FFD700' }}>{Math.floor(state.coins).toLocaleString('ru')}</span>
         </div>
       </header>
 
       {/* Active boosts */}
-      {(state.activeBoosts.length > 0 || state.purchasedBoosts.includes('robot')) && (
+      {state.activeBoosts.length > 0 && (
         <div className="relative z-10 flex gap-2 px-4 py-1.5 overflow-x-auto"
           style={{ background: '#0d131e', borderBottom: '1px solid #1C2333' }}>
-          {/* Постоянный робот — без таймера */}
-          {state.purchasedBoosts.includes('robot') && (
-            <div className="flex-shrink-0 flex items-center gap-1.5 px-3 py-1 font-bold text-sm"
-              style={{ background: '#FF8C00', borderRadius: 3, color: '#111', boxShadow: '0 2px 0 #a35800' }}>
-              🤖 АВТО-РОБОТ
-            </div>
-          )}
-          {/* Временные бусты с таймером (кроме робота) */}
-          {state.activeBoosts.filter(ab => ab.boostId !== 'robot').map(ab => {
+          {state.activeBoosts.map(ab => {
             const t = getBoostTimeLeft(ab.boostId);
             if (t <= 0) return null;
-            const emojis: Record<string,string> = { turbo:'⚡', mega:'🚀', rainbow:'🌈', star:'⭐' };
+            const fmt = (s: number) => s >= 60 ? `${Math.floor(s / 60)}м ${s % 60}с` : `${s}с`;
+            const emojis: Record<string,string> = { turbo:'⚡', mega:'🚀', rainbow:'🌈', star:'⭐', robot:'🤖' };
+            const isRobot = ab.boostId === 'robot';
             return (
               <div key={ab.boostId} className="flex-shrink-0 flex items-center gap-1.5 px-3 py-1 font-bold text-sm"
-                style={{ background: '#E61919', borderRadius: 3, color: '#fff', boxShadow: '0 2px 0 #8f0e0e' }}>
-                <span>{emojis[ab.boostId] ?? '⚡'}</span><span>{t}с</span>
+                style={{ background: isRobot ? '#FF8C00' : '#E61919', borderRadius: 3,
+                  color: isRobot ? '#111' : '#fff', boxShadow: isRobot ? '0 2px 0 #a35800' : '0 2px 0 #8f0e0e' }}>
+                <span>{emojis[ab.boostId] ?? '⚡'}</span><span>{fmt(t)}</span>
               </div>
             );
           })}
@@ -237,9 +232,9 @@ export default function Index() {
               clicksPerSecond={state.clicksPerSecond} multiplier={multiplier}
               skin={currentSkin} achievements={state.achievements} onClick={handleClickWithAd}
               isAutoActive={
-                state.purchasedBoosts.includes('robot') ||
-                state.activeBoosts.some(b => b.boostId === 'rainbow' && b.expiresAt > Date.now())
-              } />
+                state.activeBoosts.some(b => (b.boostId === 'robot' || b.boostId === 'rainbow') && b.expiresAt > Date.now())
+              }
+              robotTimeLeft={getBoostTimeLeft('robot')} />
           </div>
         )}
         {tab === 'skins' && (

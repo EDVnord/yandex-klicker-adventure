@@ -52,7 +52,7 @@ export default function AchievementsPage({ achievements, totalClicks, totalCoins
 
       {/* Achievement list */}
       <div className="space-y-2">
-        {achievements.map(a => (
+        {achievements.filter(a => !a.unlocked).map(a => (
           <div
             key={a.id}
             className="rblx-panel flex items-center gap-3"

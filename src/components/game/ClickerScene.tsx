@@ -14,9 +14,10 @@ interface Props {
   achievements: Achievement[];
   onClick: () => void;
   isAutoActive?: boolean;
+  robotTimeLeft?: number;
 }
 
-export default function ClickerScene({ coins, totalClicks, clicksPerSecond, multiplier, skin, achievements, onClick, isAutoActive = false }: Props) {
+export default function ClickerScene({ coins, totalClicks, clicksPerSecond, multiplier, skin, achievements, onClick, isAutoActive = false, robotTimeLeft = 0 }: Props) {
   const [particles, setParticles] = useState<CoinParticle[]>([]);
   const [isClicking, setIsClicking] = useState(false);
   const [autoPulse, setAutoPulse] = useState(false);
@@ -24,26 +25,28 @@ export default function ClickerScene({ coins, totalClicks, clicksPerSecond, mult
   const containerRef = useRef<HTMLDivElement>(null);
 
   const formatCoins = (n: number) => {
-    if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}М`;
-    if (n >= 1_000)     return `${(n / 1_000).toFixed(1)}К`;
-    return n.toString();
+    const v = Math.floor(n);
+    if (v >= 1_000_000) return `${(v / 1_000_000).toFixed(1)}М`;
+    if (v >= 1_000)     return `${(v / 1_000).toFixed(1)}К`;
+    return v.toString();
   };
 
-  // Пульсация для автоклика — синхронизирована с реальным интервалом 80мс
+  const formatTime = (s: number) => s >= 60 ? `${Math.floor(s / 60)}м ${s % 60}с` : `${s}с`;
+
+  // Пульсация для автоклика — визуальная раз в 600мс, не дёргает анимацию
   useEffect(() => {
     if (!isAutoActive) { setAutoPulse(false); return; }
     const t = setInterval(() => {
       setAutoPulse(true);
-      // Спавним частицу в случайной точке персонажа
       const x = 30 + Math.random() * 40;
       const y = 20 + Math.random() * 60;
       const id = particleId.current++;
       const pool = multiplier >= 10 ? ['💎','💎','⭐'] : multiplier >= 5 ? ['🌟','⚡'] : ['⚡','🪙'];
       const label = pool[Math.floor(Math.random() * pool.length)];
       setParticles(p => [...p, { id, x, y, label }]);
-      setTimeout(() => setParticles(p => p.filter(pp => pp.id !== id)), 500);
-      setTimeout(() => setAutoPulse(false), 60);
-    }, 80);
+      setTimeout(() => setParticles(p => p.filter(pp => pp.id !== id)), 700);
+      setTimeout(() => setAutoPulse(false), 200);
+    }, 600);
     return () => clearInterval(t);
   }, [isAutoActive, multiplier]);
 
@@ -100,9 +103,11 @@ export default function ClickerScene({ coins, totalClicks, clicksPerSecond, mult
         )}
         {isAutoActive && (
           <div className="w-full flex items-center justify-center gap-2 px-5 py-1.5 font-game text-sm"
-            style={{ background: 'linear-gradient(90deg,#FF8C00,#FFB74D)', borderRadius: 4, boxShadow: '0 3px 0 #a35800', color: '#111',
-              animation: 'autoPulseBar 0.08s ease-in-out infinite alternate' }}>
+            style={{ background: 'linear-gradient(90deg,#FF8C00,#FFB74D)', borderRadius: 4, boxShadow: '0 3px 0 #a35800', color: '#111' }}>
             🤖 АВТО-РОБОТ КЛИКАЕТ!
+            {robotTimeLeft > 0 && (
+              <span className="text-xs font-bold opacity-75">{formatTime(robotTimeLeft)}</span>
+            )}
           </div>
         )}
       </div>
