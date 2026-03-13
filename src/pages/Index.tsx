@@ -202,16 +202,19 @@ export default function Index() {
 
   /* Rewarded ad для бонусной страницы */
   const AD_COOLDOWNS_MS: Record<string, number> = {
-    lucky_spin:   60 * 60 * 1000,
+    lucky_spin:    1 * 60 * 1000,
     coins_bonus:   5 * 60 * 1000,
     turbo:         5 * 60 * 1000,
     mega:         10 * 60 * 1000,
     star:         15 * 60 * 1000,
   };
 
-  const handleAdOffer = (offerId: string, rewardType: string, rewardValue: number) => {
+  const handleAdOffer = (offerId: string, rewardType: string, rewardValue: number, onAdComplete?: () => void) => {
     const cooldownMs = AD_COOLDOWNS_MS[offerId] ?? 5 * 60 * 1000;
-    showRewardedAd(() => claimAdOffer(offerId, rewardType, rewardValue, cooldownMs));
+    showRewardedAd(() => {
+      claimAdOffer(offerId, rewardType, rewardValue, cooldownMs);
+      onAdComplete?.();
+    });
   };
 
   return (

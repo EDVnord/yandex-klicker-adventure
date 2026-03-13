@@ -64,7 +64,7 @@ function saveState(s: GameState) {
 }
 
 const MAX_COOLDOWNS_MS: Record<string, number> = {
-  lucky_spin:  60 * 60 * 1000,
+  lucky_spin:   1 * 60 * 1000,
   coins_bonus:  5 * 60 * 1000,
   turbo:        5 * 60 * 1000,
   mega:        10 * 60 * 1000,

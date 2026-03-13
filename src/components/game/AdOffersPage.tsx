@@ -9,7 +9,7 @@ interface Props {
   adStatus: string;
   getAdCooldownLeft: (offerId: string) => number;
   onClaim: (offerId: string, rewardType: string, rewardValue: number) => void;
-  onShowRewardedAd: (offerId: string, rewardType: string, rewardValue: number) => void;
+  onShowRewardedAd: (offerId: string, rewardType: string, rewardValue: number, onAdComplete?: () => void) => void;
 }
 
 const SPIN_PRIZES = [
@@ -265,10 +265,11 @@ export default function AdOffersPage({
     setShowWin(false);
     setWinPrize(null);
     setShowJackpot(false);
-    setSpinning(true);
 
-    // Показываем рекламу + начисляем приз в колбэке
-    onShowRewardedAd('lucky_spin', pendingPrize.current.type, pendingPrize.current.value);
+    // Сначала показываем рекламу, спин крутится только после просмотра
+    onShowRewardedAd('lucky_spin', pendingPrize.current.type, pendingPrize.current.value, () => {
+      setSpinning(true);
+    });
   };
 
   const handleSpinDone = () => {
