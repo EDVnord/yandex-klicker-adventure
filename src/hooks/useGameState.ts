@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import type { GameState, ActiveBoost } from '@/types/game';
 import { ACHIEVEMENTS } from '@/data/gameData';
 
-const STORAGE_KEY = 'roboclick_save_v2';
+const STORAGE_KEY = 'roboclick_save_v3';
 
 const defaultState: GameState = {
   coins: 0,
@@ -19,9 +19,11 @@ const defaultState: GameState = {
 };
 
 function loadState(): GameState {
-  try {
-    const saved = localStorage.getItem(STORAGE_KEY);
-    if (saved) {
+  // Пробуем новый ключ, затем старый для миграции
+  for (const key of [STORAGE_KEY, 'roboclick_save_v2', 'roboclick_save']) {
+    try {
+      const saved = localStorage.getItem(key);
+      if (!saved) continue;
       const parsed = JSON.parse(saved);
       return {
         ...defaultState,
@@ -37,35 +39,67 @@ function loadState(): GameState {
         unlockedSkins: parsed.unlockedSkins ?? ['noob'],
         adCooldowns: parsed.adCooldowns ?? {},
       };
+    } catch (e) {
+      console.warn('Failed to load save from', key, e);
     }
-  } catch (e) {
-    console.warn('Failed to load save', e);
   }
   return { ...defaultState, achievements: ACHIEVEMENTS.map(a => ({ ...a })) };
 }
 
+function saveState(s: GameState) {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(s));
+  } catch (e) {
+    console.warn('Failed to save state', e);
+  }
+}
+
 const BOOST_MULTIPLIERS: Record<string, number> = { turbo: 3, mega: 5, rainbow: 2, star: 10, robot: 1 };
+
+function getMultiplierFromBoosts(boosts: ActiveBoost[]): number {
+  const now = Date.now();
+  let mult = 1;
+  boosts.forEach(b => {
+    if (b.expiresAt > now) {
+      const m = BOOST_MULTIPLIERS[b.boostId];
+      if (m) mult = Math.max(mult, m);
+    }
+  });
+  return mult;
+}
 
 export function useGameState() {
   const [state, setState] = useState<GameState>(loadState);
+
+  // Ref для актуального state — нужен в интервалах без зависимостей
+  const stateRef = useRef(state);
+  useEffect(() => { stateRef.current = state; }, [state]);
+
   const clickTimestamps = useRef<number[]>([]);
   const autoClickRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  const handleClickRef = useRef<(isAuto?: boolean) => void>(() => {});
 
+  // --- Сохранение: немедленно при каждом изменении (debounce 300ms) ---
+  const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   useEffect(() => {
-    const t = setTimeout(() => localStorage.setItem(STORAGE_KEY, JSON.stringify(state)), 500);
-    return () => clearTimeout(t);
+    if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
+    saveTimerRef.current = setTimeout(() => saveState(state), 300);
+    return () => { if (saveTimerRef.current) clearTimeout(saveTimerRef.current); };
   }, [state]);
 
+  // --- CPS счётчик ---
   useEffect(() => {
     const interval = setInterval(() => {
       const now = Date.now();
       clickTimestamps.current = clickTimestamps.current.filter(t => now - t < 1000);
-      setState(s => ({ ...s, clicksPerSecond: clickTimestamps.current.length }));
+      setState(s => {
+        const cps = clickTimestamps.current.length;
+        return s.clicksPerSecond === cps ? s : { ...s, clicksPerSecond: cps };
+      });
     }, 200);
     return () => clearInterval(interval);
   }, []);
 
+  // --- Истечение бустов ---
   useEffect(() => {
     const interval = setInterval(() => {
       setState(s => {
@@ -77,22 +111,11 @@ export function useGameState() {
     return () => clearInterval(interval);
   }, []);
 
-  const getMultiplier = useCallback((boosts: ActiveBoost[]) => {
-    const now = Date.now();
-    let mult = 1;
-    boosts.forEach(b => {
-      if (b.expiresAt > now) {
-        const boost = BOOST_MULTIPLIERS[b.boostId];
-        if (boost) mult = Math.max(mult, boost);
-      }
-    });
-    return mult;
-  }, []);
-
+  // --- Клик ---
   const handleClick = useCallback((isAuto = false) => {
     if (!isAuto) clickTimestamps.current.push(Date.now());
     setState(s => {
-      const mult = getMultiplier(s.activeBoosts);
+      const mult = getMultiplierFromBoosts(s.activeBoosts);
       const earned = s.coinsPerClick * mult;
       const newCoins = s.coins + earned;
       const newTotal = s.totalClicks + (isAuto ? 0 : 1);
@@ -113,8 +136,7 @@ export function useGameState() {
       });
 
       const rewardCoins = newAchievements.reduce((acc, a, i) => {
-        if (a.unlocked && !s.achievements[i].unlocked) return acc + a.reward;
-        return acc;
+        return (a.unlocked && !s.achievements[i].unlocked) ? acc + a.reward : acc;
       }, 0);
 
       return {
@@ -125,32 +147,35 @@ export function useGameState() {
         achievements: newAchievements,
       };
     });
-  }, [getMultiplier]);
+  }, []);
 
-  // Держим актуальную функцию в ref, чтобы интервал автоклика не пересоздавался
-  useEffect(() => { handleClickRef.current = handleClick; }, [handleClick]);
-
-  // Автоклик: запускаем/останавливаем только при изменении наличия буста robot
-  const hasRobotRef = useRef(false);
+  // --- Автоклик: один стабильный интервал, смотрит в stateRef ---
   useEffect(() => {
-    const hasRobot = state.activeBoosts.some(b => b.boostId === 'robot' && b.expiresAt > Date.now());
-    if (hasRobot === hasRobotRef.current) return;
-    hasRobotRef.current = hasRobot;
-    if (hasRobot) {
-      autoClickRef.current = setInterval(() => handleClickRef.current(true), 400);
-    } else {
-      if (autoClickRef.current) { clearInterval(autoClickRef.current); autoClickRef.current = null; }
-    }
-    return () => { if (autoClickRef.current) { clearInterval(autoClickRef.current); autoClickRef.current = null; } };
-  }, [state.activeBoosts]);
+    // Запускаем один интервал навсегда, внутри проверяем наличие robot-буста
+    autoClickRef.current = setInterval(() => {
+      const s = stateRef.current;
+      const now = Date.now();
+      const hasRobot = s.activeBoosts.some(b => b.boostId === 'robot' && b.expiresAt > now);
+      if (hasRobot) {
+        handleClick(true);
+      }
+    }, 400);
+    return () => {
+      if (autoClickRef.current) clearInterval(autoClickRef.current);
+    };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // только при монтировании
 
+  // --- Покупка буста ---
   const buyBoost = useCallback((boostId: string, cost: number, duration: number) => {
     setState(s => {
       if (s.coins < cost) return s;
       const now = Date.now();
       const existing = s.activeBoosts.find(b => b.boostId === boostId);
       const newBoosts = existing
-        ? s.activeBoosts.map(b => b.boostId === boostId ? { ...b, expiresAt: Math.max(b.expiresAt, now) + duration * 1000 } : b)
+        ? s.activeBoosts.map(b => b.boostId === boostId
+            ? { ...b, expiresAt: Math.max(b.expiresAt, now) + duration * 1000 }
+            : b)
         : [...s.activeBoosts, { boostId, expiresAt: now + duration * 1000 }];
       return { ...s, coins: s.coins - cost, activeBoosts: newBoosts };
     });
@@ -161,7 +186,9 @@ export function useGameState() {
       const now = Date.now();
       const existing = s.activeBoosts.find(b => b.boostId === boostId);
       const newBoosts = existing
-        ? s.activeBoosts.map(b => b.boostId === boostId ? { ...b, expiresAt: Math.max(b.expiresAt, now) + duration * 1000 } : b)
+        ? s.activeBoosts.map(b => b.boostId === boostId
+            ? { ...b, expiresAt: Math.max(b.expiresAt, now) + duration * 1000 }
+            : b)
         : [...s.activeBoosts, { boostId, expiresAt: now + duration * 1000 }];
       return { ...s, activeBoosts: newBoosts };
     });
@@ -171,13 +198,15 @@ export function useGameState() {
     setState(s => ({ ...s, playerName: name }));
   }, []);
 
-  const getActiveMultiplier = useCallback(() => getMultiplier(state.activeBoosts), [state.activeBoosts, getMultiplier]);
+  const getActiveMultiplier = useCallback(() => {
+    return getMultiplierFromBoosts(stateRef.current.activeBoosts);
+  }, []);
 
   const getBoostTimeLeft = useCallback((boostId: string) => {
-    const boost = state.activeBoosts.find(b => b.boostId === boostId);
+    const boost = stateRef.current.activeBoosts.find(b => b.boostId === boostId);
     if (!boost) return 0;
     return Math.max(0, Math.ceil((boost.expiresAt - Date.now()) / 1000));
-  }, [state.activeBoosts]);
+  }, []);
 
   const selectSkin = useCallback((skinId: string) => {
     setState(s => {
@@ -203,41 +232,35 @@ export function useGameState() {
     });
   }, []);
 
-  // Получить награду за рекламный оффер (с кулдауном)
   const claimAdOffer = useCallback((offerId: string, rewardType: string, rewardValue: number, cooldownMs = 4 * 60 * 60 * 1000) => {
     setState(s => {
       const now = Date.now();
       const cooldownEnds = s.adCooldowns[offerId] ?? 0;
-      if (cooldownEnds > now) return s; // ещё не остыло
+      if (cooldownEnds > now) return s;
 
       let newState = { ...s, adCooldowns: { ...s.adCooldowns, [offerId]: now + cooldownMs } };
       if (rewardType === 'coins') {
         newState = { ...newState, coins: s.coins + rewardValue, totalCoinsEarned: s.totalCoinsEarned + rewardValue };
       } else if (rewardType === 'boost') {
-        // rewardValue = длительность буста в секундах, offerId = boostId
         const existing = s.activeBoosts.find(b => b.boostId === offerId);
         const newBoosts = existing
-          ? s.activeBoosts.map(b => b.boostId === offerId ? { ...b, expiresAt: Math.max(b.expiresAt, now) + rewardValue * 1000 } : b)
+          ? s.activeBoosts.map(b => b.boostId === offerId
+              ? { ...b, expiresAt: Math.max(b.expiresAt, now) + rewardValue * 1000 }
+              : b)
           : [...s.activeBoosts, { boostId: offerId, expiresAt: now + rewardValue * 1000 }];
         newState = { ...newState, activeBoosts: newBoosts };
       } else if (rewardType === 'cpc') {
-        // rewardValue = число кликов, добавляем монеты
         newState = { ...newState, coins: s.coins + rewardValue, totalCoinsEarned: s.totalCoinsEarned + rewardValue };
       }
       return newState;
     });
   }, []);
 
-  // Сколько секунд осталось кулдауна оффера
   const getAdCooldownLeft = useCallback((offerId: string): number => {
-    const cooldownEnds = state.adCooldowns[offerId] ?? 0;
+    const cooldownEnds = stateRef.current.adCooldowns[offerId] ?? 0;
     return Math.max(0, Math.ceil((cooldownEnds - Date.now()) / 1000));
-  }, [state.adCooldowns]);
+  }, []);
 
-  /**
-   * Загружает облачный сейв (из Yandex Player API) — применяется поверх localStorage
-   * только если облако опережает по прогрессу.
-   */
   const loadCloudState = useCallback((cloud: {
     coins?: number;
     totalClicks?: number;
