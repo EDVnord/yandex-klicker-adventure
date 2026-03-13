@@ -53,9 +53,9 @@ export default function ClickerScene({ coins, totalClicks, clicksPerSecond, mult
       {/* Stats */}
       <div className="w-full max-w-sm grid grid-cols-3 gap-2">
         {[
-          { label: 'COINS',  value: formatCoins(coins),        color: '#FFD700' },
-          { label: 'CLICKS', value: formatCoins(totalClicks),  color: '#fff'    },
-          { label: 'CPS',    value: String(clicksPerSecond),   color: '#00B06F' },
+          { label: 'МОНЕТЫ',  value: formatCoins(coins),        color: '#FFD700' },
+          { label: 'КЛИКОВ',  value: formatCoins(totalClicks),  color: '#fff'    },
+          { label: 'КЛ/СЕК', value: String(clicksPerSecond),   color: '#00B06F' },
         ].map(({ label, value, color }) => (
           <div key={label} className="rblx-panel text-center py-2">
             <div className="text-[10px] font-bold tracking-widest mb-1" style={{ color: '#4a5768' }}>{label}</div>
@@ -70,7 +70,7 @@ export default function ClickerScene({ coins, totalClicks, clicksPerSecond, mult
           className="animate-bounce-in flex items-center gap-2 px-5 py-2 font-game text-base"
           style={{ background: 'linear-gradient(90deg,#E61919,#ff4444)', borderRadius: 4, boxShadow: '0 4px 0 #8f0e0e', color: '#fff' }}
         >
-          🔥 MULTIPLIER x{multiplier} ACTIVE!
+          🔥 МНОЖИТЕЛЬ x{multiplier} АКТИВЕН!
         </div>
       )}
 
@@ -118,7 +118,7 @@ export default function ClickerScene({ coins, totalClicks, clicksPerSecond, mult
         {totalClicks === 0 && (
           <div className="absolute -bottom-10 left-1/2 -translate-x-1/2 whitespace-nowrap text-xs font-bold tracking-widest"
             style={{ color: '#3d4a60' }}>
-            ▼ TAP THE CHARACTER! ▼
+            ▼ НАЖИМАЙ НА ПЕРСОНАЖА! ▼
           </div>
         )}
       </div>
@@ -127,7 +127,7 @@ export default function ClickerScene({ coins, totalClicks, clicksPerSecond, mult
       <button className="rblx-btn rblx-btn-blue btn-click-pulse mt-4"
         style={{ fontSize: '1.35rem', padding: '14px 52px', borderRadius: 5 }}
         onClick={handleClick} onTouchStart={handleClick}>
-        🪙 TAP! {multiplier > 1 ? `+${multiplier}` : '+1'}
+        🪙 ТЫК! {multiplier > 1 ? `+${multiplier}` : '+1'}
       </button>
 
       {/* Balance */}

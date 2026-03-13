@@ -17,10 +17,10 @@ export const SKINS: Skin[] = [
   // ── COMMON ──────────────────────────────────────────────────────────────────
   {
     id: 'noob',
-    name: 'Noob',
+    name: 'Нуб',
     tag: 'Noob_1337',
     emoji: '😅',
-    description: 'Classic noob. Everything starts here!',
+    description: 'Классический нуб. С него всё начинается!',
     price: 0,
     rarity: 'common',
     img: `${CDN}/c098cb11-81b3-4ccb-b9b5-92c1ae9caf1f.jpg`,
@@ -29,10 +29,10 @@ export const SKINS: Skin[] = [
   },
   {
     id: 'alien',
-    name: 'Alien',
+    name: 'Пришелец',
     tag: 'UFO_Invader',
     emoji: '👽',
-    description: 'Flew in from another galaxy to click! (ad unlock)',
+    description: 'Прилетел из другой галактики кликать! (за рекламу)',
     price: -1,
     rarity: 'rare',
     img: `${CDN}/061eabb6-897b-4a73-8c54-00c822ed9e14.jpg`,
@@ -43,10 +43,10 @@ export const SKINS: Skin[] = [
   // ── RARE ────────────────────────────────────────────────────────────────────
   {
     id: 'ninja',
-    name: 'Ninja',
+    name: 'Ниндзя',
     tag: 'ShadowKiller_X',
     emoji: '🥷',
-    description: 'Fast and silent. Clicks like the wind!',
+    description: 'Быстрый и бесшумный. Кликает как ветер!',
     price: 20_000,
     rarity: 'rare',
     img: `${CDN}/afc07325-9767-484f-a606-d5896bdf9017.jpg`,
@@ -55,10 +55,10 @@ export const SKINS: Skin[] = [
   },
   {
     id: 'cowboy',
-    name: 'Cowboy',
+    name: 'Ковбой',
     tag: 'WildWest_Click',
     emoji: '🤠',
-    description: 'In the Wild West they click faster than bullets!',
+    description: 'На Диком Западе кликают быстрее пуль!',
     price: 36_000,
     rarity: 'rare',
     img: `${CDN}/0b2485af-83a3-4f20-b0c8-89e5e830957f.jpg`,
@@ -67,10 +67,10 @@ export const SKINS: Skin[] = [
   },
   {
     id: 'pirate',
-    name: 'Pirate',
+    name: 'Пират',
     tag: 'Capt_Clickbeard',
     emoji: '🏴‍☠️',
-    description: 'Yo-ho-ho! Coins or your life!',
+    description: 'Йо-хо-хо! Монеты или жизнь!',
     price: 50_000,
     rarity: 'rare',
     img: `${CDN}/f6eb7b0e-130b-475e-98e3-e836f8065b86.jpg`,
@@ -81,10 +81,10 @@ export const SKINS: Skin[] = [
   // ── EPIC ────────────────────────────────────────────────────────────────────
   {
     id: 'vip',
-    name: 'VIP Rich',
+    name: 'VIP Богач',
     tag: 'MoneyMaker_Pro',
     emoji: '👑',
-    description: 'Golden armor! Coins fly into your hands.',
+    description: 'Золотая броня! Монеты сами летят в руки.',
     price: 100_000,
     rarity: 'epic',
     img: `${CDN}/0f06273c-f4fc-474e-824d-dd320a8064f4.jpg`,
@@ -93,10 +93,10 @@ export const SKINS: Skin[] = [
   },
   {
     id: 'cyborg',
-    name: 'Cyborg',
+    name: 'Киборг',
     tag: 'CyberClick_3000',
     emoji: '🤖',
-    description: 'Half robot, half human. Clicks at processor speed!',
+    description: 'Полуробот-получеловек. Кликает со скоростью процессора!',
     price: 150_000,
     rarity: 'epic',
     img: `${CDN}/45b66460-dc97-498a-aae1-0ff5321b1268.jpg`,
@@ -105,10 +105,10 @@ export const SKINS: Skin[] = [
   },
   {
     id: 'witch',
-    name: 'Witch',
+    name: 'Ведьма',
     tag: 'DarkSpell_Click',
     emoji: '🧙‍♀️',
-    description: 'Enchanted clicks — every one doubly wicked!',
+    description: 'Заколдованные клики — каждый вдвойне злее!',
     price: 200_000,
     rarity: 'epic',
     img: `${CDN}/cfca79d1-de2a-4ce3-b1a1-0b6ac4a25ea6.jpg`,
@@ -117,10 +117,10 @@ export const SKINS: Skin[] = [
   },
   {
     id: 'samurai',
-    name: 'Samurai',
+    name: 'Самурай',
     tag: 'BushidoClicker',
     emoji: '⚔️',
-    description: 'Honor and coins. Clicks with dignity.',
+    description: 'Честь и монеты. Кликает с достоинством.',
     price: 260_000,
     rarity: 'epic',
     img: `${CDN}/110d91ae-571a-427b-b197-9e478e2b0df1.jpg`,
@@ -131,10 +131,10 @@ export const SKINS: Skin[] = [
   // ── LEGENDARY ───────────────────────────────────────────────────────────────
   {
     id: 'hero',
-    name: 'Superhero',
+    name: 'Супергерой',
     tag: 'ClickHero_9000',
     emoji: '🦸',
-    description: 'Saves the world with one click! Legendary!',
+    description: 'Спасает мир одним кликом! Легендарный!',
     price: 400_000,
     rarity: 'legendary',
     img: `${CDN}/e4f8c281-4ff4-485e-9db9-3f15fc306039.jpg`,
@@ -143,10 +143,10 @@ export const SKINS: Skin[] = [
   },
   {
     id: 'dragon',
-    name: 'Dragon',
+    name: 'Дракон',
     tag: 'DragonClick_FIRE',
     emoji: '🐉',
-    description: 'Fire-breathing click master. Burns the competition!',
+    description: 'Огнедышащий мастер кликов. Сжигает конкурентов!',
     price: 600_000,
     rarity: 'legendary',
     img: `${CDN}/f5ff136e-bf00-4883-8543-27338b1e9807.jpg`,
@@ -157,10 +157,10 @@ export const SKINS: Skin[] = [
   // ── MYTHIC ───────────────────────────────────────────────────────────────────
   {
     id: 'god',
-    name: 'Click God',
+    name: 'Бог Кликов',
     tag: 'ClickGod_OMEGA',
     emoji: '⚡',
-    description: 'Transcended mortals. Every click is divine thunder!',
+    description: 'Превзошёл смертных. Каждый клик — гром небесный!',
     price: 1_000_000,
     rarity: 'mythic',
     img: `${CDN}/e8fa85bb-5f6d-46a3-8d2c-c6dae130d65e.jpg`,
@@ -170,11 +170,11 @@ export const SKINS: Skin[] = [
 ];
 
 export const RARITY_LABEL: Record<string, string> = {
-  common:    'COMMON',
-  rare:      'RARE',
-  epic:      'EPIC',
-  legendary: 'LEGENDARY',
-  mythic:    'MYTHIC',
+  common:    'ОБЫЧНЫЙ',
+  rare:      'РЕДКИЙ',
+  epic:      'ЭПИЧЕСКИЙ',
+  legendary: 'ЛЕГЕНДАРНЫЙ',
+  mythic:    'МИФИЧЕСКИЙ',
 };
 
 export const RARITY_COLOR: Record<string, string> = {
