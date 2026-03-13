@@ -210,8 +210,11 @@
 .coin-float {
   position: absolute;
   pointer-events: none;
-  font-size: 1.5rem;
+  font-size: 1.3rem;
   font-weight: 900;
+  font-family: "Fredoka One", cursive;
+  color: #ffd700;
+  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.7);
   animation: coin-pop 0.75s ease-out forwards;
   z-index: 100;
 }

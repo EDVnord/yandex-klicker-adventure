@@ -43,7 +43,7 @@ export default function ClickerScene({ lang, coins, totalClicks, clicksPerSecond
       const x = 30 + Math.random() * 40;
       const y = 20 + Math.random() * 60;
       const id = particleId.current++;
-      const pool = multiplier >= 10 ? ['💎','💎','⭐'] : multiplier >= 5 ? ['🌟','⚡'] : ['⚡','💰'];
+      const pool = multiplier >= 10 ? ['+30','+50','+100'] : multiplier >= 5 ? ['+10','+20'] : ['+1','+2'];
       const label = pool[Math.floor(Math.random() * pool.length)];
       setParticles(p => [...p, { id, x, y, label }]);
       setTimeout(() => setParticles(p => p.filter(pp => pp.id !== id)), 700);
@@ -54,7 +54,7 @@ export default function ClickerScene({ lang, coins, totalClicks, clicksPerSecond
 
   const spawnParticle = useCallback((x: number, y: number) => {
     const id = particleId.current++;
-    const pool = multiplier >= 10 ? ['💎','💎','⭐'] : multiplier >= 5 ? ['🌟','⚡'] : ['⚡','💰'];
+    const pool = multiplier >= 10 ? ['+30','+50','+100'] : multiplier >= 5 ? ['+10','+20'] : ['+1','+2'];
     const label = pool[Math.floor(Math.random() * pool.length)];
     setParticles(p => [...p, { id, x, y, label }]);
     setTimeout(() => setParticles(p => p.filter(pp => pp.id !== id)), 750);
