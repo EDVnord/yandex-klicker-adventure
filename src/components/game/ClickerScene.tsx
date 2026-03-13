@@ -191,7 +191,7 @@ export default function ClickerScene({ lang, coins, totalClicks, clicksPerSecond
       {skin.clickMultiplier > 1 && (
         <div className="flex items-center gap-1.5 px-3 py-1 font-game text-sm mt-1"
           style={{ background: skin.borderColor + '22', border: `1px solid ${skin.borderColor}55`, borderRadius: 4, color: skin.borderColor }}>
-          {skin.emoji} ×{skin.clickMultiplier} ЗА КЛИК
+          {skin.emoji} ×{skin.clickMultiplier} {t(lang, 'per_click')}
         </div>
       )}
 
@@ -199,7 +199,7 @@ export default function ClickerScene({ lang, coins, totalClicks, clicksPerSecond
       <button className="rblx-btn rblx-btn-blue btn-click-pulse mt-3"
         style={{ fontSize: '1.35rem', padding: '14px 52px', borderRadius: 5 }}
         onClick={handleClick} onTouchStart={handleClick}>
-        💰 ТЫК! {multiplier > 1 ? `+${multiplier}` : '+1'}
+        💰 {t(lang, 'btn_tyk')} {multiplier > 1 ? `+${multiplier}` : '+1'}
       </button>
 
       {/* Balance */}

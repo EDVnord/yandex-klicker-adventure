@@ -18,7 +18,6 @@ export default function AchievementsPage({ lang, achievements, totalClicks, tota
 
   return (
     <div className="px-4 py-3 space-y-3 pb-6">
-      {/* Диалог подтверждения сброса */}
       {showConfirm && (
         <div style={{
           position: 'fixed', inset: 0, zIndex: 60,
@@ -29,9 +28,9 @@ export default function AchievementsPage({ lang, achievements, totalClicks, tota
           <div className="rblx-panel w-full max-w-sm" style={{ borderTopColor: '#ef4444', borderTopWidth: 3 }}>
             <div className="text-center mb-4">
               <div className="text-4xl mb-2">⚠️</div>
-              <div className="font-game text-lg text-white">Сбросить прогресс?</div>
+              <div className="font-game text-lg text-white">{t(lang, 'ach_reset_confirm_title')}</div>
               <p className="text-sm font-semibold mt-2" style={{ color: '#4a5768' }}>
-                Все клики, монеты, достижения и скины будут удалены. Это действие нельзя отменить.
+                {t(lang, 'ach_reset_confirm_desc')}
               </p>
             </div>
             <div className="flex gap-2">
@@ -39,20 +38,20 @@ export default function AchievementsPage({ lang, achievements, totalClicks, tota
                 className="rblx-btn rblx-btn-gray flex-1 py-2.5 font-game"
                 onClick={() => setShowConfirm(false)}
               >
-                Отмена
+                {t(lang, 'ach_reset_cancel')}
               </button>
               <button
                 className="rblx-btn flex-1 py-2.5 font-game"
                 style={{ background: '#ef4444', color: '#fff', border: '2px solid #ef444488' }}
                 onClick={() => { onReset(); setShowConfirm(false); }}
               >
-                Сбросить всё
+                {t(lang, 'ach_reset_confirm_btn')}
               </button>
             </div>
           </div>
         </div>
       )}
-      {/* Header */}
+
       <div className="rblx-panel-blue flex items-center gap-3">
         <span className="text-2xl">🏆</span>
         <div>
@@ -64,11 +63,9 @@ export default function AchievementsPage({ lang, achievements, totalClicks, tota
         <div className="ml-auto font-game text-xl" style={{ color: '#1A6BFF' }}>{pct}%</div>
       </div>
 
-      {/* XP bar */}
       <div className="rblx-panel">
-        <div className="flex justify-between text-xs font-bold tracking-widest mb-2"
-          style={{ color: '#4a5768' }}>
-          <span>ПРОГРЕСС</span>
+        <div className="flex justify-between text-xs font-bold tracking-widest mb-2" style={{ color: '#4a5768' }}>
+          <span>{t(lang, 'ach_progress')}</span>
           <span style={{ color: '#1A6BFF' }}>{unlocked}/{achievements.length}</span>
         </div>
         <div className="rblx-progress-track">
@@ -76,21 +73,19 @@ export default function AchievementsPage({ lang, achievements, totalClicks, tota
         </div>
       </div>
 
-      {/* Stats */}
       <div className="grid grid-cols-2 gap-2">
         <div className="rblx-panel text-center py-3">
           <div className="text-2xl mb-1">👆</div>
-          <div className="font-game text-xl text-white">{totalClicks.toLocaleString('ru')}</div>
-          <div className="text-xs font-bold tracking-wide mt-0.5" style={{ color: '#4a5768' }}>КЛИКОВ</div>
+          <div className="font-game text-xl text-white">{totalClicks.toLocaleString()}</div>
+          <div className="text-xs font-bold tracking-wide mt-0.5" style={{ color: '#4a5768' }}>{t(lang, 'ach_clicks_stat')}</div>
         </div>
         <div className="rblx-panel text-center py-3">
           <div className="text-2xl mb-1">💰</div>
-          <div className="font-game text-xl" style={{ color: '#FFD700' }}>{totalCoinsEarned.toLocaleString('ru')}</div>
-          <div className="text-xs font-bold tracking-wide mt-0.5" style={{ color: '#4a5768' }}>ЗАРАБОТАНО</div>
+          <div className="font-game text-xl" style={{ color: '#FFD700' }}>{totalCoinsEarned.toLocaleString()}</div>
+          <div className="text-xs font-bold tracking-wide mt-0.5" style={{ color: '#4a5768' }}>{t(lang, 'ach_earned_stat')}</div>
         </div>
       </div>
 
-      {/* Achievement list */}
       <div className="space-y-2">
         {[...achievements].sort((a, b) => (b.unlocked ? 1 : 0) - (a.unlocked ? 1 : 0)).map(a => (
           <div
@@ -102,8 +97,7 @@ export default function AchievementsPage({ lang, achievements, totalClicks, tota
               opacity: a.unlocked ? 1 : 0.55,
             }}
           >
-            {/* Badge */}
-            <div className="w-13 h-13 w-12 h-12 flex items-center justify-center text-2xl flex-shrink-0"
+            <div className="w-12 h-12 flex items-center justify-center text-2xl flex-shrink-0"
               style={{
                 background: a.unlocked ? 'rgba(255,215,0,0.1)' : '#0F1923',
                 border: `2px solid ${a.unlocked ? '#FFD70044' : '#2D3A50'}`,
@@ -115,7 +109,7 @@ export default function AchievementsPage({ lang, achievements, totalClicks, tota
 
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2 flex-wrap">
-                <span className="font-game text-base text-white leading-none">{a.name}</span>
+                <span className="font-game text-base text-white leading-none">{t(lang, `ach_${a.id}_name` as Parameters<typeof t>[1])}</span>
                 {a.unlocked && (
                   <span className="text-xs font-black px-2 py-0.5"
                     style={{ background: 'rgba(255,215,0,0.15)', color: '#FFD700', borderRadius: 3 }}>
@@ -125,11 +119,11 @@ export default function AchievementsPage({ lang, achievements, totalClicks, tota
                 {a.unlocked && (
                   <span className="text-xs font-black px-2 py-0.5"
                     style={{ background: 'rgba(105,240,174,0.15)', color: '#69F0AE', borderRadius: 3 }}>
-                    ✓ Выполнено
+                    {t(lang, 'ach_done')}
                   </span>
                 )}
               </div>
-              <p className="text-xs font-semibold mt-0.5" style={{ color: '#4a5768' }}>{a.description}</p>
+              <p className="text-xs font-semibold mt-0.5" style={{ color: '#4a5768' }}>{t(lang, `ach_${a.id}_desc` as Parameters<typeof t>[1])}</p>
 
               {!a.unlocked && a.requirement > 0 && (
                 <div className="mt-1.5">
@@ -147,7 +141,6 @@ export default function AchievementsPage({ lang, achievements, totalClicks, tota
         ))}
       </div>
 
-      {/* Кнопка сброса */}
       <div className="rblx-panel" style={{ borderTopColor: '#ef4444', borderTopWidth: 3 }}>
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 flex items-center justify-center text-xl flex-shrink-0"
@@ -155,9 +148,9 @@ export default function AchievementsPage({ lang, achievements, totalClicks, tota
             🔄
           </div>
           <div className="flex-1 min-w-0">
-            <div className="font-game text-base text-white leading-none">Начать заново</div>
+            <div className="font-game text-base text-white leading-none">{t(lang, 'ach_reset_title')}</div>
             <p className="text-xs font-semibold mt-0.5" style={{ color: '#4a5768' }}>
-              Сбросить весь прогресс и пройти игру с нуля
+              {t(lang, 'ach_reset_desc')}
             </p>
           </div>
           <button
@@ -165,7 +158,7 @@ export default function AchievementsPage({ lang, achievements, totalClicks, tota
             style={{ background: '#ef4444', color: '#fff', border: '2px solid #ef444488' }}
             onClick={() => setShowConfirm(true)}
           >
-            <Icon name="RotateCcw" size={13} /> Сброс
+            <Icon name="RotateCcw" size={13} /> {t(lang, 'ach_reset_btn')}
           </button>
         </div>
       </div>

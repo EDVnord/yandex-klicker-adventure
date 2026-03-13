@@ -52,7 +52,7 @@ export default function BoostersPage({ lang, coins, adStatus, getBoostTimeLeft, 
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-1.5 flex-wrap">
-                  <span className="font-game text-base text-white leading-none">{boost.name}</span>
+                  <span className="font-game text-base text-white leading-none">{t(lang, `boost_${boost.id}_name` as Parameters<typeof t>[1])}</span>
                   {isActive && (
                     <span className="text-xs font-black px-1.5 py-0.5 tracking-widest"
                       style={{ background: color, color: '#000', borderRadius: 3 }}>
@@ -60,7 +60,7 @@ export default function BoostersPage({ lang, coins, adStatus, getBoostTimeLeft, 
                     </span>
                   )}
                 </div>
-                <p className="text-xs mt-0.5 font-semibold" style={{ color: '#4a5768' }}>{boost.description}</p>
+                <p className="text-xs mt-0.5 font-semibold" style={{ color: '#4a5768' }}>{t(lang, `boost_${boost.id}_desc` as Parameters<typeof t>[1])}</p>
                 {timeLeft > 0 && (
                   <div className="flex items-center gap-1 text-xs font-bold" style={{ color }}>
                     <Icon name="Clock" size={11} /> {formatTime(timeLeft)} {t(lang, 'boost_left')}
@@ -97,7 +97,7 @@ export default function BoostersPage({ lang, coins, adStatus, getBoostTimeLeft, 
 
       <div className="rblx-panel text-center py-2">
         <p className="text-xs font-bold tracking-wide" style={{ color: '#2D3A50' }}>
-          РЕКЛАМА ПОМОГАЕТ РАЗВИТИЮ ИГРЫ 🙏
+          {t(lang, 'ad_support')}
         </p>
       </div>
     </div>

@@ -13,12 +13,12 @@ interface Props {
 }
 
 const SPIN_PRIZES = [
-  { emoji: '💰', label: '2 000',      type: 'coins', value: 2_000,  weight: 35, color: '#FFD700' },
-  { emoji: '⚡',  label: 'Турбо 60с', type: 'turbo', value: 60,     weight: 25, color: '#FFD700' },
-  { emoji: '💰', label: '5 000',      type: 'coins', value: 5_000,  weight: 20, color: '#4FC3F7' },
-  { emoji: '🚀', label: 'Мега 30с',   type: 'mega',  value: 30,     weight: 12, color: '#FF6BC8' },
-  { emoji: '💰', label: '10 000',     type: 'coins', value: 10_000, weight: 6,  color: '#a855f7' },
-  { emoji: '⭐',  label: 'Звезда 20с', type: 'star', value: 20,     weight: 2,  color: '#69F0AE' },
+  { emoji: '💰', labelKey: null,        label: '2 000',  type: 'coins', value: 2_000,  weight: 35, color: '#FFD700' },
+  { emoji: '⚡',  labelKey: 'spin_turbo' as const, label: '',       type: 'turbo', value: 60,     weight: 25, color: '#FFD700' },
+  { emoji: '💰', labelKey: null,        label: '5 000',  type: 'coins', value: 5_000,  weight: 20, color: '#4FC3F7' },
+  { emoji: '🚀', labelKey: 'spin_mega' as const,  label: '',        type: 'mega',  value: 30,     weight: 12, color: '#FF6BC8' },
+  { emoji: '💰', labelKey: null,        label: '10 000', type: 'coins', value: 10_000, weight: 6,  color: '#a855f7' },
+  { emoji: '⭐',  labelKey: 'spin_star' as const,  label: '',        type: 'star',  value: 20,     weight: 2,  color: '#69F0AE' },
 ];
 
 function weightedRandom() {
@@ -69,10 +69,11 @@ function calcTargetY(items: typeof SPIN_PRIZES[number][]) {
   return -((items.length - 1) * ITEM_H - centerRow * ITEM_H);
 }
 
-function SpinDrum({ spinning, winIndex, onDone }: {
+function SpinDrum({ spinning, winIndex, onDone, lang }: {
   spinning: boolean;
   winIndex: number;
   onDone: () => void;
+  lang: Lang;
 }) {
   const ref = useRef<HTMLDivElement>(null);
   const doneRef = useRef(false);
@@ -157,7 +158,7 @@ function SpinDrum({ spinning, winIndex, onDone }: {
               fontFamily: 'Nunito, sans-serif',
               letterSpacing: '0.5px',
             }}>
-              {p.label}
+              {p.labelKey ? t(lang, p.labelKey, { s: String(p.value) }) : p.label}
             </span>
           </div>
         ))}
@@ -167,7 +168,7 @@ function SpinDrum({ spinning, winIndex, onDone }: {
 }
 
 // Конфетти-джекпот
-function Jackpot({ show, onHide }: { show: boolean; onHide: () => void }) {
+function Jackpot({ show, onHide, lang: jackpotLang }: { show: boolean; onHide: () => void; lang: Lang }) {
   useEffect(() => {
     if (!show) return;
     const t = setTimeout(onHide, 4000);
@@ -202,14 +203,15 @@ function Jackpot({ show, onHide }: { show: boolean; onHide: () => void }) {
       }}>
         <div style={{ fontSize: 48, lineHeight: 1 }}>💎</div>
         <div style={{
-          fontFamily: 'Fredoka One, sans-serif',
+          fontFamily: 'Nunito, sans-serif',
           fontSize: 28,
+          fontWeight: 900,
           color: '#fff',
           textShadow: '0 2px 8px #0008',
           marginTop: 6,
-        }}>ДЖЕКПОТ!</div>
+        }}>{t(jackpotLang, 'offer_jackpot')}</div>
         <div style={{ color: '#f0abfc', fontWeight: 900, fontSize: 18, marginTop: 4 }}>
-          Звёздный дождь ×10! 🎉
+          {t(jackpotLang, 'offer_jackpot_sub')}
         </div>
       </div>
 
@@ -280,46 +282,10 @@ export default function AdOffersPage({
   };
 
   const OFFERS = [
-    {
-      id: 'coins_bonus',
-      emoji: '💰',
-      title: 'Куча монет',
-      description: 'Получи 5 000 монет прямо сейчас!',
-      rewardType: 'coins',
-      rewardValue: 5_000,
-      cooldownSec: 5 * 60,
-      color: '#FFD700',
-    },
-    {
-      id: 'turbo',
-      emoji: '⚡',
-      title: 'Турбо-буст',
-      description: 'Активируй Турбо-клик ×3 на 60 секунд бесплатно!',
-      rewardType: 'boost',
-      rewardValue: 60,
-      cooldownSec: 5 * 60,
-      color: '#FFD700',
-    },
-    {
-      id: 'mega',
-      emoji: '🚀',
-      title: 'МЕГА-буст',
-      description: '×5 монет за клик на 30 секунд — за рекламу!',
-      rewardType: 'boost',
-      rewardValue: 30,
-      cooldownSec: 10 * 60,
-      color: '#FF6BC8',
-    },
-    {
-      id: 'star',
-      emoji: '⭐',
-      title: 'Звёздный дождь',
-      description: '×10 монет на 20 секунд — очень редко!',
-      rewardType: 'boost',
-      rewardValue: 20,
-      cooldownSec: 15 * 60,
-      color: '#69F0AE',
-    },
+    { id: 'coins_bonus', emoji: '💰', title: t(lang, 'offer_coins_title'), description: t(lang, 'offer_coins_desc'), rewardType: 'coins', rewardValue: 5_000,  cooldownSec: 5 * 60,  color: '#FFD700' },
+    { id: 'turbo',       emoji: '⚡', title: t(lang, 'offer_turbo_title'), description: t(lang, 'offer_turbo_desc'), rewardType: 'boost', rewardValue: 60,    cooldownSec: 5 * 60,  color: '#FFD700' },
+    { id: 'mega',        emoji: '🚀', title: t(lang, 'offer_mega_title'),  description: t(lang, 'offer_mega_desc'),  rewardType: 'boost', rewardValue: 30,    cooldownSec: 10 * 60, color: '#FF6BC8' },
+    { id: 'star',        emoji: '⭐', title: t(lang, 'offer_star_title'),  description: t(lang, 'offer_star_desc'),  rewardType: 'boost', rewardValue: 20,    cooldownSec: 15 * 60, color: '#69F0AE' },
   ];
 
   const [, setTick] = useState(0);
@@ -330,7 +296,7 @@ export default function AdOffersPage({
 
   return (
     <div className="px-4 py-3 space-y-3 pb-6">
-      <Jackpot show={showJackpot} onHide={() => setShowJackpot(false)} />
+      <Jackpot show={showJackpot} onHide={() => setShowJackpot(false)} lang={lang} />
 
       <div className="rblx-panel flex items-center gap-3">
         <span className="text-2xl">📺</span>
@@ -360,7 +326,7 @@ export default function AdOffersPage({
           </div>
         </div>
 
-        <SpinDrum spinning={spinning} winIndex={winIndex} onDone={handleSpinDone} />
+        <SpinDrum spinning={spinning} winIndex={winIndex} onDone={handleSpinDone} lang={lang} />
 
         {showWin && winPrize && (
           <div className="mt-3 text-center py-3 rounded-md font-game text-xl"
@@ -460,7 +426,7 @@ export default function AdOffersPage({
                   ? formatCooldown(cd)
                   : isAdBusy
                     ? <Icon name="Loader2" size={13} className="animate-spin" />
-                    : <><Icon name="Play" size={13} /> Смотреть</>}
+                    : <><Icon name="Play" size={13} /> {t(lang, 'offer_watch')}</>}
               </button>
             </div>
           </div>
@@ -469,7 +435,7 @@ export default function AdOffersPage({
 
       <div className="rblx-panel text-center py-2">
         <p className="text-xs font-bold tracking-wide" style={{ color: '#2D3A50' }}>
-          РЕКЛАМА ПОМОГАЕТ РАЗВИТИЮ ИГРЫ 🙏
+          {t(lang, 'ad_support')}
         </p>
       </div>
 

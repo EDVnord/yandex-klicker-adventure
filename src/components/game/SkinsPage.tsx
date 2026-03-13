@@ -93,7 +93,7 @@ export default function SkinsPage({ lang, coins, currentSkinId, unlockedSkins, o
               </div>
 
               {/* Name */}
-              <div className="font-game text-[11px] text-white leading-none truncate">{skin.name}</div>
+              <div className="font-game text-[11px] text-white leading-none truncate">{t(lang, `skin_${skin.id}_name` as Parameters<typeof t>[1])}</div>
 
               {/* Action button */}
               {unlocked ? (
@@ -107,12 +107,12 @@ export default function SkinsPage({ lang, coins, currentSkinId, unlockedSkins, o
                   }}
                   onClick={() => !active && onSelect(skin.id)}
                 >
-                  {active ? '✓ Выбран' : t(lang, 'btn_select')}
+                  {active ? t(lang, 'btn_selected_check') : t(lang, 'btn_select')}
                 </button>
               ) : skin.price === -1 ? (
                 <button className="rblx-btn rblx-btn-blue w-full text-[10px] py-1"
                   onClick={() => onAdUnlock(skin.id, () => onSelect(skin.id))}>
-                  <Icon name="Play" size={11} /> Реклама
+                  <Icon name="Play" size={11} /> {t(lang, 'btn_unlock_ad')}
                 </button>
               ) : (
                 <button

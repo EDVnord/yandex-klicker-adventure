@@ -1,20 +1,22 @@
 import { useState } from 'react';
 import { LEADERBOARD } from '@/data/gameData';
 import Icon from '@/components/ui/icon';
+import { type Lang, t } from '@/i18n';
 
 interface Props {
+  lang: Lang;
   playerName: string;
   totalClicks: number;
   setPlayerName: (name: string) => void;
 }
 
-export default function LeaderboardPage({ playerName, totalClicks, setPlayerName }: Props) {
+export default function LeaderboardPage({ lang, playerName, totalClicks, setPlayerName }: Props) {
   const [editing, setEditing] = useState(false);
   const [nameInput, setNameInput] = useState(playerName);
 
   const saveName = () => {
-    const t = nameInput.trim();
-    if (t.length >= 2) setPlayerName(t);
+    const v = nameInput.trim();
+    if (v.length >= 2) setPlayerName(v);
     setEditing(false);
   };
 
@@ -30,16 +32,14 @@ export default function LeaderboardPage({ playerName, totalClicks, setPlayerName
 
   return (
     <div className="px-4 py-3 pb-6 space-y-3">
-      {/* Header */}
       <div className="rblx-panel-gold flex items-center gap-3">
         <span className="text-2xl">👑</span>
         <div>
-          <div className="font-game text-lg text-white leading-none">Таблица лидеров</div>
-          <div className="text-xs font-bold tracking-wide mt-0.5" style={{ color: '#4a5768' }}>ТОП КЛИКЕРОВ</div>
+          <div className="font-game text-lg text-white leading-none">{t(lang, 'lb_title')}</div>
+          <div className="text-xs font-bold tracking-wide mt-0.5" style={{ color: '#4a5768' }}>{t(lang, 'lb_subtitle')}</div>
         </div>
       </div>
 
-      {/* My card */}
       <div className="rblx-panel" style={{ borderTopColor: '#1A6BFF', borderTopWidth: 3 }}>
         <div className="flex items-center gap-3">
           <div className="w-12 h-12 flex items-center justify-center text-2xl"
@@ -71,18 +71,17 @@ export default function LeaderboardPage({ playerName, totalClicks, setPlayerName
               </div>
             )}
             <div className="text-xs font-bold mt-0.5" style={{ color: '#4a5768' }}>
-              💰 {totalClicks.toLocaleString('ru')} кликов
+              💰 {totalClicks.toLocaleString()} {t(lang, 'lb_clicks')}
             </div>
           </div>
 
           <div className="text-right">
             <div className="font-game text-2xl" style={{ color: '#1A6BFF' }}>#{myRank}</div>
-            <div className="text-xs font-bold" style={{ color: '#4a5768' }}>МЕСТО</div>
+            <div className="text-xs font-bold" style={{ color: '#4a5768' }}>{t(lang, 'lb_rank')}</div>
           </div>
         </div>
       </div>
 
-      {/* List */}
       <div className="space-y-1.5">
         {allEntries.map((entry, idx) => {
           const rank = idx + 1;
@@ -99,12 +98,9 @@ export default function LeaderboardPage({ playerName, totalClicks, setPlayerName
                 borderRadius: 5,
               }}
             >
-              {/* Rank */}
               <div className="w-8 text-center font-game text-lg flex-shrink-0" style={{ color: rankColor(rank) }}>
                 {medal || <span className="text-sm font-bold" style={{ color: '#2D3A50' }}>#{rank}</span>}
               </div>
-
-              {/* Avatar */}
               <div className="w-9 h-9 flex items-center justify-center text-xl flex-shrink-0"
                 style={{
                   background: rank <= 3 ? `${rankColor(rank)}22` : '#0F1923',
@@ -113,19 +109,15 @@ export default function LeaderboardPage({ playerName, totalClicks, setPlayerName
                 }}>
                 {entry.emoji || '🏅'}
               </div>
-
-              {/* Name */}
               <div className="flex-1 min-w-0">
-                <span className={`font-game text-sm ${isMe ? 'text-white' : 'text-white'}`} style={{ color: isMe ? '#4d9fff' : undefined }}>
+                <span className="font-game text-sm" style={{ color: isMe ? '#4d9fff' : '#fff' }}>
                   {entry.name}
-                  {isMe && <span className="ml-1 text-xs font-bold" style={{ color: '#4a5768' }}>(ты)</span>}
+                  {isMe && <span className="ml-1 text-xs font-bold" style={{ color: '#4a5768' }}>{t(lang, 'lb_you')}</span>}
                 </span>
               </div>
-
-              {/* Score */}
               <div className="text-right">
-                <div className="font-game text-sm text-white">{entry.score.toLocaleString('ru')}</div>
-                <div className="text-[10px] font-bold tracking-wide" style={{ color: '#4a5768' }}>КЛИКОВ</div>
+                <div className="font-game text-sm text-white">{entry.score.toLocaleString()}</div>
+                <div className="text-[10px] font-bold tracking-wide" style={{ color: '#4a5768' }}>{t(lang, 'lb_clicks_stat')}</div>
               </div>
             </div>
           );

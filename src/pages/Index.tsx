@@ -297,9 +297,11 @@ export default function Index() {
           <div className="rblx-panel w-full max-w-sm" style={{ borderTopColor: '#1A6BFF', borderTopWidth: 3 }}>
             <div className="text-center mb-4">
               <div className="text-4xl mb-2">☁️</div>
-              <div className="font-game text-lg text-white">Сохраняй прогресс!</div>
+              <div className="font-game text-lg text-white">{lang === 'en' ? 'Save your progress!' : 'Сохраняй прогресс!'}</div>
               <p className="text-sm font-semibold mt-2" style={{ color: '#4a5768' }}>
-                Войди в аккаунт Яндекса — и твои монеты, достижения и скины сохранятся онлайн. Можно продолжить с любого устройства.
+                {lang === 'en'
+                  ? 'Sign in to your Yandex account — your coins, achievements and skins will be saved online. Continue from any device.'
+                  : 'Войди в аккаунт Яндекса — и твои монеты, достижения и скины сохранятся онлайн. Можно продолжить с любого устройства.'}
               </p>
             </div>
             <div className="flex gap-2">
@@ -307,13 +309,13 @@ export default function Index() {
                 className="rblx-btn rblx-btn-gray flex-1 py-2.5 font-game text-sm"
                 onClick={() => setShowAuthHint(false)}
               >
-                Потом
+                {lang === 'en' ? 'Later' : 'Потом'}
               </button>
               <button
                 className="rblx-btn rblx-btn-blue flex-1 py-2.5 font-game text-sm"
                 onClick={() => { setShowAuthHint(false); requestAuth(); }}
               >
-                🔑 Войти
+                🔑 {lang === 'en' ? 'Sign in' : 'Войти'}
               </button>
             </div>
           </div>
