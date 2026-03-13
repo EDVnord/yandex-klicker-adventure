@@ -54,7 +54,7 @@ export default function AchievementsPage({ lang, achievements, totalClicks, tota
 
       {/* Achievement list */}
       <div className="space-y-2">
-        {achievements.filter(a => !a.unlocked).map(a => (
+        {[...achievements].sort((a, b) => (b.unlocked ? 1 : 0) - (a.unlocked ? 1 : 0)).map(a => (
           <div
             key={a.id}
             className="rblx-panel flex items-center gap-3"
@@ -82,6 +82,12 @@ export default function AchievementsPage({ lang, achievements, totalClicks, tota
                   <span className="text-xs font-black px-2 py-0.5"
                     style={{ background: 'rgba(255,215,0,0.15)', color: '#FFD700', borderRadius: 3 }}>
                     {t(lang, 'ach_reward', { n: a.reward })}
+                  </span>
+                )}
+                {a.unlocked && (
+                  <span className="text-xs font-black px-2 py-0.5"
+                    style={{ background: 'rgba(105,240,174,0.15)', color: '#69F0AE', borderRadius: 3 }}>
+                    ✓ Выполнено
                   </span>
                 )}
               </div>
