@@ -1,7 +1,9 @@
 import { useState, useRef, useEffect } from 'react';
 import Icon from '@/components/ui/icon';
+import { type Lang, t } from '@/i18n';
 
 interface Props {
+  lang: Lang;
   coins: number;
   coinsPerClick: number;
   adStatus: string;
@@ -11,12 +13,12 @@ interface Props {
 }
 
 const SPIN_PRIZES = [
-  { emoji: '🪙', label: '500',        type: 'coins', value: 500,    weight: 35, color: '#FFD700' },
-  { emoji: '⚡',  label: 'Турбо 30с', type: 'turbo', value: 30,     weight: 25, color: '#FFD700' },
-  { emoji: '🪙', label: '1 500',      type: 'coins', value: 1_500,  weight: 20, color: '#4FC3F7' },
-  { emoji: '🚀', label: 'Мега 20с',   type: 'mega',  value: 20,     weight: 12, color: '#FF6BC8' },
-  { emoji: '🪙', label: '3 000',      type: 'coins', value: 3_000,  weight: 6,  color: '#a855f7' },
-  { emoji: '⭐',  label: 'Звезда 15с', type: 'star', value: 15,     weight: 2,  color: '#69F0AE' },
+  { emoji: '🪙', label: '2 000',      type: 'coins', value: 2_000,  weight: 35, color: '#FFD700' },
+  { emoji: '⚡',  label: 'Турбо 60с', type: 'turbo', value: 60,     weight: 25, color: '#FFD700' },
+  { emoji: '🪙', label: '5 000',      type: 'coins', value: 5_000,  weight: 20, color: '#4FC3F7' },
+  { emoji: '🚀', label: 'Мега 30с',   type: 'mega',  value: 30,     weight: 12, color: '#FF6BC8' },
+  { emoji: '🪙', label: '10 000',     type: 'coins', value: 10_000, weight: 6,  color: '#a855f7' },
+  { emoji: '⭐',  label: 'Звезда 20с', type: 'star', value: 20,     weight: 2,  color: '#69F0AE' },
 ];
 
 function weightedRandom() {
@@ -239,7 +241,7 @@ function Jackpot({ show, onHide }: { show: boolean; onHide: () => void }) {
 }
 
 export default function AdOffersPage({
-  coins, adStatus, getAdCooldownLeft, onClaim, onShowRewardedAd,
+  lang, coins, adStatus, getAdCooldownLeft, onClaim, onShowRewardedAd,
 }: Props) {
   const isAdBusy = adStatus === 'loading' || adStatus === 'showing';
 
@@ -282,9 +284,9 @@ export default function AdOffersPage({
       id: 'coins_bonus',
       emoji: '💰',
       title: 'Куча монет',
-      description: 'Получи 10 000 монет прямо сейчас!',
+      description: 'Получи 25 000 монет прямо сейчас!',
       rewardType: 'coins',
-      rewardValue: 10_000,
+      rewardValue: 25_000,
       cooldownSec: 5 * 60,
       color: '#FFD700',
     },
@@ -333,9 +335,9 @@ export default function AdOffersPage({
       <div className="rblx-panel flex items-center gap-3">
         <span className="text-2xl">📺</span>
         <div>
-          <div className="font-game text-lg text-white leading-none">Бонусы за рекламу</div>
+          <div className="font-game text-lg text-white leading-none">{t(lang, 'offers_title')}</div>
           <div className="text-xs font-bold tracking-wide mt-0.5" style={{ color: '#4a5768' }}>
-            СМОТРИ РЕКЛАМУ — ПОЛУЧАЙ ПРИЗЫ
+            {t(lang, 'offers_subtitle')}
           </div>
         </div>
         <div className="ml-auto flex items-center gap-1.5 px-3 py-1.5 font-game text-base"
@@ -351,9 +353,9 @@ export default function AdOffersPage({
         <div className="flex items-center gap-2 mb-3">
           <span className="text-2xl">🎰</span>
           <div>
-            <div className="font-game text-lg text-white leading-none">Удачный спин</div>
+            <div className="font-game text-lg text-white leading-none">{t(lang, 'spin_title')}</div>
             <div className="text-xs font-bold mt-0.5" style={{ color: '#4a5768' }}>
-              Крути барабан — выигрывай монеты и бусты!
+              {t(lang, 'spin_subtitle')}
             </div>
           </div>
         </div>
@@ -369,7 +371,9 @@ export default function AdOffersPage({
             }}>
             <span style={{ fontSize: 32 }}>{winPrize.emoji}</span>
             <div style={{ color: winPrize.color, marginTop: 4 }}>
-              {winPrize.type === 'coins' ? `+${winPrize.label} монет!` : `${winPrize.label} активирован!`}
+              {winPrize.type === 'coins'
+                ? t(lang, 'spin_coins', { n: winPrize.label })
+                : t(lang, 'spin_boost', { n: winPrize.label })}
             </div>
           </div>
         )}
@@ -377,7 +381,7 @@ export default function AdOffersPage({
         {spinCooldown > 0 && (
           <div className="mt-3 mb-1">
             <div className="flex items-center justify-between text-xs font-bold mb-1" style={{ color: '#a855f7' }}>
-              <span><Icon name="Clock" size={12} /> Следующий спин через</span>
+              <span><Icon name="Clock" size={12} /> {t(lang, 'spin_next')}</span>
               <span>{formatCooldown(spinCooldown)}</span>
             </div>
             <div className="w-full rounded-full overflow-hidden" style={{ height: 6, background: '#1C2333' }}>
@@ -395,7 +399,7 @@ export default function AdOffersPage({
         <div className="mt-2">
           {spinCooldown > 0 ? (
             <button className="rblx-btn rblx-btn-gray w-full py-3 font-game" disabled>
-              ⏳ Заряжается...
+              {t(lang, 'spin_charging')}
             </button>
           ) : (
             <button
@@ -405,10 +409,10 @@ export default function AdOffersPage({
               disabled={spinning || isAdBusy}
             >
               {spinning
-                ? <><Icon name="Loader2" size={15} className="animate-spin" /> Крутим...</>
+                ? <><Icon name="Loader2" size={15} className="animate-spin" /> {t(lang, 'spin_spinning')}</>
                 : isAdBusy
-                  ? <><Icon name="Loader2" size={15} className="animate-spin" /> Реклама...</>
-                  : <><Icon name="Play" size={15} /> Смотреть рекламу и крутить!</>}
+                  ? <><Icon name="Loader2" size={15} className="animate-spin" /> {t(lang, 'btn_ad_busy')}</>
+                  : <><Icon name="Play" size={15} /> {t(lang, 'spin_btn')}</>}
             </button>
           )}
         </div>
@@ -431,7 +435,7 @@ export default function AdOffersPage({
                 {!ready && (
                   <>
                     <div className="mt-1 flex items-center gap-1 text-sm font-bold" style={{ color: offer.color }}>
-                      <Icon name="Clock" size={13} /> {formatCooldown(cd)} до следующего
+                      <Icon name="Clock" size={13} /> {formatCooldown(cd)} {t(lang, 'offer_next')}
                     </div>
                     <div className="mt-1.5 w-full rounded-full overflow-hidden" style={{ height: 6, background: '#1C2333' }}>
                       <div style={{

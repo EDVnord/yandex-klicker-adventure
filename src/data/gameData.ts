@@ -60,14 +60,14 @@ export const BOOSTS: Boost[] = [
 ];
 
 export const ACHIEVEMENTS: Achievement[] = [
-  { id: 'first', name: 'Первый клик!', description: 'Нажми в первый раз', emoji: '👆', requirement: 1, reward: 10, unlocked: false },
-  { id: 'ten', name: 'Разминка', description: 'Сделай 10 кликов', emoji: '🔥', requirement: 10, reward: 50, unlocked: false },
-  { id: 'hundred', name: 'Сотня!', description: 'Сделай 100 кликов', emoji: '💪', requirement: 100, reward: 200, unlocked: false },
-  { id: 'five_hundred', name: 'Чемпион кликов', description: 'Сделай 500 кликов', emoji: '🏆', requirement: 500, reward: 500, unlocked: false },
-  { id: 'thousand', name: 'Кликер-мастер', description: 'Сделай 1000 кликов', emoji: '👑', requirement: 1000, reward: 1000, unlocked: false },
-  { id: 'five_k', name: 'Робо-легенда!', description: 'Сделай 5000 кликов', emoji: '🌟', requirement: 5000, reward: 5000, unlocked: false },
-  { id: 'coins_1k', name: 'Богач', description: 'Накопи 1000 монет', emoji: '💰', requirement: 0, reward: 300, unlocked: false },
-  { id: 'speed', name: 'Молния!', description: 'Достигни 10 кликов/сек', emoji: '⚡', requirement: 0, reward: 400, unlocked: false },
+  { id: 'first', name: 'Первый клик!', description: 'Нажми в первый раз', emoji: '👆', requirement: 1, reward: 100, unlocked: false },
+  { id: 'ten', name: 'Разминка', description: 'Сделай 10 кликов', emoji: '🔥', requirement: 10, reward: 500, unlocked: false },
+  { id: 'hundred', name: 'Сотня!', description: 'Сделай 100 кликов', emoji: '💪', requirement: 100, reward: 1_000, unlocked: false },
+  { id: 'five_hundred', name: 'Чемпион кликов', description: 'Сделай 500 кликов', emoji: '🏆', requirement: 500, reward: 3_000, unlocked: false },
+  { id: 'thousand', name: 'Кликер-мастер', description: 'Сделай 1000 кликов', emoji: '👑', requirement: 1000, reward: 8_000, unlocked: false },
+  { id: 'five_k', name: 'Робо-легенда!', description: 'Сделай 5000 кликов', emoji: '🌟', requirement: 5000, reward: 25_000, unlocked: false },
+  { id: 'coins_1k', name: 'Богач', description: 'Накопи 1000 монет', emoji: '💰', requirement: 0, reward: 500, unlocked: false },
+  { id: 'speed', name: 'Молния!', description: 'Достигни 10 кликов/сек', emoji: '⚡', requirement: 0, reward: 2_000, unlocked: false },
 ];
 
 export const LEADERBOARD: LeaderEntry[] = [

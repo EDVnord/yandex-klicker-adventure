@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react';
 import type { Achievement } from '@/types/game';
+import { type Lang, t } from '@/i18n';
 
-interface Props { achievements: Achievement[]; }
+interface Props { lang: Lang; achievements: Achievement[]; }
 
-export default function AchievementToast({ achievements }: Props) {
+export default function AchievementToast({ lang, achievements }: Props) {
   const [shown, setShown] = useState<Set<string>>(() =>
     new Set(achievements.filter(a => a.unlocked).map(a => a.id))
   );
@@ -33,10 +34,10 @@ export default function AchievementToast({ achievements }: Props) {
         <span className="text-2xl">{current.emoji}</span>
         <div>
           <div className="text-[10px] font-black tracking-widest mb-0.5" style={{ color: '#FFD700' }}>
-            ДОСТИЖЕНИЕ!
+            {t(lang, 'ach_toast_title')}
           </div>
           <div className="font-game text-sm text-white leading-none">{current.name}</div>
-          <div className="text-[11px] font-bold mt-0.5" style={{ color: '#4a5768' }}>Награда: +{current.reward} 🪙</div>
+          <div className="text-[11px] font-bold mt-0.5" style={{ color: '#4a5768' }}>{t(lang, 'ach_reward', { n: current.reward })}</div>
         </div>
       </div>
     </div>

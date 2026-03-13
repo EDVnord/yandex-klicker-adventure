@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useGameState } from '@/hooks/useGameState';
 import { useYandexGames } from '@/hooks/useYandexGames';
+import { detectLang, t } from '@/i18n';
 import ClickerScene from '@/components/game/ClickerScene';
 import BoostersPage from '@/components/game/BoostersPage';
 import AchievementsPage from '@/components/game/AchievementsPage';
@@ -9,14 +10,6 @@ import AdOffersPage from '@/components/game/AdOffersPage';
 import { SKINS } from '@/data/skins';
 
 type Tab = 'game' | 'skins' | 'boosts' | 'ads' | 'achievements';
-
-const TABS: { id: Tab; label: string; emoji: string }[] = [
-  { id: 'game',         label: 'Игра',    emoji: '🎮' },
-  { id: 'skins',        label: 'Скины',   emoji: '👗' },
-  { id: 'boosts',       label: 'Магазин', emoji: '🛒' },
-  { id: 'ads',          label: 'Бонусы',  emoji: '📺' },
-  { id: 'achievements', label: 'Ачивки',  emoji: '🏆' },
-];
 
 export default function Index() {
   const [tab, setTab] = useState<Tab>('game');
@@ -28,7 +21,16 @@ export default function Index() {
     claimAdOffer, getAdCooldownLeft, setAdCooldown,
   } = useGameState();
 
-  const { adStatus, showRewardedAd, showFullscreenAd, submitScore, saveProgress, loadProgress, ready } = useYandexGames();
+  const { adStatus, showRewardedAd, showFullscreenAd, submitScore, saveProgress, loadProgress, ready, yaLang } = useYandexGames();
+  const lang = detectLang(yaLang);
+
+  const TABS = [
+    { id: 'game' as Tab,         label: t(lang, 'nav_game'),         emoji: '🎮' },
+    { id: 'skins' as Tab,        label: t(lang, 'nav_skins'),        emoji: '👗' },
+    { id: 'boosts' as Tab,       label: t(lang, 'nav_shop'),         emoji: '🛒' },
+    { id: 'ads' as Tab,          label: t(lang, 'nav_bonuses'),      emoji: '📺' },
+    { id: 'achievements' as Tab, label: t(lang, 'nav_achievements'), emoji: '🏆' },
+  ];
 
   const doSaveProgress = useCallback((s: typeof state) => {
     saveProgress({
@@ -180,7 +182,7 @@ export default function Index() {
             <div className="w-4 h-5 rounded-sm" style={{ background: '#E61919' }} />
             <div className="w-4 h-5 rounded-sm" style={{ background: '#1A6BFF' }} />
           </div>
-          <span className="font-game text-xl text-white tracking-wide">НубоКлик</span>
+          <span className="font-game text-xl text-white tracking-wide">{t(lang, 'game_title')}</span>
           {/* Current skin badge */}
           <span className="text-lg ml-1">{currentSkin.emoji}</span>
         </div>
@@ -198,8 +200,8 @@ export default function Index() {
         <div className="relative z-10 flex gap-2 px-4 py-1.5 overflow-x-auto"
           style={{ background: '#0d131e', borderBottom: '1px solid #1C2333' }}>
           {state.activeBoosts.map(ab => {
-            const t = getBoostTimeLeft(ab.boostId);
-            if (t <= 0) return null;
+            const timeLeft = getBoostTimeLeft(ab.boostId);
+            if (timeLeft <= 0) return null;
             const fmt = (s: number) => s >= 60 ? `${Math.floor(s / 60)}м ${s % 60}с` : `${s}с`;
             const emojis: Record<string,string> = { turbo:'⚡', mega:'🚀', rainbow:'🌈', star:'⭐', robot:'🤖' };
             const isRobot = ab.boostId === 'robot';
@@ -207,7 +209,7 @@ export default function Index() {
               <div key={ab.boostId} className="flex-shrink-0 flex items-center gap-1.5 px-3 py-1 font-bold text-sm"
                 style={{ background: isRobot ? '#FF8C00' : '#E61919', borderRadius: 3,
                   color: isRobot ? '#111' : '#fff', boxShadow: isRobot ? '0 2px 0 #a35800' : '0 2px 0 #8f0e0e' }}>
-                <span>{emojis[ab.boostId] ?? '⚡'}</span><span>{fmt(t)}</span>
+                <span>{emojis[ab.boostId] ?? '⚡'}</span><span>{fmt(timeLeft)}</span>
               </div>
             );
           })}
@@ -220,8 +222,8 @@ export default function Index() {
           style={{ background: 'rgba(0,0,0,0.85)' }}>
           <div className="rblx-panel text-center px-8 py-6">
             <div className="text-4xl mb-3 animate-spin" style={{ animationDuration: '1s' }}>📺</div>
-            <div className="font-game text-xl text-white">Загрузка рекламы...</div>
-            <div className="text-sm font-bold mt-1" style={{ color: '#4a5768' }}>Досмотри до конца для получения бонуса!</div>
+            <div className="font-game text-xl text-white">{t(lang, 'ad_loading')}</div>
+            <div className="text-sm font-bold mt-1" style={{ color: '#4a5768' }}>{t(lang, 'ad_hint')}</div>
           </div>
         </div>
       )}
@@ -236,7 +238,7 @@ export default function Index() {
               isAutoActive={
                 state.activeBoosts.some(b => (b.boostId === 'robot' || b.boostId === 'rainbow') && b.expiresAt > Date.now())
               }
-              robotTimeLeft={getBoostTimeLeft('robot')} />
+              robotTimeLeft={getBoostTimeLeft('robot')} lang={lang} />
           </div>
         )}
         {tab === 'skins' && (
@@ -247,13 +249,14 @@ export default function Index() {
             onSelect={selectSkin}
             onBuy={(id, price) => buySkin(id, price)}
             onAdUnlock={handleSkinAd}
+            lang={lang}
           />
         )}
         {tab === 'boosts' && (
           <BoostersPage coins={state.coins} adStatus={adStatus}
             getBoostTimeLeft={getBoostTimeLeft}
             buyBoost={(id, cost, dur) => buyBoost(id, cost, dur)}
-            onShowRewardedAd={handleBoostAd} />
+            onShowRewardedAd={handleBoostAd} lang={lang} />
         )}
         {tab === 'ads' && (
           <AdOffersPage
@@ -263,21 +266,22 @@ export default function Index() {
             getAdCooldownLeft={getAdCooldownLeft}
             onClaim={claimAdOffer}
             onShowRewardedAd={handleAdOffer}
+            lang={lang}
           />
         )}
         {tab === 'achievements' && (
           <AchievementsPage achievements={state.achievements}
-            totalClicks={state.totalClicks} totalCoinsEarned={state.totalCoinsEarned} />
+            totalClicks={state.totalClicks} totalCoinsEarned={state.totalCoinsEarned} lang={lang} />
         )}
       </main>
 
       {/* Bottom nav */}
       <nav className="fixed bottom-0 left-0 right-0 z-20 flex items-center justify-around py-2 px-1"
         style={{ background: '#0a0f1a', borderTop: '2px solid #1C2333' }}>
-        {TABS.map(t => (
-          <button key={t.id} className={`nav-btn ${tab === t.id ? 'active' : ''}`} onClick={() => setTab(t.id)}>
-            <span className="text-xl leading-none">{t.emoji}</span>
-            <span>{t.label}</span>
+        {TABS.map(tb => (
+          <button key={tb.id} className={`nav-btn ${tab === tb.id ? 'active' : ''}`} onClick={() => setTab(tb.id)}>
+            <span className="text-xl leading-none">{tb.emoji}</span>
+            <span>{tb.label}</span>
           </button>
         ))}
       </nav>

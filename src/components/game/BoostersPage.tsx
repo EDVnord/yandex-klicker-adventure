@@ -1,7 +1,9 @@
 import { BOOSTS } from '@/data/gameData';
 import Icon from '@/components/ui/icon';
+import { type Lang, t } from '@/i18n';
 
 interface Props {
+  lang: Lang;
   coins: number;
   adStatus: string;
   getBoostTimeLeft: (id: string) => number;
@@ -9,7 +11,7 @@ interface Props {
   onShowRewardedAd: (boostId: string, duration: number) => void;
 }
 
-export default function BoostersPage({ coins, adStatus, getBoostTimeLeft, buyBoost, onShowRewardedAd }: Props) {
+export default function BoostersPage({ lang, coins, adStatus, getBoostTimeLeft, buyBoost, onShowRewardedAd }: Props) {
   const isAdBusy = adStatus === 'loading' || adStatus === 'showing';
 
   const formatTime = (s: number) => s >= 60 ? `${Math.floor(s / 60)}м ${s % 60}с` : `${s}с`;
@@ -23,8 +25,8 @@ export default function BoostersPage({ coins, adStatus, getBoostTimeLeft, buyBoo
       <div className="rblx-panel flex items-center gap-3">
         <span className="text-2xl">🛒</span>
         <div>
-          <div className="font-game text-lg text-white leading-none">Магазин бустеров</div>
-          <div className="text-xs font-bold tracking-wide mt-0.5" style={{ color: '#4a5768' }}>УСИЛЬ СВОЕГО ПЕРСОНАЖА</div>
+          <div className="font-game text-lg text-white leading-none">{t(lang, 'shop_title')}</div>
+          <div className="text-xs font-bold tracking-wide mt-0.5" style={{ color: '#4a5768' }}>{t(lang, 'shop_subtitle')}</div>
         </div>
         <div className="ml-auto flex items-center gap-1.5 px-3 py-1.5 font-game text-base"
           style={{ background: '#0F1923', border: '2px solid #2D3A50', borderRadius: 4 }}>
@@ -54,14 +56,14 @@ export default function BoostersPage({ coins, adStatus, getBoostTimeLeft, buyBoo
                   {isActive && (
                     <span className="text-xs font-black px-2 py-0.5 tracking-widest"
                       style={{ background: color, color: '#000', borderRadius: 3 }}>
-                      АКТИВЕН
+                      {t(lang, 'boost_active')}
                     </span>
                   )}
                 </div>
                 <p className="text-sm mt-0.5 font-semibold" style={{ color: '#4a5768' }}>{boost.description}</p>
                 {timeLeft > 0 && (
                   <div className="mt-1 flex items-center gap-1 text-sm font-bold" style={{ color }}>
-                    <Icon name="Clock" size={13} /> {formatTime(timeLeft)} осталось
+                    <Icon name="Clock" size={13} /> {formatTime(timeLeft)} {t(lang, 'boost_left')}
                   </div>
                 )}
               </div>
@@ -75,8 +77,8 @@ export default function BoostersPage({ coins, adStatus, getBoostTimeLeft, buyBoo
                   onClick={() => !isAdBusy && onShowRewardedAd(boost.id, boost.adDuration ?? boost.duration)}
                 >
                   {isAdBusy
-                    ? <><Icon name="Loader2" size={14} className="animate-spin" /> Реклама...</>
-                    : <><Icon name="Play" size={14} /> Смотреть рекламу</>
+                    ? <><Icon name="Loader2" size={14} className="animate-spin" /> {t(lang, 'btn_ad_busy')}</>
+                    : <><Icon name="Play" size={14} /> {t(lang, 'btn_watch_ad')}</>
                   }
                 </button>
               )}

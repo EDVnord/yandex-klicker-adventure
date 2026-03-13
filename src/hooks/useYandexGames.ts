@@ -9,6 +9,10 @@ declare global {
 }
 
 interface YaSDK {
+  environment?: {
+    i18n?: { lang?: string };
+    app?: { id?: string };
+  };
   adv: {
     showRewardedVideo: (opts: {
       callbacks: {
@@ -50,6 +54,7 @@ export function useYandexGames() {
   const playerRef = useRef<YaPlayer | null>(null);
   const [ready, setReady] = useState(false);
   const [adStatus, setAdStatus] = useState<AdStatus>('idle');
+  const [yaLang, setYaLang] = useState<string | undefined>(undefined);
 
   useEffect(() => {
     if (!window.YaGames) {
@@ -60,9 +65,11 @@ export function useYandexGames() {
     window.YaGames.init()
       .then(async sdk => {
         sdkRef.current = sdk;
+        const lang = sdk.environment?.i18n?.lang;
+        if (lang) setYaLang(lang);
         try {
           playerRef.current = await sdk.getPlayer({ scopes: false });
-          console.log('[YaGames] SDK + Player готов');
+          console.log('[YaGames] SDK + Player готов, lang:', lang);
         } catch (e) {
           console.warn('[YaGames] Не удалось получить Player', e);
         }
@@ -156,5 +163,5 @@ export function useYandexGames() {
     }
   }, []);
 
-  return { ready, adStatus, showRewardedAd, showFullscreenAd, submitScore, saveProgress, loadProgress };
+  return { ready, adStatus, yaLang, showRewardedAd, showFullscreenAd, submitScore, saveProgress, loadProgress };
 }

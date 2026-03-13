@@ -2,10 +2,12 @@ import { useState, useCallback, useRef, useEffect } from 'react';
 import type { Skin } from '@/data/skins';
 import type { Achievement } from '@/types/game';
 import AchievementToast from './AchievementToast';
+import { type Lang, t } from '@/i18n';
 
 interface CoinParticle { id: number; x: number; y: number; label: string; }
 
 interface Props {
+  lang: Lang;
   coins: number;
   totalClicks: number;
   clicksPerSecond: number;
@@ -17,7 +19,7 @@ interface Props {
   robotTimeLeft?: number;
 }
 
-export default function ClickerScene({ coins, totalClicks, clicksPerSecond, multiplier, skin, achievements, onClick, isAutoActive = false, robotTimeLeft = 0 }: Props) {
+export default function ClickerScene({ lang, coins, totalClicks, clicksPerSecond, multiplier, skin, achievements, onClick, isAutoActive = false, robotTimeLeft = 0 }: Props) {
   const [particles, setParticles] = useState<CoinParticle[]>([]);
   const [isClicking, setIsClicking] = useState(false);
   const [autoPulse, setAutoPulse] = useState(false);
@@ -82,9 +84,9 @@ export default function ClickerScene({ coins, totalClicks, clicksPerSecond, mult
       {/* Stats */}
       <div className="w-full max-w-sm grid grid-cols-3 gap-2">
         {[
-          { label: 'МОНЕТЫ',  value: formatCoins(coins),        color: '#FFD700' },
-          { label: 'КЛИКОВ',  value: formatCoins(totalClicks),  color: '#fff'    },
-          { label: 'КЛ/СЕК', value: String(clicksPerSecond),   color: '#00B06F' },
+          { label: t(lang, 'stat_coins'),  value: formatCoins(coins),        color: '#FFD700' },
+          { label: t(lang, 'stat_clicks'),  value: formatCoins(totalClicks),  color: '#fff'    },
+          { label: t(lang, 'stat_cps'), value: String(clicksPerSecond),   color: '#00B06F' },
         ].map(({ label, value, color }) => (
           <div key={label} className="rblx-panel text-center py-2">
             <div className="text-[10px] font-bold tracking-widest mb-1" style={{ color: '#4a5768' }}>{label}</div>
@@ -98,13 +100,13 @@ export default function ClickerScene({ coins, totalClicks, clicksPerSecond, mult
         {multiplier > 1 && (
           <div className="animate-bounce-in w-full flex items-center justify-center gap-2 px-5 py-2 font-game text-base"
             style={{ background: 'linear-gradient(90deg,#E61919,#ff4444)', borderRadius: 4, boxShadow: '0 4px 0 #8f0e0e', color: '#fff' }}>
-            🔥 МНОЖИТЕЛЬ x{multiplier} АКТИВЕН!
+            {t(lang, 'multiplier_active', { m: multiplier })}
           </div>
         )}
         {isAutoActive && (
           <div className="w-full flex items-center justify-center gap-2 px-5 py-1.5 font-game text-sm"
             style={{ background: 'linear-gradient(90deg,#FF8C00,#FFB74D)', borderRadius: 4, boxShadow: '0 3px 0 #a35800', color: '#111' }}>
-            🤖 АВТО-РОБОТ КЛИКАЕТ!
+            {t(lang, 'auto_robot')}
             {robotTimeLeft > 0 && (
               <span className="text-xs font-bold opacity-75">{formatTime(robotTimeLeft)}</span>
             )}
@@ -181,7 +183,7 @@ export default function ClickerScene({ coins, totalClicks, clicksPerSecond, mult
       {totalClicks === 0 && (
         <div className="text-xs font-bold tracking-widest mt-2"
           style={{ color: '#3d4a60' }}>
-          ▼ НАЖИМАЙ НА ПЕРСОНАЖА ИЛИ КНОПКУ! ▼
+          {t(lang, 'click_hint')}
         </div>
       )}
 
@@ -207,7 +209,7 @@ export default function ClickerScene({ coins, totalClicks, clicksPerSecond, mult
         <span className="font-game text-base" style={{ color: '#FFD700' }}>{formatCoins(coins)} монет</span>
       </div>
 
-      <AchievementToast achievements={achievements} />
+      <AchievementToast lang={lang} achievements={achievements} />
 
       <style>{`
         @keyframes autoFloat {

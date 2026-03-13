@@ -1,12 +1,14 @@
 import type { Achievement } from '@/types/game';
+import { type Lang, t } from '@/i18n';
 
 interface Props {
+  lang: Lang;
   achievements: Achievement[];
   totalClicks: number;
   totalCoinsEarned: number;
 }
 
-export default function AchievementsPage({ achievements, totalClicks, totalCoinsEarned }: Props) {
+export default function AchievementsPage({ lang, achievements, totalClicks, totalCoinsEarned }: Props) {
   const unlocked = achievements.filter(a => a.unlocked).length;
   const pct = Math.round((unlocked / achievements.length) * 100);
 
@@ -16,9 +18,9 @@ export default function AchievementsPage({ achievements, totalClicks, totalCoins
       <div className="rblx-panel-blue flex items-center gap-3">
         <span className="text-2xl">🏆</span>
         <div>
-          <div className="font-game text-lg text-white leading-none">Достижения</div>
+          <div className="font-game text-lg text-white leading-none">{t(lang, 'ach_title')}</div>
           <div className="text-xs font-bold tracking-wide mt-0.5" style={{ color: '#4a5768' }}>
-            {unlocked}/{achievements.length} ОТКРЫТО
+            {t(lang, 'ach_unlocked', { n: unlocked, total: achievements.length })}
           </div>
         </div>
         <div className="ml-auto font-game text-xl" style={{ color: '#1A6BFF' }}>{pct}%</div>
@@ -79,7 +81,7 @@ export default function AchievementsPage({ achievements, totalClicks, totalCoins
                 {a.unlocked && (
                   <span className="text-xs font-black px-2 py-0.5"
                     style={{ background: 'rgba(255,215,0,0.15)', color: '#FFD700', borderRadius: 3 }}>
-                    +{a.reward} 🪙
+                    {t(lang, 'ach_reward', { n: a.reward })}
                   </span>
                 )}
               </div>

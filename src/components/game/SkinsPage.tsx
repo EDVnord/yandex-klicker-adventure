@@ -1,7 +1,9 @@
-import { SKINS, RARITY_LABEL, RARITY_COLOR } from '@/data/skins';
+import { SKINS, RARITY_COLOR } from '@/data/skins';
 import Icon from '@/components/ui/icon';
+import { type Lang, t } from '@/i18n';
 
 interface Props {
+  lang: Lang;
   coins: number;
   currentSkinId: string;
   unlockedSkins: string[];
@@ -10,7 +12,7 @@ interface Props {
   onAdUnlock: (id: string, onSuccess: () => void) => void;
 }
 
-export default function SkinsPage({ coins, currentSkinId, unlockedSkins, onSelect, onBuy, onAdUnlock }: Props) {
+export default function SkinsPage({ lang, coins, currentSkinId, unlockedSkins, onSelect, onBuy, onAdUnlock }: Props) {
   const isUnlocked = (id: string) => unlockedSkins.includes(id);
 
   const handleBuy = (id: string, price: number) => {
@@ -23,8 +25,8 @@ export default function SkinsPage({ coins, currentSkinId, unlockedSkins, onSelec
       <div className="rblx-panel flex items-center gap-3">
         <span className="text-2xl">👗</span>
         <div>
-          <div className="font-game text-lg text-white leading-none">Скины</div>
-          <div className="text-xs font-bold tracking-wide mt-0.5" style={{ color: '#4a5768' }}>ВЫБЕРИ ПЕРСОНАЖА</div>
+          <div className="font-game text-lg text-white leading-none">{t(lang, 'skins_title')}</div>
+          <div className="text-xs font-bold tracking-wide mt-0.5" style={{ color: '#4a5768' }}>{t(lang, 'skins_subtitle')}</div>
         </div>
         <div className="ml-auto flex items-center gap-1.5 px-3 py-1.5 font-game text-base"
           style={{ background: '#0F1923', border: '2px solid #2D3A50', borderRadius: 4 }}>
@@ -56,13 +58,13 @@ export default function SkinsPage({ coins, currentSkinId, unlockedSkins, onSelec
               {active && (
                 <div className="absolute top-2 right-2 z-10 text-xs font-black px-2 py-0.5 tracking-widest"
                   style={{ background: rarityColor, color: active && skin.rarity === 'legendary' ? '#111' : '#fff', borderRadius: 3 }}>
-                  НАДЕТ
+                  {t(lang, 'skin_selected')}
                 </div>
               )}
 
               {/* Rarity badge */}
               <div className="text-[9px] font-black tracking-widest" style={{ color: rarityColor }}>
-                {RARITY_LABEL[skin.rarity]}
+                {t(lang, `rarity_${skin.rarity}` as Parameters<typeof t>[1])}
               </div>
 
               {/* Image */}
@@ -112,12 +114,12 @@ export default function SkinsPage({ coins, currentSkinId, unlockedSkins, onSelec
                   }}
                   onClick={() => !active && onSelect(skin.id)}
                 >
-                  {active ? '✓ НАДЕТ' : 'НАДЕТЬ'}
+                  {active ? `✓ ${t(lang, 'skin_selected')}` : t(lang, 'btn_select')}
                 </button>
               ) : skin.price === -1 ? (
                 <button className="rblx-btn rblx-btn-blue w-full text-xs py-2"
                   onClick={() => onAdUnlock(skin.id, () => onSelect(skin.id))}>
-                  <Icon name="Play" size={13} /> Реклама
+                  <Icon name="Play" size={13} /> {t(lang, 'btn_unlock_ad')}
                 </button>
               ) : (
                 <button

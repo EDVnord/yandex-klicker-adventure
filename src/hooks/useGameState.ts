@@ -9,7 +9,7 @@ const defaultState: GameState = {
   coins: 0,
   totalClicks: 0,
   clicksPerSecond: 0,
-  coinsPerClick: 1,
+  coinsPerClick: 5,
   playerName: 'Игрок',
   achievements: ACHIEVEMENTS.map(a => ({ ...a })),
   activeBoosts: [],
