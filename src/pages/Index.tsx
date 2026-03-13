@@ -202,11 +202,11 @@ export default function Index() {
 
   /* Rewarded ad для бонусной страницы */
   const AD_COOLDOWNS_MS: Record<string, number> = {
-    lucky_spin:    1 * 60 * 1000,
-    coins_bonus:   5 * 60 * 1000,
-    turbo:         5 * 60 * 1000,
-    mega:         10 * 60 * 1000,
-    star:         15 * 60 * 1000,
+    lucky_spin:   2 * 60 * 1000,
+    coins_bonus:  1 * 60 * 1000,
+    turbo:        1 * 60 * 1000,
+    mega:         1 * 60 * 1000,
+    star:         1 * 60 * 1000,
   };
 
   const handleAdOffer = (offerId: string, rewardType: string, rewardValue: number, onAdComplete?: () => void) => {

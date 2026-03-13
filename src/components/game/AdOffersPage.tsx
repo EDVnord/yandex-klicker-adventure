@@ -283,10 +283,10 @@ export default function AdOffersPage({
   };
 
   const OFFERS = [
-    { id: 'coins_bonus', emoji: '💰', title: t(lang, 'offer_coins_title'), description: t(lang, 'offer_coins_desc'), rewardType: 'coins', rewardValue: 5_000,  cooldownSec: 5 * 60,  color: '#FFD700' },
-    { id: 'turbo',       emoji: '⚡', title: t(lang, 'offer_turbo_title'), description: t(lang, 'offer_turbo_desc'), rewardType: 'boost', rewardValue: 60,    cooldownSec: 5 * 60,  color: '#FFD700' },
-    { id: 'mega',        emoji: '🚀', title: t(lang, 'offer_mega_title'),  description: t(lang, 'offer_mega_desc'),  rewardType: 'boost', rewardValue: 30,    cooldownSec: 10 * 60, color: '#FF6BC8' },
-    { id: 'star',        emoji: '⭐', title: t(lang, 'offer_star_title'),  description: t(lang, 'offer_star_desc'),  rewardType: 'boost', rewardValue: 20,    cooldownSec: 15 * 60, color: '#69F0AE' },
+    { id: 'coins_bonus', emoji: '💰', title: t(lang, 'offer_coins_title'), description: t(lang, 'offer_coins_desc'), rewardType: 'coins', rewardValue: 5_000, cooldownSec: 60, color: '#FFD700' },
+    { id: 'turbo',       emoji: '⚡', title: t(lang, 'offer_turbo_title'), description: t(lang, 'offer_turbo_desc'), rewardType: 'boost', rewardValue: 60,   cooldownSec: 60, color: '#FFD700' },
+    { id: 'mega',        emoji: '🚀', title: t(lang, 'offer_mega_title'),  description: t(lang, 'offer_mega_desc'),  rewardType: 'boost', rewardValue: 30,   cooldownSec: 60, color: '#FF6BC8' },
+    { id: 'star',        emoji: '⭐', title: t(lang, 'offer_star_title'),  description: t(lang, 'offer_star_desc'),  rewardType: 'boost', rewardValue: 20,   cooldownSec: 60, color: '#69F0AE' },
   ];
 
   const [, setTick] = useState(0);
@@ -354,7 +354,7 @@ export default function AdOffersPage({
             <div className="w-full rounded-full overflow-hidden" style={{ height: 6, background: '#1C2333' }}>
               <div style={{
                 height: '100%',
-                width: `${Math.min(100, Math.max(2, (spinCooldown / 3600) * 100))}%`,
+                width: `${Math.min(100, Math.max(2, (spinCooldown / 120) * 100))}%`,
                 background: 'linear-gradient(90deg, #7c3aed88, #a855f7)',
                 borderRadius: 9999,
                 transition: 'width 1s linear',
