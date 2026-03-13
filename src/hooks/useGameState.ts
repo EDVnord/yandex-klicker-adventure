@@ -326,12 +326,12 @@ export function useGameState() {
       }
       return {
         ...s,
-        coins:            cloud.coins            ?? s.coins,
-        totalClicks:      cloud.totalClicks      ?? s.totalClicks,
-        totalCoinsEarned: cloud.totalCoinsEarned ?? s.totalCoinsEarned,
+        coins:            Math.max(s.coins,            cloud.coins            ?? 0),
+        totalClicks:      Math.max(s.totalClicks,      cloud.totalClicks      ?? 0),
+        totalCoinsEarned: Math.max(s.totalCoinsEarned, cloud.totalCoinsEarned ?? 0),
         playerName:       cloud.playerName       ?? s.playerName,
         currentSkinId:    cloud.currentSkinId    ?? s.currentSkinId,
-        unlockedSkins:    cloud.unlockedSkins    ?? s.unlockedSkins,
+        unlockedSkins:    Array.from(new Set([...s.unlockedSkins, ...(cloud.unlockedSkins ?? [])])),
         adCooldowns:      sanitizeCooldowns({ ...s.adCooldowns, ...(cloud.adCooldowns ?? {}) }),
         activeBoosts:     mergedBoosts,
         achievements: s.achievements.map(a => {

@@ -44,24 +44,27 @@ export default function Index() {
   const adCooldownRef = useRef(false);
   const lastAdTimeRef = useRef(Date.now());
 
-  // Загружаем облачный прогресс, когда SDK готов — мёрдж: берём максимум по totalClicks
+  // Загружаем облачный прогресс, когда SDK готов
   useEffect(() => {
     if (!ready) return;
     (async () => {
       const cloud = await loadProgress();
       if (!cloud) return;
-      // Мёрдж: применяем облачный сейв только если он "старше" по прогрессу
-      const cloudClicks = (cloud.totalClicks as number) ?? 0;
-      if (cloudClicks > state.totalClicks) {
-        loadCloudState(cloud as Parameters<typeof loadCloudState>[0]);
-      }
+      // Всегда применяем облако — loadCloudState сам мёрджит (берёт максимум)
+      loadCloudState(cloud as Parameters<typeof loadCloudState>[0]);
     })();
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ready]);
 
-  // Сохраняем прогресс в облако каждые 10с при изменении состояния
+  // Полное сохранение в облако: быстро (2с) при изменении бустов/кулдаунов, иначе каждые 10с
+  const saveRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const prevBoostsRef = useRef(state.activeBoosts);
   useEffect(() => {
-    const t = setTimeout(() => {
+    const boostsChanged = state.activeBoosts !== prevBoostsRef.current;
+    prevBoostsRef.current = state.activeBoosts;
+    const delay = boostsChanged ? 1000 : 10_000;
+    if (saveRef.current) clearTimeout(saveRef.current);
+    saveRef.current = setTimeout(() => {
       saveProgress({
         coins: state.coins,
         totalClicks: state.totalClicks,
@@ -73,8 +76,8 @@ export default function Index() {
         activeBoosts: state.activeBoosts,
         adCooldowns: state.adCooldowns,
       });
-    }, 10_000);
-    return () => clearTimeout(t);
+    }, delay);
+    return () => { if (saveRef.current) clearTimeout(saveRef.current); };
   }, [state, saveProgress]);
 
   // Отправляем счёт в лидерборд (дебаунс 5с)
