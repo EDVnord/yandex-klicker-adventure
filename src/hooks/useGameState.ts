@@ -37,7 +37,7 @@ function loadState(): GameState {
         ),
         currentSkinId: parsed.currentSkinId ?? 'noob',
         unlockedSkins: parsed.unlockedSkins ?? ['noob'],
-        adCooldowns: parsed.adCooldowns ?? {},
+        adCooldowns: sanitizeCooldowns(parsed.adCooldowns ?? {}),
       };
     } catch (e) {
       console.warn('Failed to load save from', key, e);
@@ -52,6 +52,25 @@ function saveState(s: GameState) {
   } catch (e) {
     console.warn('Failed to save state', e);
   }
+}
+
+const MAX_COOLDOWNS_MS: Record<string, number> = {
+  lucky_spin:  60 * 60 * 1000,
+  coins_bonus:  5 * 60 * 1000,
+  turbo:        5 * 60 * 1000,
+  mega:        10 * 60 * 1000,
+  star:        15 * 60 * 1000,
+};
+
+function sanitizeCooldowns(raw: Record<string, number>): Record<string, number> {
+  const now = Date.now();
+  const result: Record<string, number> = {};
+  for (const [id, expiresAt] of Object.entries(raw)) {
+    const maxMs = MAX_COOLDOWNS_MS[id] ?? 15 * 60 * 1000;
+    const capped = Math.min(expiresAt, now + maxMs);
+    if (capped > now) result[id] = capped;
+  }
+  return result;
 }
 
 const BOOST_MULTIPLIERS: Record<string, number> = { turbo: 3, mega: 5, rainbow: 2, star: 10, robot: 1 };

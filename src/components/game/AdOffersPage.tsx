@@ -396,7 +396,7 @@ export default function AdOffersPage({
         <div className="mt-2">
           {spinCooldown > 0 ? (
             <button className="rblx-btn rblx-btn-gray w-full py-3 font-game" disabled>
-              🔒 Кулдаун активен
+              ⏳ Заряжается...
             </button>
           ) : (
             <button
@@ -440,7 +440,6 @@ export default function AdOffersPage({
                         width: `${Math.min(100, Math.max(2, (cd / offer.cooldownSec) * 100))}%`,
                         background: `linear-gradient(90deg, ${offer.color}88, ${offer.color})`,
                         borderRadius: 9999,
-                        transition: 'width 1s linear',
                         boxShadow: `0 0 8px ${offer.color}66`,
                       }} />
                     </div>
