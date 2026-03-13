@@ -220,11 +220,11 @@ export default function Index() {
               </button>
             )
           )}
-          <div className="flex items-center gap-2 px-3 py-1.5 font-game text-base"
-            style={{ background: '#1C2333', border: '2px solid #2D3A50', borderRadius: 4 }}>
-            <div className="w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-black"
+          <div className="flex items-center gap-1.5 px-2 py-1.5 font-game text-sm"
+            style={{ background: '#1C2333', border: '2px solid #2D3A50', borderRadius: 4, maxWidth: 110 }}>
+            <div className="w-4 h-4 rounded-full flex-shrink-0 flex items-center justify-center text-[9px] font-black"
               style={{ background: '#FFD700', color: '#111' }}>R$</div>
-            <span style={{ color: '#FFD700' }}>{Math.floor(state.coins).toLocaleString('ru')}</span>
+            <span className="truncate" style={{ color: '#FFD700' }}>{(() => { const v = Math.floor(state.coins); if (v >= 1_000_000) return `${(v/1_000_000).toFixed(1)}М`; if (v >= 1_000) return `${(v/1_000).toFixed(1)}К`; return v.toString(); })()}</span>
           </div>
         </div>
       </header>
