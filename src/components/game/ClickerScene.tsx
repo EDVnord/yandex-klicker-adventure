@@ -13,10 +13,12 @@ interface Props {
   skin: Skin;
   achievements: Achievement[];
   onClick: () => void;
-  isAutoActive?: boolean; // активен ли авто-робот
+  isAutoActive?: boolean;
+  isRobotOwned?: boolean;
+  autoCapped?: boolean;
 }
 
-export default function ClickerScene({ coins, totalClicks, clicksPerSecond, multiplier, skin, achievements, onClick, isAutoActive = false }: Props) {
+export default function ClickerScene({ coins, totalClicks, clicksPerSecond, multiplier, skin, achievements, onClick, isAutoActive = false, isRobotOwned = false, autoCapped = false }: Props) {
   const [particles, setParticles] = useState<CoinParticle[]>([]);
   const [isClicking, setIsClicking] = useState(false);
   const [autoPulse, setAutoPulse] = useState(false);
@@ -98,11 +100,17 @@ export default function ClickerScene({ coins, totalClicks, clicksPerSecond, mult
             🔥 МНОЖИТЕЛЬ x{multiplier} АКТИВЕН!
           </div>
         )}
-        {isAutoActive && (
+        {isAutoActive && !autoCapped && (
           <div className="w-full flex items-center justify-center gap-2 px-5 py-1.5 font-game text-sm"
             style={{ background: 'linear-gradient(90deg,#FF8C00,#FFB74D)', borderRadius: 4, boxShadow: '0 3px 0 #a35800', color: '#111',
               animation: 'autoPulseBar 0.08s ease-in-out infinite alternate' }}>
             🤖 АВТО-РОБОТ АКТИВЕН!
+          </div>
+        )}
+        {isRobotOwned && autoCapped && (
+          <div className="w-full flex items-center justify-center gap-2 px-5 py-1.5 font-game text-sm"
+            style={{ background: 'linear-gradient(90deg,#2D3A50,#3a4a60)', borderRadius: 4, boxShadow: '0 3px 0 #111', color: '#FFB74D', border: '1px solid #FFB74D44' }}>
+            ⏸ РОБОТ НА ПАУЗЕ — трать монеты, чтобы он снова заработал!
           </div>
         )}
       </div>

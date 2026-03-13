@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import type { GameState, ActiveBoost } from '@/types/game';
-import { ACHIEVEMENTS } from '@/data/gameData';
+import { ACHIEVEMENTS, BOOSTS } from '@/data/gameData';
 import { SKINS } from '@/data/skins';
 
 const STORAGE_KEY = 'roboclick_save_v3';
@@ -17,7 +17,25 @@ const defaultState: GameState = {
   currentSkinId: 'noob',
   unlockedSkins: ['noob'],
   adCooldowns: {},
+  purchasedBoosts: [],
 };
+
+function restorePersistentBoosts(purchasedBoosts: string[], activeBoosts: ActiveBoost[]): ActiveBoost[] {
+  const now = Date.now();
+  const result = [...activeBoosts];
+  for (const boostId of purchasedBoosts) {
+    const boost = BOOSTS.find(b => b.id === boostId && b.persistent);
+    if (!boost) continue;
+    const existing = result.find(b => b.boostId === boostId);
+    if (!existing || existing.expiresAt <= now) {
+      const idx = result.findIndex(b => b.boostId === boostId);
+      const fresh = { boostId, expiresAt: now + boost.duration * 1000 };
+      if (idx >= 0) result[idx] = fresh;
+      else result.push(fresh);
+    }
+  }
+  return result;
+}
 
 function loadState(): GameState {
   // Пробуем новый ключ, затем старый для миграции
@@ -26,6 +44,10 @@ function loadState(): GameState {
       const saved = localStorage.getItem(key);
       if (!saved) continue;
       const parsed = JSON.parse(saved);
+      const purchasedBoosts: string[] = parsed.purchasedBoosts ?? [];
+      const activeBoosts = (parsed.activeBoosts || []).filter(
+        (b: ActiveBoost) => b.expiresAt > Date.now()
+      );
       return {
         ...defaultState,
         ...parsed,
@@ -33,12 +55,11 @@ function loadState(): GameState {
           const savedA = parsed.achievements?.find((s: { id: string; unlocked: boolean }) => s.id === a.id);
           return savedA ? { ...a, unlocked: savedA.unlocked } : { ...a };
         }),
-        activeBoosts: (parsed.activeBoosts || []).filter(
-          (b: ActiveBoost) => b.expiresAt > Date.now()
-        ),
+        activeBoosts: restorePersistentBoosts(purchasedBoosts, activeBoosts),
         currentSkinId: parsed.currentSkinId ?? 'noob',
         unlockedSkins: parsed.unlockedSkins ?? ['noob'],
         adCooldowns: sanitizeCooldowns(parsed.adCooldowns ?? {}),
+        purchasedBoosts,
       };
     } catch (e) {
       console.warn('Failed to load save from', key, e);
@@ -119,13 +140,25 @@ export function useGameState() {
     return () => clearInterval(interval);
   }, []);
 
-  // --- Истечение бустов ---
+  // --- Истечение бустов (persistent перезапускаются автоматически) ---
   useEffect(() => {
     const interval = setInterval(() => {
       setState(s => {
         const now = Date.now();
-        const active = s.activeBoosts.filter(b => b.expiresAt > now);
-        return active.length !== s.activeBoosts.length ? { ...s, activeBoosts: active } : s;
+        const newBoosts = s.activeBoosts
+          .map(b => {
+            if (b.expiresAt > now) return b;
+            // Persistent-бует истёк — перезапускаем
+            if (s.purchasedBoosts.includes(b.boostId)) {
+              const boost = BOOSTS.find(bb => bb.id === b.boostId);
+              if (boost) return { ...b, expiresAt: now + boost.duration * 1000 };
+            }
+            return null;
+          })
+          .filter(Boolean) as typeof s.activeBoosts;
+        const changed = newBoosts.length !== s.activeBoosts.length ||
+          newBoosts.some((b, i) => b.expiresAt !== s.activeBoosts[i]?.expiresAt);
+        return changed ? { ...s, activeBoosts: newBoosts } : s;
       });
     }, 1000);
     return () => clearInterval(interval);
@@ -206,7 +239,11 @@ export function useGameState() {
             ? { ...b, expiresAt: Math.max(b.expiresAt, now) + duration * 1000 }
             : b)
         : [...s.activeBoosts, { boostId, expiresAt: now + duration * 1000 }];
-      return { ...s, coins: s.coins - cost, activeBoosts: newBoosts };
+      const boost = BOOSTS.find(b => b.id === boostId);
+      const newPurchased = boost?.persistent && !s.purchasedBoosts.includes(boostId)
+        ? [...s.purchasedBoosts, boostId]
+        : s.purchasedBoosts;
+      return { ...s, coins: s.coins - cost, activeBoosts: newBoosts, purchasedBoosts: newPurchased };
     });
   }, []);
 

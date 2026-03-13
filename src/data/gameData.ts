@@ -55,6 +55,7 @@ export const BOOSTS: Boost[] = [
     cost: 2000,
     color: '#FFB74D',
     adUnlock: false,
+    persistent: true,
   },
 ];
 

@@ -8,6 +8,7 @@ export interface Boost {
   cost: number;
   color: string;
   adUnlock: boolean; // can unlock via ad
+  persistent?: boolean; // сохраняется между сессиями после покупки
 }
 
 export interface Achievement {
@@ -44,4 +45,5 @@ export interface GameState {
   currentSkinId: string;
   unlockedSkins: string[];
   adCooldowns: Record<string, number>; // offerId -> timestamp when cooldown ends
+  purchasedBoosts: string[]; // id постоянных бустов, купленных навсегда
 }
