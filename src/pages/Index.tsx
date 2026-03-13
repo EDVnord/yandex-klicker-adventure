@@ -117,7 +117,8 @@ export default function Index() {
 
   /* Rewarded ad для бонусной страницы */
   const handleAdOffer = (offerId: string, rewardType: string, rewardValue: number) => {
-    showRewardedAd(() => claimAdOffer(offerId, rewardType, rewardValue));
+    const cooldownMs = offerId === 'lucky_spin' ? 60 * 60 * 1000 : 5 * 60 * 1000;
+    showRewardedAd(() => claimAdOffer(offerId, rewardType, rewardValue, cooldownMs));
   };
 
   return (
