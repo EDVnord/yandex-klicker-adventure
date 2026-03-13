@@ -75,6 +75,7 @@ export default function Index() {
         achievements: state.achievements.map(a => ({ id: a.id, unlocked: a.unlocked })),
         activeBoosts: state.activeBoosts,
         adCooldowns: state.adCooldowns,
+        savedAt: Date.now(),
       });
     }, delay);
     return () => { if (saveRef.current) clearTimeout(saveRef.current); };

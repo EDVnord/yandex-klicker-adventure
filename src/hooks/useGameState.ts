@@ -55,7 +55,7 @@ function loadState(): GameState {
 
 function saveState(s: GameState) {
   try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(s));
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({ ...s, savedAt: Date.now() }));
   } catch (e) {
     console.warn('Failed to save state', e);
   }
@@ -310,36 +310,38 @@ export function useGameState() {
     adCooldowns?: Record<string, number>;
     achievements?: { id: string; unlocked: boolean }[];
     activeBoosts?: ActiveBoost[];
+    savedAt?: number;
   }) => {
     const now = Date.now();
+
+    // Читаем savedAt из localStorage
+    let localSavedAt = 0;
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (raw) localSavedAt = JSON.parse(raw).savedAt ?? 0;
+    } catch { /* ignore */ }
+
+    const cloudSavedAt = cloud.savedAt ?? 0;
+
+    // Если локальное сохранение новее облака — не трогаем state
+    if (localSavedAt > cloudSavedAt) return;
+
     const cloudBoosts = (cloud.activeBoosts ?? []).filter((b: ActiveBoost) => b.expiresAt > now);
-    setState(s => {
-      // Мёрджим бусты: объединяем локальные и облачные, берём максимальный expiresAt
-      const mergedBoosts = [...s.activeBoosts];
-      for (const cb of cloudBoosts) {
-        const idx = mergedBoosts.findIndex(b => b.boostId === cb.boostId);
-        if (idx >= 0) {
-          mergedBoosts[idx] = { ...mergedBoosts[idx], expiresAt: Math.max(mergedBoosts[idx].expiresAt, cb.expiresAt) };
-        } else {
-          mergedBoosts.push(cb);
-        }
-      }
-      return {
-        ...s,
-        coins:            Math.max(s.coins,            cloud.coins            ?? 0),
-        totalClicks:      Math.max(s.totalClicks,      cloud.totalClicks      ?? 0),
-        totalCoinsEarned: Math.max(s.totalCoinsEarned, cloud.totalCoinsEarned ?? 0),
-        playerName:       cloud.playerName       ?? s.playerName,
-        currentSkinId:    cloud.currentSkinId    ?? s.currentSkinId,
-        unlockedSkins:    Array.from(new Set([...s.unlockedSkins, ...(cloud.unlockedSkins ?? [])])),
-        adCooldowns:      sanitizeCooldowns({ ...s.adCooldowns, ...(cloud.adCooldowns ?? {}) }),
-        activeBoosts:     mergedBoosts,
-        achievements: s.achievements.map(a => {
-          const ca = cloud.achievements?.find(x => x.id === a.id);
-          return ca?.unlocked ? { ...a, unlocked: true } : a;
-        }),
-      };
-    });
+    setState(s => ({
+      ...s,
+      coins:            cloud.coins            ?? s.coins,
+      totalClicks:      cloud.totalClicks      ?? s.totalClicks,
+      totalCoinsEarned: cloud.totalCoinsEarned ?? s.totalCoinsEarned,
+      playerName:       cloud.playerName       ?? s.playerName,
+      currentSkinId:    cloud.currentSkinId    ?? s.currentSkinId,
+      unlockedSkins:    Array.from(new Set([...s.unlockedSkins, ...(cloud.unlockedSkins ?? [])])),
+      adCooldowns:      sanitizeCooldowns({ ...s.adCooldowns, ...(cloud.adCooldowns ?? {}) }),
+      activeBoosts:     cloudBoosts.length > 0 ? cloudBoosts : s.activeBoosts,
+      achievements: s.achievements.map(a => {
+        const ca = cloud.achievements?.find(x => x.id === a.id);
+        return ca?.unlocked ? { ...a, unlocked: true } : a;
+      }),
+    }));
   }, []);
 
   return {
