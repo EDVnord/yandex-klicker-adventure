@@ -81,7 +81,7 @@ export default function AchievementsPage({ lang, achievements, totalClicks, tota
         </div>
         <div className="rblx-panel text-center py-3">
           <div className="text-2xl mb-1">💰</div>
-          <div className="font-game text-xl" style={{ color: '#FFD700' }}>{totalCoinsEarned.toLocaleString()}</div>
+          <div className="font-game text-xl" style={{ color: '#FFD700' }}>{Math.floor(totalCoinsEarned).toLocaleString()}</div>
           <div className="text-xs font-bold tracking-wide mt-0.5" style={{ color: '#4a5768' }}>{t(lang, 'ach_earned_stat')}</div>
         </div>
       </div>
