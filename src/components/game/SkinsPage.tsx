@@ -73,8 +73,9 @@ export default function SkinsPage({ coins, currentSkinId, unlockedSkins, onSelec
                   filter: unlocked ? 'none' : 'grayscale(0.7) brightness(0.6)',
                 }}>
                 <img src={skin.img} alt={skin.name}
-                  style={{ width: '100%', height: '100%', objectFit: 'cover', imageRendering: 'pixelated' }}
+                  style={{ width: '100%', height: '100%', objectFit: 'cover', imageRendering: 'pixelated', userSelect: 'none', WebkitUserSelect: 'none', pointerEvents: 'none' }}
                   draggable={false}
+                  onContextMenu={e => e.preventDefault()}
                 />
                 {!unlocked && (
                   <div className="absolute inset-0 flex items-center justify-center"

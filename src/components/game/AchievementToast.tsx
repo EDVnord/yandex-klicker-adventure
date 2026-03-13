@@ -4,7 +4,9 @@ import type { Achievement } from '@/types/game';
 interface Props { achievements: Achievement[]; }
 
 export default function AchievementToast({ achievements }: Props) {
-  const [shown, setShown] = useState<Set<string>>(new Set());
+  const [shown, setShown] = useState<Set<string>>(() =>
+    new Set(achievements.filter(a => a.unlocked).map(a => a.id))
+  );
   const [current, setCurrent] = useState<Achievement | null>(null);
 
   useEffect(() => {

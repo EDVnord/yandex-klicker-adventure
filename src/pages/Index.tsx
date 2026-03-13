@@ -70,6 +70,8 @@ export default function Index() {
         currentSkinId: state.currentSkinId,
         unlockedSkins: state.unlockedSkins,
         achievements: state.achievements.map(a => ({ id: a.id, unlocked: a.unlocked })),
+        activeBoosts: state.activeBoosts,
+        adCooldowns: state.adCooldowns,
       });
     }, 10_000);
     return () => clearTimeout(t);

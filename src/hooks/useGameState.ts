@@ -309,21 +309,37 @@ export function useGameState() {
     unlockedSkins?: string[];
     adCooldowns?: Record<string, number>;
     achievements?: { id: string; unlocked: boolean }[];
+    activeBoosts?: ActiveBoost[];
   }) => {
-    setState(s => ({
-      ...s,
-      coins:            cloud.coins            ?? s.coins,
-      totalClicks:      cloud.totalClicks      ?? s.totalClicks,
-      totalCoinsEarned: cloud.totalCoinsEarned ?? s.totalCoinsEarned,
-      playerName:       cloud.playerName       ?? s.playerName,
-      currentSkinId:    cloud.currentSkinId    ?? s.currentSkinId,
-      unlockedSkins:    cloud.unlockedSkins    ?? s.unlockedSkins,
-      adCooldowns:      cloud.adCooldowns      ?? s.adCooldowns,
-      achievements: s.achievements.map(a => {
-        const ca = cloud.achievements?.find(x => x.id === a.id);
-        return ca?.unlocked ? { ...a, unlocked: true } : a;
-      }),
-    }));
+    const now = Date.now();
+    const cloudBoosts = (cloud.activeBoosts ?? []).filter((b: ActiveBoost) => b.expiresAt > now);
+    setState(s => {
+      // Мёрджим бусты: объединяем локальные и облачные, берём максимальный expiresAt
+      const mergedBoosts = [...s.activeBoosts];
+      for (const cb of cloudBoosts) {
+        const idx = mergedBoosts.findIndex(b => b.boostId === cb.boostId);
+        if (idx >= 0) {
+          mergedBoosts[idx] = { ...mergedBoosts[idx], expiresAt: Math.max(mergedBoosts[idx].expiresAt, cb.expiresAt) };
+        } else {
+          mergedBoosts.push(cb);
+        }
+      }
+      return {
+        ...s,
+        coins:            cloud.coins            ?? s.coins,
+        totalClicks:      cloud.totalClicks      ?? s.totalClicks,
+        totalCoinsEarned: cloud.totalCoinsEarned ?? s.totalCoinsEarned,
+        playerName:       cloud.playerName       ?? s.playerName,
+        currentSkinId:    cloud.currentSkinId    ?? s.currentSkinId,
+        unlockedSkins:    cloud.unlockedSkins    ?? s.unlockedSkins,
+        adCooldowns:      sanitizeCooldowns({ ...s.adCooldowns, ...(cloud.adCooldowns ?? {}) }),
+        activeBoosts:     mergedBoosts,
+        achievements: s.achievements.map(a => {
+          const ca = cloud.achievements?.find(x => x.id === a.id);
+          return ca?.unlocked ? { ...a, unlocked: true } : a;
+        }),
+      };
+    });
   }, []);
 
   return {
