@@ -423,36 +423,33 @@ export default function AdOffersPage({
         const cd = getAdCooldownLeft(offer.id);
         const ready = cd <= 0;
         return (
-          <div key={offer.id} className="rblx-panel" style={{ borderTopColor: offer.color, borderTopWidth: 3 }}>
-            <div className="flex items-start gap-3">
-              <div className="w-14 h-14 flex items-center justify-center text-3xl flex-shrink-0"
+          <div key={offer.id} className="rblx-panel" style={{ borderTopColor: offer.color, borderTopWidth: 3, padding: '10px 12px' }}>
+            <div className="flex items-center gap-2">
+              <div className="w-10 h-10 flex items-center justify-center text-2xl flex-shrink-0"
                 style={{ background: '#0F1923', border: `2px solid ${offer.color}44`, borderRadius: 5 }}>
                 {offer.emoji}
               </div>
               <div className="flex-1 min-w-0">
-                <div className="font-game text-lg text-white leading-none">{offer.title}</div>
-                <p className="text-sm mt-0.5 font-semibold" style={{ color: '#4a5768' }}>{offer.description}</p>
+                <div className="font-game text-base text-white leading-none">{offer.title}</div>
+                <p className="text-xs mt-0.5 font-semibold" style={{ color: '#4a5768' }}>{offer.description}</p>
                 {!ready && (
                   <>
-                    <div className="mt-1 flex items-center gap-1 text-sm font-bold" style={{ color: offer.color }}>
-                      <Icon name="Clock" size={13} /> {formatCooldown(cd)} {t(lang, 'offer_next')}
+                    <div className="flex items-center gap-1 text-xs font-bold" style={{ color: offer.color }}>
+                      <Icon name="Clock" size={11} /> {formatCooldown(cd)}
                     </div>
-                    <div className="mt-1.5 w-full rounded-full overflow-hidden" style={{ height: 6, background: '#1C2333' }}>
+                    <div className="mt-1 w-full rounded-full overflow-hidden" style={{ height: 4, background: '#1C2333' }}>
                       <div style={{
                         height: '100%',
                         width: `${Math.min(100, Math.max(2, (cd / offer.cooldownSec) * 100))}%`,
                         background: `linear-gradient(90deg, ${offer.color}88, ${offer.color})`,
                         borderRadius: 9999,
-                        boxShadow: `0 0 8px ${offer.color}66`,
                       }} />
                     </div>
                   </>
                 )}
               </div>
-            </div>
-            <div className="mt-3">
               <button
-                className={`rblx-btn w-full py-2.5 text-sm ${ready && !isAdBusy ? 'rblx-btn-blue' : 'rblx-btn-gray'}`}
+                className={`rblx-btn text-xs py-1.5 px-3 flex-shrink-0 ${ready && !isAdBusy ? 'rblx-btn-blue' : 'rblx-btn-gray'}`}
                 disabled={!ready || isAdBusy}
                 onClick={() => {
                   if (!ready || isAdBusy) return;
@@ -460,10 +457,10 @@ export default function AdOffersPage({
                 }}
               >
                 {!ready
-                  ? <><Icon name="Clock" size={13} /> Ещё {formatCooldown(cd)}</>
+                  ? formatCooldown(cd)
                   : isAdBusy
-                    ? <><Icon name="Loader2" size={14} className="animate-spin" /> Реклама...</>
-                    : <><Icon name="Play" size={14} /> Смотреть рекламу</>}
+                    ? <Icon name="Loader2" size={13} className="animate-spin" />
+                    : <><Icon name="Play" size={13} /> Смотреть</>}
               </button>
             </div>
           </div>

@@ -37,7 +37,7 @@ export default function SkinsPage({ lang, coins, currentSkinId, unlockedSkins, o
       </div>
 
       {/* Skin grid */}
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-3 gap-2">
         {SKINS.map(skin => {
           const unlocked = isUnlocked(skin.id);
           const active = currentSkinId === skin.id;
@@ -47,24 +47,23 @@ export default function SkinsPage({ lang, coins, currentSkinId, unlockedSkins, o
           return (
             <div
               key={skin.id}
-              className="rblx-panel flex flex-col gap-2 relative overflow-hidden"
+              className="rblx-panel flex flex-col gap-1 relative overflow-hidden"
               style={{
                 borderTopColor: active ? rarityColor : unlocked ? rarityColor + '88' : '#2D3A50',
                 borderTopWidth: 3,
-                boxShadow: active ? `0 0 18px ${skin.glowColor}` : 'none',
+                boxShadow: active ? `0 0 14px ${skin.glowColor}` : 'none',
+                padding: '8px',
               }}
             >
-              {/* Active badge */}
-              {active && (
-                <div className="absolute top-2 right-2 z-10 text-xs font-black px-2 py-0.5 tracking-widest"
-                  style={{ background: rarityColor, color: active && skin.rarity === 'legendary' ? '#111' : '#fff', borderRadius: 3 }}>
-                  {t(lang, 'skin_selected')}
+              {/* Rarity + multiplier */}
+              <div className="flex items-center justify-between">
+                <div className="text-[8px] font-black tracking-widest" style={{ color: rarityColor }}>
+                  {t(lang, `rarity_${skin.rarity}` as Parameters<typeof t>[1])}
                 </div>
-              )}
-
-              {/* Rarity badge */}
-              <div className="text-[9px] font-black tracking-widest" style={{ color: rarityColor }}>
-                {t(lang, `rarity_${skin.rarity}` as Parameters<typeof t>[1])}
+                <span className="text-[9px] font-black px-1 py-0.5 rounded"
+                  style={{ background: rarityColor + '22', color: rarityColor }}>
+                  ×{skin.clickMultiplier}
+                </span>
               </div>
 
               {/* Image */}
@@ -81,53 +80,47 @@ export default function SkinsPage({ lang, coins, currentSkinId, unlockedSkins, o
                 />
                 {!unlocked && (
                   <div className="absolute inset-0 flex items-center justify-center"
-                    style={{ background: 'rgba(0,0,0,0.4)' }}>
-                    <Icon name="Lock" size={32} color="#fff" />
+                    style={{ background: 'rgba(0,0,0,0.45)' }}>
+                    <Icon name="Lock" size={22} color="#fff" />
+                  </div>
+                )}
+                {active && (
+                  <div className="absolute top-1 right-1 z-10 text-[8px] font-black px-1 py-0.5"
+                    style={{ background: rarityColor, color: skin.rarity === 'legendary' ? '#111' : '#fff', borderRadius: 2 }}>
+                    ✓
                   </div>
                 )}
               </div>
 
-              {/* Name & desc */}
-              <div>
-                <div className="font-game text-base text-white leading-none flex items-center justify-between">
-                  <span>{skin.emoji} {skin.name}</span>
-                  <span className="text-xs font-black px-1.5 py-0.5 rounded"
-                    style={{ background: rarityColor + '22', color: rarityColor, border: `1px solid ${rarityColor}55` }}>
-                    ×{skin.clickMultiplier}
-                  </span>
-                </div>
-                <div className="text-[11px] font-semibold mt-0.5 leading-tight" style={{ color: '#4a5768' }}>
-                  {skin.description}
-                </div>
-              </div>
+              {/* Name */}
+              <div className="font-game text-[11px] text-white leading-none truncate">{skin.name}</div>
 
               {/* Action button */}
               {unlocked ? (
                 <button
-                  className="rblx-btn w-full text-sm py-2"
+                  className="rblx-btn w-full text-[10px] py-1"
                   style={{
                     background: active ? rarityColor : '#1C2333',
                     color: active ? (skin.rarity === 'legendary' ? '#111' : '#fff') : rarityColor,
-                    border: `2px solid ${rarityColor}55`,
-                    borderRadius: 4,
-                    boxShadow: active ? `0 3px 0 ${skin.glowColor}` : 'none',
+                    border: `1px solid ${rarityColor}55`,
+                    borderRadius: 3,
                   }}
                   onClick={() => !active && onSelect(skin.id)}
                 >
-                  {active ? `✓ ${t(lang, 'skin_selected')}` : t(lang, 'btn_select')}
+                  {active ? '✓ Выбран' : t(lang, 'btn_select')}
                 </button>
               ) : skin.price === -1 ? (
-                <button className="rblx-btn rblx-btn-blue w-full text-xs py-2"
+                <button className="rblx-btn rblx-btn-blue w-full text-[10px] py-1"
                   onClick={() => onAdUnlock(skin.id, () => onSelect(skin.id))}>
-                  <Icon name="Play" size={13} /> {t(lang, 'btn_unlock_ad')}
+                  <Icon name="Play" size={11} /> Реклама
                 </button>
               ) : (
                 <button
-                  className={`rblx-btn w-full text-xs py-2 ${canAfford ? 'rblx-btn-yellow' : 'rblx-btn-gray'}`}
+                  className={`rblx-btn w-full text-[10px] py-1 ${canAfford ? 'rblx-btn-yellow' : 'rblx-btn-gray'}`}
                   onClick={() => canAfford && handleBuy(skin.id, skin.price)}
                 >
-                  {canAfford ? '' : <Icon name="Lock" size={12} />}
-                  🪙 {skin.price.toLocaleString('ru')}
+                  {!canAfford && <Icon name="Lock" size={10} />}
+                  🪙 {skin.price >= 1000 ? `${(skin.price/1000).toFixed(0)}к` : skin.price}
                 </button>
               )}
             </div>
