@@ -192,13 +192,21 @@ export default function Index() {
       </header>
 
       {/* Active boosts */}
-      {state.activeBoosts.length > 0 && (
+      {(state.activeBoosts.length > 0 || state.purchasedBoosts.includes('robot')) && (
         <div className="relative z-10 flex gap-2 px-4 py-1.5 overflow-x-auto"
           style={{ background: '#0d131e', borderBottom: '1px solid #1C2333' }}>
-          {state.activeBoosts.map(ab => {
+          {/* Постоянный робот — без таймера */}
+          {state.purchasedBoosts.includes('robot') && (
+            <div className="flex-shrink-0 flex items-center gap-1.5 px-3 py-1 font-bold text-sm"
+              style={{ background: '#FF8C00', borderRadius: 3, color: '#111', boxShadow: '0 2px 0 #a35800' }}>
+              🤖 АВТО-РОБОТ
+            </div>
+          )}
+          {/* Временные бусты с таймером (кроме робота) */}
+          {state.activeBoosts.filter(ab => ab.boostId !== 'robot').map(ab => {
             const t = getBoostTimeLeft(ab.boostId);
             if (t <= 0) return null;
-            const emojis: Record<string,string> = { turbo:'⚡', mega:'🚀', rainbow:'🌈', star:'⭐', robot:'🤖' };
+            const emojis: Record<string,string> = { turbo:'⚡', mega:'🚀', rainbow:'🌈', star:'⭐' };
             return (
               <div key={ab.boostId} className="flex-shrink-0 flex items-center gap-1.5 px-3 py-1 font-bold text-sm"
                 style={{ background: '#E61919', borderRadius: 3, color: '#fff', boxShadow: '0 2px 0 #8f0e0e' }}>
@@ -228,13 +236,10 @@ export default function Index() {
             <ClickerScene coins={state.coins} totalClicks={state.totalClicks}
               clicksPerSecond={state.clicksPerSecond} multiplier={multiplier}
               skin={currentSkin} achievements={state.achievements} onClick={handleClickWithAd}
-              isRobotOwned={state.purchasedBoosts.includes('robot')}
-              autoCapped={state.purchasedBoosts.includes('robot') && state.coins >= 50_000}
               isAutoActive={
-                !( state.purchasedBoosts.includes('robot') && state.coins >= 50_000 ) &&
-                state.activeBoosts.some(b => (b.boostId === 'robot' || b.boostId === 'rainbow') && b.expiresAt > Date.now())
-              }
-              onGoToShop={() => setTab('boosts')} />
+                state.purchasedBoosts.includes('robot') ||
+                state.activeBoosts.some(b => b.boostId === 'rainbow' && b.expiresAt > Date.now())
+              } />
           </div>
         )}
         {tab === 'skins' && (
@@ -250,7 +255,8 @@ export default function Index() {
         {tab === 'boosts' && (
           <BoostersPage coins={state.coins} adStatus={adStatus}
             getBoostTimeLeft={getBoostTimeLeft} buyBoost={buyBoost}
-            onShowRewardedAd={handleBoostAd} />
+            onShowRewardedAd={handleBoostAd}
+            purchasedBoosts={state.purchasedBoosts} />
         )}
         {tab === 'ads' && (
           <AdOffersPage

@@ -7,9 +7,10 @@ interface Props {
   getBoostTimeLeft: (id: string) => number;
   buyBoost: (id: string, cost: number, duration: number) => void;
   onShowRewardedAd: (boostId: string, duration: number) => void;
+  purchasedBoosts?: string[];
 }
 
-export default function BoostersPage({ coins, adStatus, getBoostTimeLeft, buyBoost, onShowRewardedAd }: Props) {
+export default function BoostersPage({ coins, adStatus, getBoostTimeLeft, buyBoost, onShowRewardedAd, purchasedBoosts = [] }: Props) {
   const isAdBusy = adStatus === 'loading' || adStatus === 'showing';
 
   const formatTime = (s: number) => s >= 60 ? `${Math.floor(s / 60)}м ${s % 60}с` : `${s}с`;
@@ -35,9 +36,10 @@ export default function BoostersPage({ coins, adStatus, getBoostTimeLeft, buyBoo
       </div>
 
       {BOOSTS.map(boost => {
+        const isPurchased = boost.persistent && purchasedBoosts.includes(boost.id);
         const timeLeft = getBoostTimeLeft(boost.id);
-        const isActive = timeLeft > 0;
-        const canBuy = coins >= boost.cost && boost.cost > 0;
+        const isActive = isPurchased || timeLeft > 0;
+        const canBuy = coins >= boost.cost && boost.cost > 0 && !isPurchased;
         const color = BOOST_COLOR[boost.id] ?? '#fff';
 
         return (
@@ -54,42 +56,49 @@ export default function BoostersPage({ coins, adStatus, getBoostTimeLeft, buyBoo
                   {isActive && (
                     <span className="text-xs font-black px-2 py-0.5 tracking-widest"
                       style={{ background: color, color: '#000', borderRadius: 3 }}>
-                      АКТИВЕН
+                      {isPurchased ? 'КУПЛЕН' : 'АКТИВЕН'}
                     </span>
                   )}
                 </div>
                 <p className="text-sm mt-0.5 font-semibold" style={{ color: '#4a5768' }}>{boost.description}</p>
-                {isActive && (
+                {!isPurchased && timeLeft > 0 && (
                   <div className="mt-1 flex items-center gap-1 text-sm font-bold" style={{ color }}>
                     <Icon name="Clock" size={13} /> {formatTime(timeLeft)} осталось
+                  </div>
+                )}
+                {isPurchased && (
+                  <div className="mt-1 text-sm font-bold" style={{ color }}>
+                    ✓ Работает постоянно
                   </div>
                 )}
               </div>
             </div>
 
-            <div className="mt-3 flex gap-2">
-              {boost.adUnlock && (
-                <button
-                  className="rblx-btn rblx-btn-blue flex-1 text-sm py-2.5"
-                  style={{ opacity: isAdBusy ? 0.65 : 1 }}
-                  onClick={() => !isAdBusy && onShowRewardedAd(boost.id, boost.duration)}
-                >
-                  {isAdBusy
-                    ? <><Icon name="Loader2" size={14} className="animate-spin" /> Реклама...</>
-                    : <><Icon name="Play" size={14} /> Смотреть рекламу</>
-                  }
-                </button>
-              )}
-              {boost.cost > 0 && (
-                <button
-                  className={`rblx-btn flex-1 text-sm py-2.5 ${canBuy ? 'rblx-btn-yellow' : 'rblx-btn-gray'}`}
-                  onClick={() => buyBoost(boost.id, boost.cost, boost.duration)}
-                >
-                  {!canBuy && <Icon name="Lock" size={13} />}
-                  🪙 {boost.cost.toLocaleString('ru')}
-                </button>
-              )}
-            </div>
+            {!isPurchased && (
+              <div className="mt-3 flex gap-2">
+                {boost.adUnlock && (
+                  <button
+                    className="rblx-btn rblx-btn-blue flex-1 text-sm py-2.5"
+                    style={{ opacity: isAdBusy ? 0.65 : 1 }}
+                    onClick={() => !isAdBusy && onShowRewardedAd(boost.id, boost.duration)}
+                  >
+                    {isAdBusy
+                      ? <><Icon name="Loader2" size={14} className="animate-spin" /> Реклама...</>
+                      : <><Icon name="Play" size={14} /> Смотреть рекламу</>
+                    }
+                  </button>
+                )}
+                {boost.cost > 0 && (
+                  <button
+                    className={`rblx-btn flex-1 text-sm py-2.5 ${canBuy ? 'rblx-btn-yellow' : 'rblx-btn-gray'}`}
+                    onClick={() => canBuy && buyBoost(boost.id, boost.cost, boost.duration)}
+                  >
+                    {!canBuy && <Icon name="Lock" size={13} />}
+                    🪙 {boost.cost.toLocaleString('ru')}
+                  </button>
+                )}
+              </div>
+            )}
           </div>
         );
       })}

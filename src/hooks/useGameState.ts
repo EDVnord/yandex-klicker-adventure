@@ -20,22 +20,7 @@ const defaultState: GameState = {
   purchasedBoosts: [],
 };
 
-function restorePersistentBoosts(purchasedBoosts: string[], activeBoosts: ActiveBoost[]): ActiveBoost[] {
-  const now = Date.now();
-  const result = [...activeBoosts];
-  for (const boostId of purchasedBoosts) {
-    const boost = BOOSTS.find(b => b.id === boostId && b.persistent);
-    if (!boost) continue;
-    const existing = result.find(b => b.boostId === boostId);
-    if (!existing || existing.expiresAt <= now) {
-      const idx = result.findIndex(b => b.boostId === boostId);
-      const fresh = { boostId, expiresAt: now + boost.duration * 1000 };
-      if (idx >= 0) result[idx] = fresh;
-      else result.push(fresh);
-    }
-  }
-  return result;
-}
+
 
 function loadState(): GameState {
   // Пробуем новый ключ, затем старый для миграции
@@ -55,7 +40,7 @@ function loadState(): GameState {
           const savedA = parsed.achievements?.find((s: { id: string; unlocked: boolean }) => s.id === a.id);
           return savedA ? { ...a, unlocked: savedA.unlocked } : { ...a };
         }),
-        activeBoosts: restorePersistentBoosts(purchasedBoosts, activeBoosts),
+        activeBoosts,
         currentSkinId: parsed.currentSkinId ?? 'noob',
         unlockedSkins: parsed.unlockedSkins ?? ['noob'],
         adCooldowns: sanitizeCooldowns(parsed.adCooldowns ?? {}),
@@ -140,37 +125,22 @@ export function useGameState() {
     return () => clearInterval(interval);
   }, []);
 
-  // --- Истечение бустов (persistent перезапускаются автоматически) ---
+  // --- Истечение бустов ---
   useEffect(() => {
     const interval = setInterval(() => {
       setState(s => {
         const now = Date.now();
-        const newBoosts = s.activeBoosts
-          .map(b => {
-            if (b.expiresAt > now) return b;
-            // Persistent-бует истёк — перезапускаем
-            if (s.purchasedBoosts.includes(b.boostId)) {
-              const boost = BOOSTS.find(bb => bb.id === b.boostId);
-              if (boost) return { ...b, expiresAt: now + boost.duration * 1000 };
-            }
-            return null;
-          })
-          .filter(Boolean) as typeof s.activeBoosts;
-        const changed = newBoosts.length !== s.activeBoosts.length ||
-          newBoosts.some((b, i) => b.expiresAt !== s.activeBoosts[i]?.expiresAt);
-        return changed ? { ...s, activeBoosts: newBoosts } : s;
+        const active = s.activeBoosts.filter(b => b.expiresAt > now);
+        return active.length !== s.activeBoosts.length ? { ...s, activeBoosts: active } : s;
       });
     }, 1000);
     return () => clearInterval(interval);
   }, []);
 
-  const AUTO_CAP = 50_000; // авторобот не начисляет монеты выше этого порога
-
   // --- Клик (через ref чтобы интервал всегда вызывал актуальную версию) ---
   const handleClickImpl = (isAuto: boolean) => {
     if (!isAuto) clickTimestamps.current.push(Date.now());
     setState(s => {
-      if (isAuto && s.coins >= AUTO_CAP) return s; // стоп при AFK-капе
       const skinMult = SKINS.find(sk => sk.id === s.currentSkinId)?.clickMultiplier ?? 1;
       const mult = getMultiplierFromBoosts(s.activeBoosts);
       const earned = s.coinsPerClick * mult * skinMult;
@@ -215,33 +185,14 @@ export function useGameState() {
    
   }, []);
 
-  // --- Автоклик: один интервал, читает stateRef напрямую ---
+  // --- Автоклик: робот всегда активен после покупки, радуга — пока не истёк ---
   useEffect(() => {
     autoClickRef.current = setInterval(() => {
       const now = Date.now();
       const s = stateRef.current;
-
-      // Перезапускаем истёкшие persistent-бусты прямо здесь, не ждём 1с тика
-      const expired = s.activeBoosts.filter(
-        b => b.expiresAt <= now && s.purchasedBoosts.includes(b.boostId)
-      );
-      if (expired.length > 0) {
-        setState(prev => ({
-          ...prev,
-          activeBoosts: prev.activeBoosts.map(b => {
-            if (b.expiresAt > now) return b;
-            if (!prev.purchasedBoosts.includes(b.boostId)) return b;
-            const boost = BOOSTS.find(bb => bb.id === b.boostId);
-            return boost ? { ...b, expiresAt: now + boost.duration * 1000 } : b;
-          }),
-        }));
-        return; // пропускаем клик в этом тике, дадим стейту обновиться
-      }
-
-      const hasAutoBoost = s.activeBoosts.some(
-        b => (b.boostId === 'robot' || b.boostId === 'rainbow') && b.expiresAt > now
-      );
-      if (hasAutoBoost) handleClickRef.current(true);
+      const hasRobot = s.purchasedBoosts.includes('robot');
+      const hasRainbow = s.activeBoosts.some(b => b.boostId === 'rainbow' && b.expiresAt > now);
+      if (hasRobot || hasRainbow) handleClickRef.current(true);
     }, 80);
     return () => { if (autoClickRef.current) clearInterval(autoClickRef.current); };
   }, []);
@@ -250,6 +201,13 @@ export function useGameState() {
   const buyBoost = useCallback((boostId: string, cost: number, duration: number) => {
     setState(s => {
       if (s.coins < cost) return s;
+      const boost = BOOSTS.find(b => b.id === boostId);
+      // Persistent-буст (робот): просто записываем в purchasedBoosts, без activeBoosts
+      if (boost?.persistent) {
+        if (s.purchasedBoosts.includes(boostId)) return s; // уже куплен
+        return { ...s, coins: s.coins - cost, purchasedBoosts: [...s.purchasedBoosts, boostId] };
+      }
+      // Временный буст: добавляем/продлеваем в activeBoosts
       const now = Date.now();
       const existing = s.activeBoosts.find(b => b.boostId === boostId);
       const newBoosts = existing
@@ -257,11 +215,7 @@ export function useGameState() {
             ? { ...b, expiresAt: Math.max(b.expiresAt, now) + duration * 1000 }
             : b)
         : [...s.activeBoosts, { boostId, expiresAt: now + duration * 1000 }];
-      const boost = BOOSTS.find(b => b.id === boostId);
-      const newPurchased = boost?.persistent && !s.purchasedBoosts.includes(boostId)
-        ? [...s.purchasedBoosts, boostId]
-        : s.purchasedBoosts;
-      return { ...s, coins: s.coins - cost, activeBoosts: newBoosts, purchasedBoosts: newPurchased };
+      return { ...s, coins: s.coins - cost, activeBoosts: newBoosts };
     });
   }, []);
 
