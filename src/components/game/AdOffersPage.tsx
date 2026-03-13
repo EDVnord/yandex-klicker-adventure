@@ -416,14 +416,14 @@ export default function AdOffersPage({
                     <div className="mt-1 flex items-center gap-1 text-sm font-bold" style={{ color: offer.color }}>
                       <Icon name="Clock" size={13} /> {formatCooldown(cd)} до следующего
                     </div>
-                    <div className="mt-1.5 w-full rounded-full overflow-hidden" style={{ height: 5, background: '#1C2333' }}>
+                    <div className="mt-1.5 w-full rounded-full overflow-hidden" style={{ height: 6, background: '#1C2333' }}>
                       <div style={{
                         height: '100%',
-                        width: `${Math.min(100, Math.max(0, (1 - cd / offer.cooldownSec) * 100))}%`,
-                        background: offer.color,
+                        width: `${Math.min(100, Math.max(2, (cd / offer.cooldownSec) * 100))}%`,
+                        background: `linear-gradient(90deg, ${offer.color}88, ${offer.color})`,
                         borderRadius: 9999,
                         transition: 'width 1s linear',
-                        boxShadow: `0 0 6px ${offer.color}88`,
+                        boxShadow: `0 0 8px ${offer.color}66`,
                       }} />
                     </div>
                   </>
