@@ -20,14 +20,33 @@ const TABS: { id: Tab; label: string; emoji: string }[] = [
 
 export default function Index() {
   const [tab, setTab] = useState<Tab>('game');
+
+  const saveProgressRef = useRef<((data: Record<string, unknown>) => void) | null>(null);
+
   const {
     state, handleClick, buyBoost, unlockBoostAd,
     getActiveMultiplier, getBoostTimeLeft,
     selectSkin, buySkin, unlockSkinAd, loadCloudState,
     claimAdOffer, getAdCooldownLeft, setAdCooldown,
-  } = useGameState();
+  } = useGameState((s) => {
+    saveProgressRef.current?.({
+      coins: s.coins,
+      totalClicks: s.totalClicks,
+      totalCoinsEarned: s.totalCoinsEarned,
+      playerName: s.playerName,
+      currentSkinId: s.currentSkinId,
+      unlockedSkins: s.unlockedSkins,
+      achievements: s.achievements.map(a => ({ id: a.id, unlocked: a.unlocked })),
+      activeBoosts: s.activeBoosts,
+      adCooldowns: s.adCooldowns,
+      savedAt: Date.now(),
+    });
+  });
 
   const { adStatus, showRewardedAd, showFullscreenAd, submitScore, saveProgress, loadProgress, ready } = useYandexGames();
+
+  // Подключаем saveProgress к ref после инициализации
+  useEffect(() => { saveProgressRef.current = saveProgress; }, [saveProgress]);
 
   const [, setTick] = useState(0);
   useEffect(() => {
@@ -56,13 +75,9 @@ export default function Index() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ready]);
 
-  // Полное сохранение в облако: быстро (2с) при изменении бустов/кулдаунов, иначе каждые 10с
+  // Сохранение в облако каждые 10с (бусты сохраняются мгновенно через onBoostsSave)
   const saveRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const prevBoostsRef = useRef(state.activeBoosts);
   useEffect(() => {
-    const boostsChanged = state.activeBoosts !== prevBoostsRef.current;
-    prevBoostsRef.current = state.activeBoosts;
-    const delay = boostsChanged ? 1000 : 10_000;
     if (saveRef.current) clearTimeout(saveRef.current);
     saveRef.current = setTimeout(() => {
       saveProgress({
@@ -77,7 +92,7 @@ export default function Index() {
         adCooldowns: state.adCooldowns,
         savedAt: Date.now(),
       });
-    }, delay);
+    }, 10_000);
     return () => { if (saveRef.current) clearTimeout(saveRef.current); };
   }, [state, saveProgress]);
 

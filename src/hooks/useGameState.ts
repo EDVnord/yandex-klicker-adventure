@@ -94,12 +94,23 @@ function getMultiplierFromBoosts(boosts: ActiveBoost[]): number {
   return mult;
 }
 
-export function useGameState() {
+export function useGameState(onBoostsSave?: (s: GameState) => void) {
   const [state, setState] = useState<GameState>(loadState);
 
   // Ref для актуального state — нужен в интервалах без зависимостей
   const stateRef = useRef(state);
   useEffect(() => { stateRef.current = state; }, [state]);
+
+  const onBoostsSaveRef = useRef(onBoostsSave);
+  onBoostsSaveRef.current = onBoostsSave;
+
+  // Мгновенное сохранение при изменении бустов
+  const prevBoostsRef2 = useRef(state.activeBoosts);
+  useEffect(() => {
+    if (state.activeBoosts === prevBoostsRef2.current) return;
+    prevBoostsRef2.current = state.activeBoosts;
+    onBoostsSaveRef.current?.(state);
+  }, [state.activeBoosts]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const clickTimestamps = useRef<number[]>([]);
   const autoClickRef = useRef<ReturnType<typeof setInterval> | null>(null);
