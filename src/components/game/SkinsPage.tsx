@@ -120,7 +120,7 @@ export default function SkinsPage({ lang, coins, currentSkinId, unlockedSkins, o
                   onClick={() => canAfford && handleBuy(skin.id, skin.price)}
                 >
                   {!canAfford && <Icon name="Lock" size={10} />}
-                  🪙 {skin.price >= 1000 ? `${(skin.price/1000).toFixed(0)}к` : skin.price}
+                  💰 {skin.price >= 1000 ? `${(skin.price/1000).toFixed(0)}к` : skin.price}
                 </button>
               )}
             </div>

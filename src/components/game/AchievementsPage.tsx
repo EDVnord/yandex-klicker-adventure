@@ -84,7 +84,7 @@ export default function AchievementsPage({ lang, achievements, totalClicks, tota
           <div className="text-xs font-bold tracking-wide mt-0.5" style={{ color: '#4a5768' }}>КЛИКОВ</div>
         </div>
         <div className="rblx-panel text-center py-3">
-          <div className="text-2xl mb-1">🪙</div>
+          <div className="text-2xl mb-1">💰</div>
           <div className="font-game text-xl" style={{ color: '#FFD700' }}>{totalCoinsEarned.toLocaleString('ru')}</div>
           <div className="text-xs font-bold tracking-wide mt-0.5" style={{ color: '#4a5768' }}>ЗАРАБОТАНО</div>
         </div>

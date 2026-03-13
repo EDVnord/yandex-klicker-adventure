@@ -13,11 +13,11 @@ interface Props {
 }
 
 const SPIN_PRIZES = [
-  { emoji: '🪙', label: '2 000',      type: 'coins', value: 2_000,  weight: 35, color: '#FFD700' },
+  { emoji: '💰', label: '2 000',      type: 'coins', value: 2_000,  weight: 35, color: '#FFD700' },
   { emoji: '⚡',  label: 'Турбо 60с', type: 'turbo', value: 60,     weight: 25, color: '#FFD700' },
-  { emoji: '🪙', label: '5 000',      type: 'coins', value: 5_000,  weight: 20, color: '#4FC3F7' },
+  { emoji: '💰', label: '5 000',      type: 'coins', value: 5_000,  weight: 20, color: '#4FC3F7' },
   { emoji: '🚀', label: 'Мега 30с',   type: 'mega',  value: 30,     weight: 12, color: '#FF6BC8' },
-  { emoji: '🪙', label: '10 000',     type: 'coins', value: 10_000, weight: 6,  color: '#a855f7' },
+  { emoji: '💰', label: '10 000',     type: 'coins', value: 10_000, weight: 6,  color: '#a855f7' },
   { emoji: '⭐',  label: 'Звезда 20с', type: 'star', value: 20,     weight: 2,  color: '#69F0AE' },
 ];
 

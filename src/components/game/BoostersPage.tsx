@@ -86,7 +86,7 @@ export default function BoostersPage({ lang, coins, adStatus, getBoostTimeLeft, 
                     onClick={() => canBuy && buyBoost(boost.id, boost.cost, boost.duration)}
                   >
                     {!canBuy && <Icon name="Lock" size={12} />}
-                    🪙 {boost.cost.toLocaleString('ru')}
+                    💰 {boost.cost.toLocaleString('ru')}
                   </button>
                 )}
               </div>

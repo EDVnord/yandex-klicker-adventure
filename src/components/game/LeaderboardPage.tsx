@@ -71,7 +71,7 @@ export default function LeaderboardPage({ playerName, totalClicks, setPlayerName
               </div>
             )}
             <div className="text-xs font-bold mt-0.5" style={{ color: '#4a5768' }}>
-              🪙 {totalClicks.toLocaleString('ru')} кликов
+              💰 {totalClicks.toLocaleString('ru')} кликов
             </div>
           </div>
 
