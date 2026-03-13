@@ -18,6 +18,8 @@ const defaultState: GameState = {
   unlockedSkins: ['noob'],
   adCooldowns: {},
   purchasedBoosts: [],
+  noBoostClicks: 0,
+  uniqueBoostsBought: [],
 };
 
 
@@ -148,17 +150,27 @@ export function useGameState() {
       const newTotal = s.totalClicks + (isAuto ? 0 : 1);
       const newTotalEarned = s.totalCoinsEarned + earned;
 
+      const hasActiveBoost = s.activeBoosts.some(b => b.expiresAt > Date.now());
+      const newNoBoostClicks = (!isAuto && !hasActiveBoost) ? s.noBoostClicks + 1 : s.noBoostClicks;
+
       const newAchievements = s.achievements.map(a => {
         if (a.unlocked) return a;
         let unlocked = false;
-        if (a.id === 'first'        && newTotal >= 1)          unlocked = true;
-        if (a.id === 'ten'          && newTotal >= 10)          unlocked = true;
-        if (a.id === 'hundred'      && newTotal >= 100)         unlocked = true;
-        if (a.id === 'five_hundred' && newTotal >= 500)         unlocked = true;
-        if (a.id === 'thousand'     && newTotal >= 1000)        unlocked = true;
-        if (a.id === 'five_k'       && newTotal >= 5000)        unlocked = true;
-        if (a.id === 'coins_1k'     && newTotalEarned >= 1000)  unlocked = true;
+        if (a.id === 'first'        && newTotal >= 1)                       unlocked = true;
+        if (a.id === 'ten'          && newTotal >= 10)                      unlocked = true;
+        if (a.id === 'hundred'      && newTotal >= 100)                     unlocked = true;
+        if (a.id === 'five_hundred' && newTotal >= 500)                     unlocked = true;
+        if (a.id === 'thousand'     && newTotal >= 1_000)                   unlocked = true;
+        if (a.id === 'five_k'       && newTotal >= 5_000)                   unlocked = true;
+        if (a.id === 'ten_k'        && newTotal >= 10_000)                  unlocked = true;
+        if (a.id === 'fifty_k'      && newTotal >= 50_000)                  unlocked = true;
+        if (a.id === 'coins_1k'     && newTotalEarned >= 1_000)             unlocked = true;
+        if (a.id === 'coins_10k'    && newTotalEarned >= 10_000)            unlocked = true;
+        if (a.id === 'coins_100k'   && newTotalEarned >= 100_000)           unlocked = true;
         if (a.id === 'speed'        && clickTimestamps.current.length >= 10) unlocked = true;
+        if (a.id === 'speed_15'     && clickTimestamps.current.length >= 15) unlocked = true;
+        if (a.id === 'all_boosts'   && s.uniqueBoostsBought.length >= 3)   unlocked = true;
+        if (a.id === 'no_boost_500' && newNoBoostClicks >= 500)             unlocked = true;
         return unlocked ? { ...a, unlocked: true } : a;
       });
 
@@ -172,6 +184,7 @@ export function useGameState() {
         totalClicks: newTotal,
         totalCoinsEarned: newTotalEarned + rewardCoins,
         achievements: newAchievements,
+        noBoostClicks: newNoBoostClicks,
       };
     });
   };
@@ -208,7 +221,10 @@ export function useGameState() {
             ? { ...b, expiresAt: Math.max(b.expiresAt, now) + duration * 1000 }
             : b)
         : [...s.activeBoosts, { boostId, expiresAt: now + duration * 1000 }];
-      return { ...s, coins: s.coins - cost, activeBoosts: newBoosts };
+      const uniqueBoostsBought = s.uniqueBoostsBought.includes(boostId)
+        ? s.uniqueBoostsBought
+        : [...s.uniqueBoostsBought, boostId];
+      return { ...s, coins: s.coins - cost, activeBoosts: newBoosts, uniqueBoostsBought };
     });
   }, []);
 
@@ -321,10 +337,18 @@ export function useGameState() {
     }));
   }, []);
 
+  const resetProgress = useCallback(() => {
+    localStorage.removeItem(STORAGE_KEY);
+    localStorage.removeItem('roboclick_save_v2');
+    localStorage.removeItem('roboclick_save');
+    setState({ ...defaultState, achievements: ACHIEVEMENTS.map(a => ({ ...a })) });
+  }, []);
+
   return {
     state, handleClick, buyBoost, unlockBoostAd, setPlayerName,
     getActiveMultiplier, getBoostTimeLeft,
     selectSkin, buySkin, unlockSkinAd, loadCloudState,
     claimAdOffer, getAdCooldownLeft, setAdCooldown,
+    resetProgress,
   };
 }

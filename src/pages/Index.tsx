@@ -19,6 +19,7 @@ export default function Index() {
     getActiveMultiplier, getBoostTimeLeft,
     selectSkin, buySkin, unlockSkinAd, loadCloudState,
     claimAdOffer, getAdCooldownLeft, setAdCooldown,
+    resetProgress,
   } = useGameState();
 
   const { adStatus, showRewardedAd, showFullscreenAd, submitScore, saveProgress, loadProgress, ready, yaLang } = useYandexGames();
@@ -271,7 +272,8 @@ export default function Index() {
         )}
         {tab === 'achievements' && (
           <AchievementsPage achievements={state.achievements}
-            totalClicks={state.totalClicks} totalCoinsEarned={state.totalCoinsEarned} lang={lang} />
+            totalClicks={state.totalClicks} totalCoinsEarned={state.totalCoinsEarned}
+            lang={lang} onReset={resetProgress} />
         )}
       </main>
 

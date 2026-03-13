@@ -47,4 +47,6 @@ export interface GameState {
   unlockedSkins: string[];
   adCooldowns: Record<string, number>; // offerId -> timestamp when cooldown ends
   purchasedBoosts: string[]; // id постоянных бустов, купленных навсегда
+  noBoostClicks: number; // клики без активных бустов
+  uniqueBoostsBought: string[]; // уникальные купленные бусты
 }

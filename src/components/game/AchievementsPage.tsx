@@ -1,19 +1,57 @@
+import { useState } from 'react';
 import type { Achievement } from '@/types/game';
 import { type Lang, t } from '@/i18n';
+import Icon from '@/components/ui/icon';
 
 interface Props {
   lang: Lang;
   achievements: Achievement[];
   totalClicks: number;
   totalCoinsEarned: number;
+  onReset: () => void;
 }
 
-export default function AchievementsPage({ lang, achievements, totalClicks, totalCoinsEarned }: Props) {
+export default function AchievementsPage({ lang, achievements, totalClicks, totalCoinsEarned, onReset }: Props) {
+  const [showConfirm, setShowConfirm] = useState(false);
   const unlocked = achievements.filter(a => a.unlocked).length;
   const pct = Math.round((unlocked / achievements.length) * 100);
 
   return (
     <div className="px-4 py-3 space-y-3 pb-6">
+      {/* Диалог подтверждения сброса */}
+      {showConfirm && (
+        <div style={{
+          position: 'fixed', inset: 0, zIndex: 60,
+          background: 'rgba(0,0,0,0.75)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          padding: '20px',
+        }}>
+          <div className="rblx-panel w-full max-w-sm" style={{ borderTopColor: '#ef4444', borderTopWidth: 3 }}>
+            <div className="text-center mb-4">
+              <div className="text-4xl mb-2">⚠️</div>
+              <div className="font-game text-lg text-white">Сбросить прогресс?</div>
+              <p className="text-sm font-semibold mt-2" style={{ color: '#4a5768' }}>
+                Все клики, монеты, достижения и скины будут удалены. Это действие нельзя отменить.
+              </p>
+            </div>
+            <div className="flex gap-2">
+              <button
+                className="rblx-btn rblx-btn-gray flex-1 py-2.5 font-game"
+                onClick={() => setShowConfirm(false)}
+              >
+                Отмена
+              </button>
+              <button
+                className="rblx-btn flex-1 py-2.5 font-game"
+                style={{ background: '#ef4444', color: '#fff', border: '2px solid #ef444488' }}
+                onClick={() => { onReset(); setShowConfirm(false); }}
+              >
+                Сбросить всё
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
       {/* Header */}
       <div className="rblx-panel-blue flex items-center gap-3">
         <span className="text-2xl">🏆</span>
@@ -107,6 +145,29 @@ export default function AchievementsPage({ lang, achievements, totalClicks, tota
             </div>
           </div>
         ))}
+      </div>
+
+      {/* Кнопка сброса */}
+      <div className="rblx-panel" style={{ borderTopColor: '#ef4444', borderTopWidth: 3 }}>
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 flex items-center justify-center text-xl flex-shrink-0"
+            style={{ background: 'rgba(239,68,68,0.1)', border: '2px solid #ef444444', borderRadius: 5 }}>
+            🔄
+          </div>
+          <div className="flex-1 min-w-0">
+            <div className="font-game text-base text-white leading-none">Начать заново</div>
+            <p className="text-xs font-semibold mt-0.5" style={{ color: '#4a5768' }}>
+              Сбросить весь прогресс и пройти игру с нуля
+            </p>
+          </div>
+          <button
+            className="rblx-btn px-4 py-2 text-sm font-game flex items-center gap-1.5 flex-shrink-0"
+            style={{ background: '#ef4444', color: '#fff', border: '2px solid #ef444488' }}
+            onClick={() => setShowConfirm(true)}
+          >
+            <Icon name="RotateCcw" size={13} /> Сброс
+          </button>
+        </div>
       </div>
     </div>
   );
