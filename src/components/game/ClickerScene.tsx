@@ -101,7 +101,10 @@ export default function ClickerScene({ coins, totalClicks, clicksPerSecond, mult
 
       {/* Character zone */}
       <div ref={containerRef} className="relative cursor-pointer select-none touch-none"
-        style={{ width: 280, height: 330 }} onClick={handleClick} onTouchStart={handleClick}>
+        style={{ width: 280, height: 330 }}
+        onClick={handleClick}
+        onTouchStart={handleClick}
+        onContextMenu={e => e.preventDefault()}>
 
         {/* Ground shadow */}
         <div className="absolute bottom-0 left-1/2 -translate-x-1/2"
@@ -141,8 +144,9 @@ export default function ClickerScene({ coins, totalClicks, clicksPerSecond, mult
             transition: 'box-shadow 0.15s, border-color 0.3s',
           }}>
             <img src={skin.img} alt={skin.name}
-              style={{ width: '100%', height: '100%', objectFit: 'cover', imageRendering: 'pixelated' }}
+              style={{ width: '100%', height: '100%', objectFit: 'cover', imageRendering: 'pixelated', pointerEvents: 'none' }}
               draggable={false}
+              onContextMenu={e => e.preventDefault()}
             />
           </div>
           {/* Name tag */}

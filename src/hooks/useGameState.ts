@@ -162,11 +162,11 @@ export function useGameState() {
   useEffect(() => {
     autoClickRef.current = setInterval(() => {
       const now = Date.now();
-      const hasRobot = stateRef.current.activeBoosts.some(
-        b => b.boostId === 'robot' && b.expiresAt > now
+      const hasAutoBoost = stateRef.current.activeBoosts.some(
+        b => (b.boostId === 'robot' || b.boostId === 'rainbow') && b.expiresAt > now
       );
-      if (hasRobot) handleClickRef.current(true);
-    }, 400);
+      if (hasAutoBoost) handleClickRef.current(true);
+    }, 80); // ~12 кликов/сек
     return () => { if (autoClickRef.current) clearInterval(autoClickRef.current); };
    
   }, []);
