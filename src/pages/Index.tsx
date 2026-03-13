@@ -62,13 +62,26 @@ export default function Index() {
   const adCooldownRef = useRef(false);
   const lastAdTimeRef = useRef(Date.now());
 
+  // Подсказка про авторизацию — показываем один раз через 10с если не авторизован
+  const [showAuthHint, setShowAuthHint] = useState(false);
+  useEffect(() => {
+    if (!ready) return;
+    if (!window.YaGames) return;
+    if (isAuthorized) return;
+    if (sessionStorage.getItem('auth_hint_shown')) return;
+    const t = setTimeout(() => {
+      setShowAuthHint(true);
+      sessionStorage.setItem('auth_hint_shown', '1');
+    }, 10_000);
+    return () => clearTimeout(t);
+  }, [ready, isAuthorized]);
+
   // Загружаем облачный прогресс, когда SDK готов
   useEffect(() => {
     if (!ready) return;
     (async () => {
       const cloud = await loadProgress();
       if (!cloud) return;
-      // Всегда применяем облако — loadCloudState сам мёрджит (берёт максимум)
       loadCloudState(cloud as Parameters<typeof loadCloudState>[0]);
     })();
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -234,6 +247,40 @@ export default function Index() {
               </div>
             );
           })}
+        </div>
+      )}
+
+      {/* Auth hint */}
+      {showAuthHint && (
+        <div style={{
+          position: 'fixed', inset: 0, zIndex: 55,
+          background: 'rgba(0,0,0,0.7)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          padding: 20,
+        }}>
+          <div className="rblx-panel w-full max-w-sm" style={{ borderTopColor: '#1A6BFF', borderTopWidth: 3 }}>
+            <div className="text-center mb-4">
+              <div className="text-4xl mb-2">☁️</div>
+              <div className="font-game text-lg text-white">Сохраняй прогресс!</div>
+              <p className="text-sm font-semibold mt-2" style={{ color: '#4a5768' }}>
+                Войди в аккаунт Яндекса — и твои монеты, достижения и скины сохранятся онлайн. Можно продолжить с любого устройства.
+              </p>
+            </div>
+            <div className="flex gap-2">
+              <button
+                className="rblx-btn rblx-btn-gray flex-1 py-2.5 font-game text-sm"
+                onClick={() => setShowAuthHint(false)}
+              >
+                Потом
+              </button>
+              <button
+                className="rblx-btn rblx-btn-blue flex-1 py-2.5 font-game text-sm"
+                onClick={() => { setShowAuthHint(false); requestAuth(); }}
+              >
+                🔑 Войти
+              </button>
+            </div>
+          </div>
         </div>
       )}
 
