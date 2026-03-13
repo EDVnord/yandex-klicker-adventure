@@ -43,4 +43,5 @@ export interface GameState {
   totalCoinsEarned: number;
   currentSkinId: string;
   unlockedSkins: string[];
+  adCooldowns: Record<string, number>; // offerId -> timestamp when cooldown ends
 }

@@ -4,27 +4,27 @@ import { useYandexGames } from '@/hooks/useYandexGames';
 import ClickerScene from '@/components/game/ClickerScene';
 import BoostersPage from '@/components/game/BoostersPage';
 import AchievementsPage from '@/components/game/AchievementsPage';
-import LeaderboardPage from '@/components/game/LeaderboardPage';
-import AboutPage from '@/components/game/AboutPage';
 import SkinsPage from '@/components/game/SkinsPage';
+import AdOffersPage from '@/components/game/AdOffersPage';
 import { SKINS } from '@/data/skins';
 
-type Tab = 'game' | 'skins' | 'boosts' | 'achievements' | 'leaderboard';
+type Tab = 'game' | 'skins' | 'boosts' | 'ads' | 'achievements';
 
 const TABS: { id: Tab; label: string; emoji: string }[] = [
   { id: 'game',         label: 'Игра',    emoji: '🎮' },
   { id: 'skins',        label: 'Скины',   emoji: '👗' },
   { id: 'boosts',       label: 'Магазин', emoji: '🛒' },
+  { id: 'ads',          label: 'Бонусы',  emoji: '📺' },
   { id: 'achievements', label: 'Ачивки',  emoji: '🏆' },
-  { id: 'leaderboard',  label: 'Топ',     emoji: '👑' },
 ];
 
 export default function Index() {
   const [tab, setTab] = useState<Tab>('game');
   const {
-    state, handleClick, buyBoost, unlockBoostAd, setPlayerName,
+    state, handleClick, buyBoost, unlockBoostAd,
     getActiveMultiplier, getBoostTimeLeft,
     selectSkin, buySkin, unlockSkinAd, loadCloudState,
+    claimAdOffer, getAdCooldownLeft,
   } = useGameState();
 
   const { adStatus, showRewardedAd, showFullscreenAd, submitScore, saveProgress, loadProgress, ready } = useYandexGames();
@@ -115,6 +115,11 @@ export default function Index() {
     });
   };
 
+  /* Rewarded ad для бонусной страницы */
+  const handleAdOffer = (offerId: string, rewardType: string, rewardValue: number) => {
+    showRewardedAd(() => claimAdOffer(offerId, rewardType, rewardValue));
+  };
+
   return (
     <div className="min-h-screen flex flex-col" style={{ background: '#0F1923' }}>
 
@@ -199,13 +204,19 @@ export default function Index() {
             getBoostTimeLeft={getBoostTimeLeft} buyBoost={buyBoost}
             onShowRewardedAd={handleBoostAd} />
         )}
+        {tab === 'ads' && (
+          <AdOffersPage
+            coins={state.coins}
+            coinsPerClick={state.coinsPerClick}
+            adStatus={adStatus}
+            getAdCooldownLeft={getAdCooldownLeft}
+            onClaim={claimAdOffer}
+            onShowRewardedAd={handleAdOffer}
+          />
+        )}
         {tab === 'achievements' && (
           <AchievementsPage achievements={state.achievements}
             totalClicks={state.totalClicks} totalCoinsEarned={state.totalCoinsEarned} />
-        )}
-        {tab === 'leaderboard' && (
-          <LeaderboardPage playerName={state.playerName}
-            totalClicks={state.totalClicks} setPlayerName={setPlayerName} />
         )}
       </main>
 

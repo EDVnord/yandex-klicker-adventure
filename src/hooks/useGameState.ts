@@ -15,6 +15,7 @@ const defaultState: GameState = {
   totalCoinsEarned: 0,
   currentSkinId: 'noob',
   unlockedSkins: ['noob'],
+  adCooldowns: {},
 };
 
 function loadState(): GameState {
@@ -34,6 +35,7 @@ function loadState(): GameState {
         ),
         currentSkinId: parsed.currentSkinId ?? 'noob',
         unlockedSkins: parsed.unlockedSkins ?? ['noob'],
+        adCooldowns: parsed.adCooldowns ?? {},
       };
     }
   } catch (e) {
@@ -193,6 +195,37 @@ export function useGameState() {
     });
   }, []);
 
+  // Получить награду за рекламный оффер (с кулдауном)
+  const claimAdOffer = useCallback((offerId: string, rewardType: string, rewardValue: number, cooldownMs = 4 * 60 * 60 * 1000) => {
+    setState(s => {
+      const now = Date.now();
+      const cooldownEnds = s.adCooldowns[offerId] ?? 0;
+      if (cooldownEnds > now) return s; // ещё не остыло
+
+      let newState = { ...s, adCooldowns: { ...s.adCooldowns, [offerId]: now + cooldownMs } };
+      if (rewardType === 'coins') {
+        newState = { ...newState, coins: s.coins + rewardValue, totalCoinsEarned: s.totalCoinsEarned + rewardValue };
+      } else if (rewardType === 'boost') {
+        // rewardValue = длительность буста в секундах, offerId = boostId
+        const existing = s.activeBoosts.find(b => b.boostId === offerId);
+        const newBoosts = existing
+          ? s.activeBoosts.map(b => b.boostId === offerId ? { ...b, expiresAt: Math.max(b.expiresAt, now) + rewardValue * 1000 } : b)
+          : [...s.activeBoosts, { boostId: offerId, expiresAt: now + rewardValue * 1000 }];
+        newState = { ...newState, activeBoosts: newBoosts };
+      } else if (rewardType === 'cpc') {
+        // rewardValue = число кликов, добавляем монеты
+        newState = { ...newState, coins: s.coins + rewardValue, totalCoinsEarned: s.totalCoinsEarned + rewardValue };
+      }
+      return newState;
+    });
+  }, []);
+
+  // Сколько секунд осталось кулдауна оффера
+  const getAdCooldownLeft = useCallback((offerId: string): number => {
+    const cooldownEnds = state.adCooldowns[offerId] ?? 0;
+    return Math.max(0, Math.ceil((cooldownEnds - Date.now()) / 1000));
+  }, [state.adCooldowns]);
+
   /**
    * Загружает облачный сейв (из Yandex Player API) — применяется поверх localStorage
    * только если облако опережает по прогрессу.
@@ -204,6 +237,7 @@ export function useGameState() {
     playerName?: string;
     currentSkinId?: string;
     unlockedSkins?: string[];
+    adCooldowns?: Record<string, number>;
     achievements?: { id: string; unlocked: boolean }[];
   }) => {
     setState(s => ({
@@ -214,6 +248,7 @@ export function useGameState() {
       playerName:       cloud.playerName       ?? s.playerName,
       currentSkinId:    cloud.currentSkinId    ?? s.currentSkinId,
       unlockedSkins:    cloud.unlockedSkins    ?? s.unlockedSkins,
+      adCooldowns:      cloud.adCooldowns      ?? s.adCooldowns,
       achievements: s.achievements.map(a => {
         const ca = cloud.achievements?.find(x => x.id === a.id);
         return ca?.unlocked ? { ...a, unlocked: true } : a;
@@ -225,5 +260,6 @@ export function useGameState() {
     state, handleClick, buyBoost, unlockBoostAd, setPlayerName,
     getActiveMultiplier, getBoostTimeLeft,
     selectSkin, buySkin, unlockSkinAd, loadCloudState,
+    claimAdOffer, getAdCooldownLeft,
   };
 }
