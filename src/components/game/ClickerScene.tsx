@@ -199,7 +199,7 @@ export default function ClickerScene({ lang, coins, totalClicks, clicksPerSecond
       <button className="rblx-btn rblx-btn-blue btn-click-pulse mt-3"
         style={{ fontSize: '1.35rem', padding: '14px 52px', borderRadius: 5 }}
         onClick={handleClick} onTouchStart={handleClick}>
-        🪙 ТЫК! {multiplier > 1 ? `+${multiplier}` : '+1'}
+        💰 ТЫК! {multiplier > 1 ? `+${multiplier}` : '+1'}
       </button>
 
       {/* Balance */}
