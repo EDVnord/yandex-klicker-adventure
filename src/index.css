@@ -1,4 +1,4 @@
-@import url("https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:ital,wght@0,400;0,600;0,700;0,800;0,900&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600&family=Nunito:ital,wght@0,400;0,600;0,700;0,800;0,900&display=swap");
 
 @tailwind base;
 @tailwind components;
@@ -186,7 +186,7 @@
 
 /* ========= UTILITY ========= */
 .font-game {
-  font-family: "Fredoka One", cursive;
+  font-family: "Fredoka", cursive;
   text-transform: none;
   font-style: normal !important;
   font-synthesis: none;
@@ -220,7 +220,7 @@
   pointer-events: none;
   font-size: 1.3rem;
   font-weight: 900;
-  font-family: "Fredoka One", cursive;
+  font-family: "Fredoka", cursive;
   color: #ffd700;
   text-shadow: 0 2px 6px rgba(0, 0, 0, 0.7);
   animation: coin-pop 0.75s ease-out forwards;
@@ -262,7 +262,7 @@
   align-items: center;
   justify-content: center;
   gap: 6px;
-  font-family: "Fredoka One", cursive;
+  font-family: "Fredoka", cursive;
   font-size: 1rem;
   text-transform: none;
   font-style: normal;
