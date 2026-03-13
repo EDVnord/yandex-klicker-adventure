@@ -22,7 +22,7 @@ export default function Index() {
     resetProgress,
   } = useGameState();
 
-  const { adStatus, showRewardedAd, showFullscreenAd, submitScore, saveProgress, loadProgress, ready, yaLang } = useYandexGames();
+  const { adStatus, showRewardedAd, showFullscreenAd, submitScore, saveProgress, loadProgress, ready, yaLang, isAuthorized, yaPlayerName, requestAuth } = useYandexGames();
   const lang = detectLang(yaLang);
 
   const TABS = [
@@ -188,11 +188,31 @@ export default function Index() {
           <span className="text-lg ml-1">{currentSkin.emoji}</span>
         </div>
 
-        <div className="flex items-center gap-2 px-3 py-1.5 font-game text-base"
-          style={{ background: '#1C2333', border: '2px solid #2D3A50', borderRadius: 4 }}>
-          <div className="w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-black"
-            style={{ background: '#FFD700', color: '#111' }}>R$</div>
-          <span style={{ color: '#FFD700' }}>{Math.floor(state.coins).toLocaleString('ru')}</span>
+        <div className="flex items-center gap-2">
+          {/* Статус авторизации Яндекс */}
+          {window.YaGames && (
+            isAuthorized ? (
+              <div className="flex items-center gap-1.5 px-2 py-1 text-xs font-bold"
+                style={{ background: 'rgba(105,240,174,0.1)', border: '1px solid #69F0AE44', borderRadius: 4, color: '#69F0AE' }}>
+                <span>☁️</span>
+                <span className="hidden sm:inline">{yaPlayerName || 'Сохранено'}</span>
+              </div>
+            ) : (
+              <button
+                onClick={requestAuth}
+                className="flex items-center gap-1.5 px-2 py-1 text-xs font-bold"
+                style={{ background: 'rgba(26,107,255,0.15)', border: '1px solid #1A6BFF88', borderRadius: 4, color: '#1A6BFF' }}>
+                <span>🔑</span>
+                <span>Войти</span>
+              </button>
+            )
+          )}
+          <div className="flex items-center gap-2 px-3 py-1.5 font-game text-base"
+            style={{ background: '#1C2333', border: '2px solid #2D3A50', borderRadius: 4 }}>
+            <div className="w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-black"
+              style={{ background: '#FFD700', color: '#111' }}>R$</div>
+            <span style={{ color: '#FFD700' }}>{Math.floor(state.coins).toLocaleString('ru')}</span>
+          </div>
         </div>
       </header>
 

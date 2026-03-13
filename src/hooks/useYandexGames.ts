@@ -32,6 +32,9 @@ interface YaSDK {
   };
   getLeaderboards: () => Promise<YaLeaderboards>;
   getPlayer: (opts?: { scopes?: boolean }) => Promise<YaPlayer>;
+  auth: {
+    openAuthDialog: () => Promise<void>;
+  };
 }
 
 interface YaLeaderboards {
@@ -55,6 +58,22 @@ export function useYandexGames() {
   const [ready, setReady] = useState(false);
   const [adStatus, setAdStatus] = useState<AdStatus>('idle');
   const [yaLang, setYaLang] = useState<string | undefined>(undefined);
+  const [isAuthorized, setIsAuthorized] = useState(false);
+  const [yaPlayerName, setYaPlayerName] = useState<string | undefined>(undefined);
+
+  const tryGetPlayer = useCallback(async (sdk: YaSDK) => {
+    try {
+      const player = await sdk.getPlayer({ scopes: false });
+      playerRef.current = player;
+      const uid = player.getUniqueID();
+      const name = player.getName();
+      setIsAuthorized(!!uid);
+      if (name) setYaPlayerName(name);
+      console.log('[YaGames] Player готов, uid:', uid, 'name:', name);
+    } catch (e) {
+      console.warn('[YaGames] Не удалось получить Player', e);
+    }
+  }, []);
 
   useEffect(() => {
     if (!window.YaGames) {
@@ -67,19 +86,24 @@ export function useYandexGames() {
         sdkRef.current = sdk;
         const lang = sdk.environment?.i18n?.lang;
         if (lang) setYaLang(lang);
-        try {
-          playerRef.current = await sdk.getPlayer({ scopes: false });
-          console.log('[YaGames] SDK + Player готов, lang:', lang);
-        } catch (e) {
-          console.warn('[YaGames] Не удалось получить Player', e);
-        }
+        await tryGetPlayer(sdk);
         setReady(true);
       })
       .catch(err => {
         console.warn('[YaGames] Ошибка инициализации', err);
         setReady(true);
       });
-  }, []);
+  }, [tryGetPlayer]);
+
+  const requestAuth = useCallback(async () => {
+    if (!sdkRef.current) return;
+    try {
+      await sdkRef.current.auth.openAuthDialog();
+      await tryGetPlayer(sdkRef.current);
+    } catch (e) {
+      console.warn('[YaGames] Авторизация отменена', e);
+    }
+  }, [tryGetPlayer]);
 
   const saveProgress = useCallback(async (data: Record<string, unknown>) => {
     if (!playerRef.current) {
@@ -163,5 +187,5 @@ export function useYandexGames() {
     }
   }, []);
 
-  return { ready, adStatus, yaLang, showRewardedAd, showFullscreenAd, submitScore, saveProgress, loadProgress };
+  return { ready, adStatus, yaLang, isAuthorized, yaPlayerName, requestAuth, showRewardedAd, showFullscreenAd, submitScore, saveProgress, loadProgress };
 }
