@@ -111,8 +111,8 @@ export function useGameState() {
     return () => clearInterval(interval);
   }, []);
 
-  // --- Клик ---
-  const handleClick = useCallback((isAuto = false) => {
+  // --- Клик (через ref чтобы интервал всегда вызывал актуальную версию) ---
+  const handleClickImpl = (isAuto: boolean) => {
     if (!isAuto) clickTimestamps.current.push(Date.now());
     setState(s => {
       const mult = getMultiplierFromBoosts(s.activeBoosts);
@@ -147,24 +147,29 @@ export function useGameState() {
         achievements: newAchievements,
       };
     });
+  };
+
+  // ref всегда указывает на актуальную реализацию
+  const handleClickRef = useRef(handleClickImpl);
+  handleClickRef.current = handleClickImpl;
+
+  const handleClick = useCallback((isAuto = false) => {
+    handleClickRef.current(isAuto);
+   
   }, []);
 
-  // --- Автоклик: один стабильный интервал, смотрит в stateRef ---
+  // --- Автоклик: один интервал, читает stateRef напрямую ---
   useEffect(() => {
-    // Запускаем один интервал навсегда, внутри проверяем наличие robot-буста
     autoClickRef.current = setInterval(() => {
-      const s = stateRef.current;
       const now = Date.now();
-      const hasRobot = s.activeBoosts.some(b => b.boostId === 'robot' && b.expiresAt > now);
-      if (hasRobot) {
-        handleClick(true);
-      }
+      const hasRobot = stateRef.current.activeBoosts.some(
+        b => b.boostId === 'robot' && b.expiresAt > now
+      );
+      if (hasRobot) handleClickRef.current(true);
     }, 400);
-    return () => {
-      if (autoClickRef.current) clearInterval(autoClickRef.current);
-    };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []); // только при монтировании
+    return () => { if (autoClickRef.current) clearInterval(autoClickRef.current); };
+   
+  }, []);
 
   // --- Покупка буста ---
   const buyBoost = useCallback((boostId: string, cost: number, duration: number) => {
