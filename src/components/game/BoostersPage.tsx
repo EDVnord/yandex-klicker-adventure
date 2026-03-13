@@ -45,7 +45,7 @@ export default function BoostersPage({ lang, coins, adStatus, getBoostTimeLeft, 
         return (
           <div key={boost.id} className="rblx-panel"
             style={{ borderTopColor: isActive ? color : '#2D3A50', borderTopWidth: 3, padding: '10px 12px' }}>
-            <div className="flex items-center gap-2">
+            <div className="flex items-start gap-2">
               <div className="w-10 h-10 flex items-center justify-center text-2xl flex-shrink-0"
                 style={{ background: '#0F1923', border: `2px solid ${color}44`, borderRadius: 5 }}>
                 {boost.emoji}
@@ -66,29 +66,29 @@ export default function BoostersPage({ lang, coins, adStatus, getBoostTimeLeft, 
                     <Icon name="Clock" size={11} /> {formatTime(timeLeft)} {t(lang, 'boost_left')}
                   </div>
                 )}
-              </div>
-              <div className="flex gap-1.5 flex-shrink-0">
-                {boost.adUnlock && (
-                  <button
-                    className="rblx-btn rblx-btn-blue text-xs py-1.5 px-2.5"
-                    style={{ opacity: isAdBusy ? 0.65 : 1 }}
-                    onClick={() => !isAdBusy && onShowRewardedAd(boost.id, boost.adDuration ?? boost.duration)}
-                  >
-                    {isAdBusy
-                      ? <Icon name="Loader2" size={13} className="animate-spin" />
-                      : <><Icon name="Play" size={13} /> {t(lang, 'btn_watch_ad')}</>
-                    }
-                  </button>
-                )}
-                {boost.cost > 0 && (
-                  <button
-                    className={`rblx-btn text-xs py-1.5 px-2.5 ${canBuy ? 'rblx-btn-yellow' : 'rblx-btn-gray'}`}
-                    onClick={() => canBuy && buyBoost(boost.id, boost.cost, boost.duration)}
-                  >
-                    {!canBuy && <Icon name="Lock" size={12} />}
-                    💰 {boost.cost.toLocaleString('ru')}
-                  </button>
-                )}
+                <div className="flex gap-1.5 mt-2 flex-wrap">
+                  {boost.adUnlock && (
+                    <button
+                      className="rblx-btn rblx-btn-blue text-xs py-1.5 px-2.5"
+                      style={{ opacity: isAdBusy ? 0.65 : 1 }}
+                      onClick={() => !isAdBusy && onShowRewardedAd(boost.id, boost.adDuration ?? boost.duration)}
+                    >
+                      {isAdBusy
+                        ? <Icon name="Loader2" size={13} className="animate-spin" />
+                        : <><Icon name="Play" size={13} /> {t(lang, 'btn_watch_ad')}</>
+                      }
+                    </button>
+                  )}
+                  {boost.cost > 0 && (
+                    <button
+                      className={`rblx-btn text-xs py-1.5 px-2.5 ${canBuy ? 'rblx-btn-yellow' : 'rblx-btn-gray'}`}
+                      onClick={() => canBuy && buyBoost(boost.id, boost.cost, boost.duration)}
+                    >
+                      {!canBuy && <Icon name="Lock" size={12} />}
+                      💰 {boost.cost.toLocaleString('ru')}
+                    </button>
+                  )}
+                </div>
               </div>
             </div>
           </div>
