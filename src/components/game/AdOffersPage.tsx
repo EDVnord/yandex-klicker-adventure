@@ -10,18 +10,16 @@ interface Props {
   onShowRewardedAd: (offerId: string, rewardType: string, rewardValue: number) => void;
 }
 
-// Сектора барабана: [эмодзи, метка, тип, значение, вес, цвет]
 const SPIN_PRIZES = [
-  { emoji: '🪙', label: '5 000',    type: 'coins', value: 5_000,   weight: 30, color: '#FFD700' },
-  { emoji: '⚡',  label: 'Турбо 30с', type: 'turbo', value: 30,    weight: 20, color: '#FFD700' },
-  { emoji: '🪙', label: '15 000',  type: 'coins', value: 15_000, weight: 20, color: '#4FC3F7' },
-  { emoji: '🚀', label: 'Мега 20с', type: 'mega',  value: 20,    weight: 15, color: '#FF6BC8' },
-  { emoji: '🪙', label: '50 000',  type: 'coins', value: 50_000, weight: 10, color: '#a855f7' },
-  { emoji: '⭐',  label: 'Звезда 15с', type: 'star', value: 15,  weight: 4,  color: '#69F0AE' },
-  { emoji: '💎', label: '200 000', type: 'coins', value: 200_000, weight: 1, color: '#f0abfc' },
+  { emoji: '🪙', label: '5 000',      type: 'coins', value: 5_000,   weight: 30, color: '#FFD700' },
+  { emoji: '⚡',  label: 'Турбо 30с', type: 'turbo', value: 30,      weight: 20, color: '#FFD700' },
+  { emoji: '🪙', label: '15 000',     type: 'coins', value: 15_000,  weight: 20, color: '#4FC3F7' },
+  { emoji: '🚀', label: 'Мега 20с',   type: 'mega',  value: 20,      weight: 15, color: '#FF6BC8' },
+  { emoji: '🪙', label: '50 000',     type: 'coins', value: 50_000,  weight: 10, color: '#a855f7' },
+  { emoji: '⭐',  label: 'Звезда 15с', type: 'star', value: 15,      weight: 4,  color: '#69F0AE' },
+  { emoji: '💎', label: '200 000',    type: 'coins', value: 200_000, weight: 1,  color: '#f0abfc' },
 ];
 
-// Получить случайный индекс с учётом весов
 function weightedRandom() {
   const total = SPIN_PRIZES.reduce((s, p) => s + p.weight, 0);
   let r = Math.random() * total;
@@ -31,8 +29,6 @@ function weightedRandom() {
   }
   return 0;
 }
-
-const ITEM_H = 80; // высота одного сектора в барабане
 
 function formatCooldown(sec: number) {
   if (sec <= 0) return '';
@@ -44,61 +40,122 @@ function formatCooldown(sec: number) {
   return `${s}с`;
 }
 
-// Компонент барабана-слота
-function SpinDrum({ spinning, winIndex, onDone }: { spinning: boolean; winIndex: number; onDone: () => void }) {
+const ITEM_H = 80;
+const VISIBLE = 3; // видимых строк
+const LOOPS = 6;   // полных оборотов перед победным
+
+// Барабан строится так:
+// [LOOPS полных копий призов] + [prizes до winIndex включительно]
+// Победный элемент всегда последний в списке → он встаёт ровно по центру
+function buildItems(winIndex: number) {
+  const items: typeof SPIN_PRIZES[number][] = [];
+  for (let i = 0; i < LOOPS; i++) {
+    SPIN_PRIZES.forEach(p => items.push(p));
+  }
+  // добавляем 0..winIndex чтобы победный оказался последним
+  for (let i = 0; i <= winIndex; i++) {
+    items.push(SPIN_PRIZES[i]);
+  }
+  return items;
+}
+
+// Итоговый translateY: победный элемент (последний) должен быть по центру окна
+// центр окна = ITEM_H * floor(VISIBLE/2) = ITEM_H * 1 (при VISIBLE=3)
+// последний элемент начинается с (items.length - 1) * ITEM_H
+// нужно translateY = -( (items.length - 1) * ITEM_H - ITEM_H * Math.floor(VISIBLE/2) )
+function calcTargetY(items: typeof SPIN_PRIZES[number][]) {
+  const centerRow = Math.floor(VISIBLE / 2); // = 1 (средняя строка)
+  return -((items.length - 1) * ITEM_H - centerRow * ITEM_H);
+}
+
+function SpinDrum({ spinning, winIndex, onDone }: {
+  spinning: boolean;
+  winIndex: number;
+  onDone: () => void;
+}) {
   const ref = useRef<HTMLDivElement>(null);
   const doneRef = useRef(false);
+  const [items, setItems] = useState(() => buildItems(0));
 
   useEffect(() => {
     if (!spinning) return;
     doneRef.current = false;
+
+    const newItems = buildItems(winIndex);
+    setItems(newItems);
+
     const el = ref.current;
     if (!el) return;
 
-    // Строим длинный список: 5 полных оборотов + победный элемент по центру
-    const loops = 5;
-    const totalItems = SPIN_PRIZES.length * loops + winIndex + 1;
-    const targetOffset = -(totalItems * ITEM_H - ITEM_H * 2.5 + ITEM_H / 2);
-
+    // Сброс без анимации
     el.style.transition = 'none';
     el.style.transform = 'translateY(0)';
 
-    // Запускаем анимацию через один фрейм
-    requestAnimationFrame(() => {
+    // Через 2 фрейма запускаем прокрутку
+    const raf = requestAnimationFrame(() => {
       requestAnimationFrame(() => {
-        el.style.transition = `transform 3s cubic-bezier(0.17, 0.67, 0.12, 1.0)`;
-        el.style.transform = `translateY(${targetOffset}px)`;
+        const targetY = calcTargetY(newItems);
+        el.style.transition = 'transform 3.2s cubic-bezier(0.25, 0.1, 0.1, 1.0)';
+        el.style.transform = `translateY(${targetY}px)`;
       });
     });
 
     const timer = setTimeout(() => {
       if (!doneRef.current) { doneRef.current = true; onDone(); }
-    }, 3200);
-    return () => clearTimeout(timer);
+    }, 3400);
+
+    return () => { clearTimeout(timer); cancelAnimationFrame(raf); };
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [spinning, winIndex]);
 
-  // Генерируем элементы барабана: 5 полных оборотов + победный
-  const items: typeof SPIN_PRIZES[number][] = [];
-  const loops = 5;
-  for (let i = 0; i < loops; i++) {
-    SPIN_PRIZES.forEach(p => items.push(p));
-  }
-  items.push(SPIN_PRIZES[winIndex]);
+  const prize = SPIN_PRIZES[winIndex];
 
   return (
-    <div style={{ height: ITEM_H * 3, overflow: 'hidden', position: 'relative', borderRadius: 8,
-      border: '2px solid #2D3A50', background: '#0a0f1a' }}>
-      {/* Подсветка центра */}
-      <div style={{ position: 'absolute', top: ITEM_H, left: 0, right: 0, height: ITEM_H,
-        background: 'rgba(26,107,255,0.12)', borderTop: '2px solid #1A6BFF', borderBottom: '2px solid #1A6BFF',
-        zIndex: 2, pointerEvents: 'none' }} />
-      <div ref={ref} style={{ display: 'flex', flexDirection: 'column' }}>
+    <div style={{
+      height: ITEM_H * VISIBLE,
+      overflow: 'hidden',
+      position: 'relative',
+      borderRadius: 8,
+      border: `2px solid ${spinning ? '#1A6BFF' : '#2D3A50'}`,
+      background: '#0a0f1a',
+      transition: 'border-color 0.3s',
+    }}>
+      {/* Подсветка центральной строки */}
+      <div style={{
+        position: 'absolute',
+        top: ITEM_H * Math.floor(VISIBLE / 2),
+        left: 0, right: 0,
+        height: ITEM_H,
+        background: spinning ? 'rgba(26,107,255,0.10)' : `${prize.color}18`,
+        borderTop: `2px solid ${spinning ? '#1A6BFF55' : prize.color + '88'}`,
+        borderBottom: `2px solid ${spinning ? '#1A6BFF55' : prize.color + '88'}`,
+        zIndex: 2,
+        pointerEvents: 'none',
+        transition: 'all 0.5s',
+      }} />
+      {/* Затемнение краёв */}
+      <div style={{
+        position: 'absolute', inset: 0, zIndex: 3, pointerEvents: 'none',
+        background: 'linear-gradient(to bottom, #0a0f1a 0%, transparent 30%, transparent 70%, #0a0f1a 100%)',
+      }} />
+      <div ref={ref}>
         {items.map((p, i) => (
-          <div key={i} style={{ height: ITEM_H, display: 'flex', alignItems: 'center', justifyContent: 'center',
-            gap: 10, flexShrink: 0 }}>
-            <span style={{ fontSize: 28 }}>{p.emoji}</span>
-            <span style={{ color: p.color, fontWeight: 900, fontSize: 18, fontFamily: 'Fredoka One, sans-serif' }}>
+          <div key={i} style={{
+            height: ITEM_H,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: 10,
+            flexShrink: 0,
+          }}>
+            <span style={{ fontSize: 30, lineHeight: 1 }}>{p.emoji}</span>
+            <span style={{
+              color: p.color,
+              fontWeight: 900,
+              fontSize: 17,
+              fontFamily: 'Fredoka One, sans-serif',
+              letterSpacing: '0.5px',
+            }}>
               {p.label}
             </span>
           </div>
@@ -108,41 +165,119 @@ function SpinDrum({ spinning, winIndex, onDone }: { spinning: boolean; winIndex:
   );
 }
 
-export default function AdOffersPage({ coins, coinsPerClick, adStatus, getAdCooldownLeft, onClaim, onShowRewardedAd }: Props) {
+// Конфетти-джекпот
+function Jackpot({ show, onHide }: { show: boolean; onHide: () => void }) {
+  useEffect(() => {
+    if (!show) return;
+    const t = setTimeout(onHide, 4000);
+    return () => clearTimeout(t);
+  }, [show, onHide]);
+
+  if (!show) return null;
+
+  const particles = Array.from({ length: 30 }, (_, i) => ({
+    left: `${Math.random() * 100}%`,
+    delay: `${Math.random() * 0.8}s`,
+    dur: `${0.8 + Math.random() * 1.2}s`,
+    emoji: ['🎉', '⭐', '💎', '🪙', '✨', '🌟'][Math.floor(Math.random() * 6)],
+    size: 16 + Math.floor(Math.random() * 18),
+  }));
+
+  return (
+    <div style={{
+      position: 'fixed', inset: 0, zIndex: 60, pointerEvents: 'none',
+      display: 'flex', alignItems: 'center', justifyContent: 'center',
+    }}>
+      {/* Центральный баннер */}
+      <div style={{
+        background: 'linear-gradient(135deg, #7c3aed, #f0abfc)',
+        border: '3px solid #f0abfc',
+        borderRadius: 16,
+        padding: '20px 36px',
+        textAlign: 'center',
+        boxShadow: '0 0 60px #f0abfc88, 0 0 20px #7c3aed88',
+        animation: 'jackpotPop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1)',
+        pointerEvents: 'none',
+      }}>
+        <div style={{ fontSize: 48, lineHeight: 1 }}>💎</div>
+        <div style={{
+          fontFamily: 'Fredoka One, sans-serif',
+          fontSize: 28,
+          color: '#fff',
+          textShadow: '0 2px 8px #0008',
+          marginTop: 6,
+        }}>ДЖЕКПОТ!</div>
+        <div style={{ color: '#f0abfc', fontWeight: 900, fontSize: 18, marginTop: 4 }}>
+          +200 000 монет 🎉
+        </div>
+      </div>
+
+      {/* Частицы */}
+      {particles.map((p, i) => (
+        <div key={i} style={{
+          position: 'absolute',
+          top: '-10%',
+          left: p.left,
+          fontSize: p.size,
+          animation: `confettiFall ${p.dur} ${p.delay} ease-in forwards`,
+        }}>
+          {p.emoji}
+        </div>
+      ))}
+
+      <style>{`
+        @keyframes jackpotPop {
+          from { transform: scale(0.3); opacity: 0; }
+          to   { transform: scale(1);   opacity: 1; }
+        }
+        @keyframes confettiFall {
+          from { transform: translateY(0) rotate(0deg); opacity: 1; }
+          to   { transform: translateY(110vh) rotate(720deg); opacity: 0; }
+        }
+      `}</style>
+    </div>
+  );
+}
+
+export default function AdOffersPage({
+  coins, adStatus, getAdCooldownLeft, onClaim, onShowRewardedAd,
+}: Props) {
   const isAdBusy = adStatus === 'loading' || adStatus === 'showing';
 
-  // --- Удачный спин ---
   const spinCooldown = getAdCooldownLeft('lucky_spin');
   const [spinning, setSpinning] = useState(false);
   const [winIndex, setWinIndex] = useState(0);
   const [winPrize, setWinPrize] = useState<typeof SPIN_PRIZES[number] | null>(null);
   const [showWin, setShowWin] = useState(false);
-  const pendingPrize = useRef<typeof SPIN_PRIZES[number] | null>(null);
+  const [showJackpot, setShowJackpot] = useState(false);
+  const pendingIdx = useRef(0);
+  const pendingPrize = useRef(SPIN_PRIZES[0]);
 
   const handleSpin = () => {
     if (spinning || spinCooldown > 0 || isAdBusy) return;
     const idx = weightedRandom();
+    pendingIdx.current = idx;
     pendingPrize.current = SPIN_PRIZES[idx];
     setWinIndex(idx);
     setShowWin(false);
     setWinPrize(null);
-
-    onShowRewardedAd('lucky_spin', pendingPrize.current.type, pendingPrize.current.value);
-    // Барабан запускается после того как реклама закончится — но т.к. onShowRewardedAd async,
-    // мы запускаем анимацию сразу а onClaim будет вызван в callback.
-    // Здесь просто крутим барабан локально для UX
+    setShowJackpot(false);
     setSpinning(true);
+
+    // Показываем рекламу + начисляем приз в колбэке
+    onShowRewardedAd('lucky_spin', pendingPrize.current.type, pendingPrize.current.value);
   };
 
   const handleSpinDone = () => {
     setSpinning(false);
-    if (pendingPrize.current) {
-      setWinPrize(pendingPrize.current);
-      setShowWin(true);
+    const prize = pendingPrize.current;
+    setWinPrize(prize);
+    setShowWin(true);
+    if (prize.value === 200_000) {
+      setTimeout(() => setShowJackpot(true), 300);
     }
   };
 
-  // --- Остальные офферы ---
   const OFFERS = [
     {
       id: 'coins_bonus',
@@ -157,7 +292,7 @@ export default function AdOffersPage({ coins, coinsPerClick, adStatus, getAdCool
     {
       id: 'turbo',
       emoji: '⚡',
-      title: 'Турбо на час',
+      title: 'Турбо-буст',
       description: 'Активируй Турбо-клик ×3 на 60 секунд бесплатно!',
       rewardType: 'boost',
       rewardValue: 60,
@@ -186,15 +321,16 @@ export default function AdOffersPage({ coins, coinsPerClick, adStatus, getAdCool
     },
   ];
 
-  const [tick, setTick] = useState(0);
+  const [, setTick] = useState(0);
   useEffect(() => {
     const t = setInterval(() => setTick(v => v + 1), 1000);
     return () => clearInterval(t);
   }, []);
-  void tick; // используем для ре-рендера кулдаунов
 
   return (
     <div className="px-4 py-3 space-y-3 pb-6">
+      <Jackpot show={showJackpot} onHide={() => setShowJackpot(false)} />
+
       <div className="rblx-panel flex items-center gap-3">
         <span className="text-2xl">📺</span>
         <div>
@@ -226,10 +362,16 @@ export default function AdOffersPage({ coins, coinsPerClick, adStatus, getAdCool
         <SpinDrum spinning={spinning} winIndex={winIndex} onDone={handleSpinDone} />
 
         {showWin && winPrize && (
-          <div className="mt-3 text-center py-3 rounded-md font-game text-xl animate-bounce"
-            style={{ background: `${winPrize.color}22`, border: `2px solid ${winPrize.color}` }}>
-            <span className="text-3xl">{winPrize.emoji}</span>
-            <div style={{ color: winPrize.color }}>+{winPrize.label}!</div>
+          <div className="mt-3 text-center py-3 rounded-md font-game text-xl"
+            style={{
+              background: `${winPrize.color}18`,
+              border: `2px solid ${winPrize.color}`,
+              animation: 'fadeInUp 0.4s ease',
+            }}>
+            <span style={{ fontSize: 32 }}>{winPrize.emoji}</span>
+            <div style={{ color: winPrize.color, marginTop: 4 }}>
+              {winPrize.type === 'coins' ? `+${winPrize.label} монет!` : `${winPrize.label} активирован!`}
+            </div>
           </div>
         )}
 
@@ -249,14 +391,13 @@ export default function AdOffersPage({ coins, coinsPerClick, adStatus, getAdCool
                 ? <><Icon name="Loader2" size={15} className="animate-spin" /> Крутим...</>
                 : isAdBusy
                   ? <><Icon name="Loader2" size={15} className="animate-spin" /> Реклама...</>
-                  : <><Icon name="Play" size={15} /> Смотреть рекламу и крутить!</>
-              }
+                  : <><Icon name="Play" size={15} /> Смотреть рекламу и крутить!</>}
             </button>
           )}
         </div>
       </div>
 
-      {/* Обычные офферы */}
+      {/* Остальные офферы */}
       {OFFERS.map(offer => {
         const cd = getAdCooldownLeft(offer.id);
         const ready = cd <= 0;
@@ -291,8 +432,7 @@ export default function AdOffersPage({ coins, coinsPerClick, adStatus, getAdCool
                   ? <><Icon name="Lock" size={13} /> Кулдаун {offer.cooldownLabel}</>
                   : isAdBusy
                     ? <><Icon name="Loader2" size={14} className="animate-spin" /> Реклама...</>
-                    : <><Icon name="Play" size={14} /> Смотреть рекламу</>
-                }
+                    : <><Icon name="Play" size={14} /> Смотреть рекламу</>}
               </button>
             </div>
           </div>
@@ -304,6 +444,13 @@ export default function AdOffersPage({ coins, coinsPerClick, adStatus, getAdCool
           РЕКЛАМА ПОМОГАЕТ РАЗВИТИЮ ИГРЫ 🙏
         </p>
       </div>
+
+      <style>{`
+        @keyframes fadeInUp {
+          from { opacity: 0; transform: translateY(8px); }
+          to   { opacity: 1; transform: translateY(0); }
+        }
+      `}</style>
     </div>
   );
 }
