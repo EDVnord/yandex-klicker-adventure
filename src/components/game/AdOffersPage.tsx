@@ -375,10 +375,28 @@ export default function AdOffersPage({
           </div>
         )}
 
-        <div className="mt-3">
+        {spinCooldown > 0 && (
+          <div className="mt-3 mb-1">
+            <div className="flex items-center justify-between text-xs font-bold mb-1" style={{ color: '#a855f7' }}>
+              <span><Icon name="Clock" size={12} /> Следующий спин через</span>
+              <span>{formatCooldown(spinCooldown)}</span>
+            </div>
+            <div className="w-full rounded-full overflow-hidden" style={{ height: 6, background: '#1C2333' }}>
+              <div style={{
+                height: '100%',
+                width: `${Math.min(100, Math.max(2, (spinCooldown / 3600) * 100))}%`,
+                background: 'linear-gradient(90deg, #7c3aed88, #a855f7)',
+                borderRadius: 9999,
+                transition: 'width 1s linear',
+                boxShadow: '0 0 8px #a855f766',
+              }} />
+            </div>
+          </div>
+        )}
+        <div className="mt-2">
           {spinCooldown > 0 ? (
             <button className="rblx-btn rblx-btn-gray w-full py-3 font-game" disabled>
-              <Icon name="Clock" size={15} /> Следующий спин через {formatCooldown(spinCooldown)}
+              🔒 Кулдаун активен
             </button>
           ) : (
             <button
