@@ -32,10 +32,11 @@ export default function Index() {
   const multiplier = getActiveMultiplier();
   const currentSkin = SKINS.find(s => s.id === state.currentSkinId) ?? SKINS[0];
 
-  // Счётчик и порог для случайной рекламы при кликах
+  // Реклама: по кликам + по таймеру (Яндекс Игры — оптимум каждые 3-5 мин)
   const clicksSinceAdRef = useRef(0);
-  const nextAdThresholdRef = useRef(600 + Math.floor(Math.random() * 300)); // 600–900 кликов
+  const nextAdThresholdRef = useRef(180 + Math.floor(Math.random() * 120)); // 180–300 кликов (~1 мин при норм темпе)
   const adCooldownRef = useRef(false);
+  const lastAdTimeRef = useRef(Date.now());
 
   // Загружаем облачный прогресс, когда SDK готов — мёрдж: берём максимум по totalClicks
   useEffect(() => {
@@ -74,29 +75,54 @@ export default function Index() {
     return () => clearTimeout(t);
   }, [state.totalClicks, submitScore]);
 
-  // Полноэкранная реклама при первом запуске
+  // Полноэкранная реклама при первом запуске (задержка 5с — дать игроку освоиться)
   useEffect(() => {
     const shown = sessionStorage.getItem('intro_ad_shown');
     if (!shown) {
       sessionStorage.setItem('intro_ad_shown', '1');
-      setTimeout(() => showFullscreenAd(), 2000);
+      setTimeout(() => showFullscreenAd(() => {
+        lastAdTimeRef.current = Date.now();
+      }), 5000);
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Обёртка клика — считаем клики, иногда показываем рекламу
+  // Таймерная реклама — каждые 4 мин для медленных/AFK игроков
+  useEffect(() => {
+    const t = setInterval(() => {
+      if (adCooldownRef.current) return;
+      const sinceLastAd = Date.now() - lastAdTimeRef.current;
+      if (sinceLastAd >= 4 * 60 * 1000) {
+        adCooldownRef.current = true;
+        lastAdTimeRef.current = Date.now();
+        clicksSinceAdRef.current = 0;
+        nextAdThresholdRef.current = 180 + Math.floor(Math.random() * 120);
+        showFullscreenAd(() => {
+          setTimeout(() => { adCooldownRef.current = false; }, 15_000);
+        });
+      }
+    }, 30_000);
+    return () => clearInterval(t);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const showInterstitial = () => {
+    adCooldownRef.current = true;
+    lastAdTimeRef.current = Date.now();
+    clicksSinceAdRef.current = 0;
+    nextAdThresholdRef.current = 180 + Math.floor(Math.random() * 120);
+    showFullscreenAd(() => {
+      setTimeout(() => { adCooldownRef.current = false; }, 15_000);
+    });
+  };
+
+  // Обёртка клика — показываем рекламу каждые ~180-300 кликов (≈1 мин игры)
   const handleClickWithAd = () => {
     handleClick();
     if (adCooldownRef.current) return;
     clicksSinceAdRef.current += 1;
     if (clicksSinceAdRef.current >= nextAdThresholdRef.current) {
-      clicksSinceAdRef.current = 0;
-      nextAdThresholdRef.current = 600 + Math.floor(Math.random() * 300);
-      adCooldownRef.current = true;
-      showFullscreenAd(() => {
-        // После закрытия рекламы — кулдаун 10 сек, чтобы не раздражать подряд
-        setTimeout(() => { adCooldownRef.current = false; }, 10_000);
-      });
+      showInterstitial();
     }
   };
 

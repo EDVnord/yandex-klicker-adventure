@@ -131,10 +131,13 @@ export function useGameState() {
     return () => clearInterval(interval);
   }, []);
 
+  const AUTO_CAP = 50_000; // авторобот не начисляет монеты выше этого порога
+
   // --- Клик (через ref чтобы интервал всегда вызывал актуальную версию) ---
   const handleClickImpl = (isAuto: boolean) => {
     if (!isAuto) clickTimestamps.current.push(Date.now());
     setState(s => {
+      if (isAuto && s.coins >= AUTO_CAP) return s; // стоп при AFK-капе
       const skinMult = SKINS.find(sk => sk.id === s.currentSkinId)?.clickMultiplier ?? 1;
       const mult = getMultiplierFromBoosts(s.activeBoosts);
       const earned = s.coinsPerClick * mult * skinMult;
