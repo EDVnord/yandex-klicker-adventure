@@ -50,6 +50,7 @@ export function useGameState() {
   const [state, setState] = useState<GameState>(loadState);
   const clickTimestamps = useRef<number[]>([]);
   const autoClickRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const handleClickRef = useRef<(isAuto?: boolean) => void>(() => {});
 
   useEffect(() => {
     const t = setTimeout(() => localStorage.setItem(STORAGE_KEY, JSON.stringify(state)), 500);
@@ -126,15 +127,22 @@ export function useGameState() {
     });
   }, [getMultiplier]);
 
+  // Держим актуальную функцию в ref, чтобы интервал автоклика не пересоздавался
+  useEffect(() => { handleClickRef.current = handleClick; }, [handleClick]);
+
+  // Автоклик: запускаем/останавливаем только при изменении наличия буста robot
+  const hasRobotRef = useRef(false);
   useEffect(() => {
-    const hasRobot = state.activeBoosts.some(b => b.boostId === 'robot');
+    const hasRobot = state.activeBoosts.some(b => b.boostId === 'robot' && b.expiresAt > Date.now());
+    if (hasRobot === hasRobotRef.current) return;
+    hasRobotRef.current = hasRobot;
     if (hasRobot) {
-      autoClickRef.current = setInterval(() => handleClick(true), 400);
+      autoClickRef.current = setInterval(() => handleClickRef.current(true), 400);
     } else {
       if (autoClickRef.current) { clearInterval(autoClickRef.current); autoClickRef.current = null; }
     }
-    return () => { if (autoClickRef.current) clearInterval(autoClickRef.current); };
-  }, [state.activeBoosts, handleClick]);
+    return () => { if (autoClickRef.current) { clearInterval(autoClickRef.current); autoClickRef.current = null; } };
+  }, [state.activeBoosts]);
 
   const buyBoost = useCallback((boostId: string, cost: number, duration: number) => {
     setState(s => {

@@ -76,14 +76,14 @@ export default function ClickerScene({ coins, totalClicks, clicksPerSecond, mult
 
       {/* Character zone */}
       <div ref={containerRef} className="relative cursor-pointer select-none touch-none"
-        style={{ width: 240, height: 280 }} onClick={handleClick} onTouchStart={handleClick}>
+        style={{ width: 280, height: 330 }} onClick={handleClick} onTouchStart={handleClick}>
 
         {/* Ground shadow */}
         <div className="absolute bottom-0 left-1/2 -translate-x-1/2"
-          style={{ width: 150, height: 16, background: 'radial-gradient(ellipse,rgba(0,0,0,0.55) 0%,transparent 70%)', borderRadius: '50%' }} />
+          style={{ width: 180, height: 16, background: 'radial-gradient(ellipse,rgba(0,0,0,0.55) 0%,transparent 70%)', borderRadius: '50%' }} />
 
         {/* Skin image */}
-        <div className="absolute inset-x-8 top-0 bottom-8" style={{
+        <div className="absolute inset-x-6 top-0 bottom-8" style={{
           animation: isClicking ? 'click-burst 0.3s ease-out' : 'float-rblx 2.8s ease-in-out infinite',
           filter: isClicking ? `drop-shadow(0 0 24px ${skin.borderColor})` : `drop-shadow(0 8px 14px rgba(0,0,0,0.7))`,
         }}>
