@@ -29,15 +29,23 @@ export default function ClickerScene({ coins, totalClicks, clicksPerSecond, mult
     return n.toString();
   };
 
-  // Пульсация для автоклика — мигает каждые 400мс синхронно с интервалом робота
+  // Пульсация для автоклика — синхронизирована с реальным интервалом 80мс
   useEffect(() => {
     if (!isAutoActive) { setAutoPulse(false); return; }
     const t = setInterval(() => {
       setAutoPulse(true);
-      setTimeout(() => setAutoPulse(false), 160);
-    }, 400);
+      // Спавним частицу в случайной точке персонажа
+      const x = 30 + Math.random() * 40;
+      const y = 20 + Math.random() * 60;
+      const id = particleId.current++;
+      const pool = multiplier >= 10 ? ['💎','💎','⭐'] : multiplier >= 5 ? ['🌟','⚡'] : ['⚡','🪙'];
+      const label = pool[Math.floor(Math.random() * pool.length)];
+      setParticles(p => [...p, { id, x, y, label }]);
+      setTimeout(() => setParticles(p => p.filter(pp => pp.id !== id)), 500);
+      setTimeout(() => setAutoPulse(false), 60);
+    }, 80);
     return () => clearInterval(t);
-  }, [isAutoActive]);
+  }, [isAutoActive, multiplier]);
 
   const spawnParticle = useCallback((x: number, y: number) => {
     const id = particleId.current++;
@@ -93,7 +101,7 @@ export default function ClickerScene({ coins, totalClicks, clicksPerSecond, mult
         {isAutoActive && (
           <div className="w-full flex items-center justify-center gap-2 px-5 py-1.5 font-game text-sm"
             style={{ background: 'linear-gradient(90deg,#FF8C00,#FFB74D)', borderRadius: 4, boxShadow: '0 3px 0 #a35800', color: '#111',
-              animation: 'autoPulseBar 0.4s ease-in-out infinite alternate' }}>
+              animation: 'autoPulseBar 0.08s ease-in-out infinite alternate' }}>
             🤖 АВТО-РОБОТ АКТИВЕН!
           </div>
         )}
@@ -120,7 +128,7 @@ export default function ClickerScene({ coins, totalClicks, clicksPerSecond, mult
           animation: isActive
             ? 'click-burst 0.15s ease-out'
             : isAutoActive
-              ? 'autoFloat 0.4s ease-in-out infinite alternate'
+              ? 'autoFloat 0.08s ease-in-out infinite alternate'
               : 'float-rblx 2.8s ease-in-out infinite',
           filter: isActive
             ? `drop-shadow(0 0 28px ${skin.borderColor})`
@@ -190,11 +198,11 @@ export default function ClickerScene({ coins, totalClicks, clicksPerSecond, mult
       <style>{`
         @keyframes autoFloat {
           from { transform: translateY(0px) scale(1); }
-          to   { transform: translateY(-8px) scale(1.03); }
+          to   { transform: translateY(-6px) scale(1.04); }
         }
         @keyframes autoPulseBar {
-          from { opacity: 0.8; }
-          to   { opacity: 1; }
+          from { opacity: 0.75; transform: scaleX(0.98); }
+          to   { opacity: 1;    transform: scaleX(1); }
         }
       `}</style>
     </div>
