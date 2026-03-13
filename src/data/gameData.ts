@@ -3,8 +3,8 @@ import type { Boost, Achievement, LeaderEntry } from '@/types/game';
 export const BOOSTS: Boost[] = [
   {
     id: 'turbo',
-    name: 'Турбо-клик',
-    description: 'x3 монеты за клик',
+    name: 'Turbo Click',
+    description: 'x3 coins per click',
     emoji: '⚡',
     multiplier: 3,
     duration: 30,
@@ -14,8 +14,8 @@ export const BOOSTS: Boost[] = [
   },
   {
     id: 'mega',
-    name: 'МЕГА-клик',
-    description: 'x5 монеты за клик',
+    name: 'MEGA Click',
+    description: 'x5 coins per click',
     emoji: '🚀',
     multiplier: 5,
     duration: 20,
@@ -25,8 +25,8 @@ export const BOOSTS: Boost[] = [
   },
   {
     id: 'rainbow',
-    name: 'Радуга',
-    description: 'x2 монеты + авто-клик',
+    name: 'Rainbow',
+    description: 'x2 coins + auto-click',
     emoji: '🌈',
     multiplier: 2,
     duration: 45,
@@ -36,8 +36,8 @@ export const BOOSTS: Boost[] = [
   },
   {
     id: 'star',
-    name: 'Звёздный бонус',
-    description: 'x10 монеты 15 секунд',
+    name: 'Star Bonus',
+    description: 'x10 coins for 15 seconds',
     emoji: '⭐',
     multiplier: 10,
     duration: 15,
@@ -47,8 +47,8 @@ export const BOOSTS: Boost[] = [
   },
   {
     id: 'robot',
-    name: 'Авто-робот',
-    description: 'Автоматически кликает',
+    name: 'Auto Robot',
+    description: 'Clicks automatically',
     emoji: '🤖',
     multiplier: 1,
     duration: 60,
@@ -59,25 +59,25 @@ export const BOOSTS: Boost[] = [
 ];
 
 export const ACHIEVEMENTS: Achievement[] = [
-  { id: 'first', name: 'Первый клик!', description: 'Нажми в первый раз', emoji: '👆', requirement: 1, reward: 10, unlocked: false },
-  { id: 'ten', name: 'Разминка', description: 'Сделай 10 кликов', emoji: '🔥', requirement: 10, reward: 50, unlocked: false },
-  { id: 'hundred', name: 'Сотня!', description: 'Сделай 100 кликов', emoji: '💪', requirement: 100, reward: 200, unlocked: false },
-  { id: 'five_hundred', name: 'Чемпион кликов', description: 'Сделай 500 кликов', emoji: '🏆', requirement: 500, reward: 500, unlocked: false },
-  { id: 'thousand', name: 'Кликер-мастер', description: 'Сделай 1000 кликов', emoji: '👑', requirement: 1000, reward: 1000, unlocked: false },
-  { id: 'five_k', name: 'Робо-легенда!', description: 'Сделай 5000 кликов', emoji: '🌟', requirement: 5000, reward: 5000, unlocked: false },
-  { id: 'coins_1k', name: 'Богач', description: 'Накопи 1000 монет', emoji: '💰', requirement: 0, reward: 300, unlocked: false },
-  { id: 'speed', name: 'Молния!', description: 'Достигни 10 кликов/сек', emoji: '⚡', requirement: 0, reward: 400, unlocked: false },
+  { id: 'first', name: 'First Click!', description: 'Click for the first time', emoji: '👆', requirement: 1, reward: 10, unlocked: false },
+  { id: 'ten', name: 'Warm-Up', description: 'Make 10 clicks', emoji: '🔥', requirement: 10, reward: 50, unlocked: false },
+  { id: 'hundred', name: 'Century!', description: 'Make 100 clicks', emoji: '💪', requirement: 100, reward: 200, unlocked: false },
+  { id: 'five_hundred', name: 'Click Champion', description: 'Make 500 clicks', emoji: '🏆', requirement: 500, reward: 500, unlocked: false },
+  { id: 'thousand', name: 'Click Master', description: 'Make 1000 clicks', emoji: '👑', requirement: 1000, reward: 1000, unlocked: false },
+  { id: 'five_k', name: 'Robo Legend!', description: 'Make 5000 clicks', emoji: '🌟', requirement: 5000, reward: 5000, unlocked: false },
+  { id: 'coins_1k', name: 'Rich Guy', description: 'Earn 1000 coins', emoji: '💰', requirement: 0, reward: 300, unlocked: false },
+  { id: 'speed', name: 'Lightning!', description: 'Reach 10 clicks/sec', emoji: '⚡', requirement: 0, reward: 400, unlocked: false },
 ];
 
 export const LEADERBOARD: LeaderEntry[] = [
-  { rank: 1, name: 'КиберЛис 🦊', score: 98420, emoji: '🥇' },
-  { rank: 2, name: 'МегаКот 🐱', score: 87310, emoji: '🥈' },
-  { rank: 3, name: 'РобоБобёр', score: 75200, emoji: '🥉' },
-  { rank: 4, name: 'НинзяКролик', score: 62100, emoji: '🏅' },
-  { rank: 5, name: 'ТурбоПёс 🐶', score: 55800, emoji: '🏅' },
-  { rank: 6, name: 'СуперЖираф', score: 48300, emoji: '🏅' },
-  { rank: 7, name: 'МультиМышка', score: 41200, emoji: '🏅' },
-  { rank: 8, name: 'КликКапитан', score: 37500, emoji: '🏅' },
-  { rank: 9, name: 'ЗвёздныйМишка', score: 29800, emoji: '🏅' },
-  { rank: 10, name: 'ПиксельТигр', score: 21400, emoji: '🏅' },
+  { rank: 1, name: 'CyberFox 🦊', score: 98420, emoji: '🥇' },
+  { rank: 2, name: 'MegaCat 🐱', score: 87310, emoji: '🥈' },
+  { rank: 3, name: 'RoboBeaver', score: 75200, emoji: '🥉' },
+  { rank: 4, name: 'NinjaRabbit', score: 62100, emoji: '🏅' },
+  { rank: 5, name: 'TurboDog 🐶', score: 55800, emoji: '🏅' },
+  { rank: 6, name: 'SuperGiraffe', score: 48300, emoji: '🏅' },
+  { rank: 7, name: 'MultiMouse', score: 41200, emoji: '🏅' },
+  { rank: 8, name: 'ClickCaptain', score: 37500, emoji: '🏅' },
+  { rank: 9, name: 'StarBear', score: 29800, emoji: '🏅' },
+  { rank: 10, name: 'PixelTiger', score: 21400, emoji: '🏅' },
 ];
