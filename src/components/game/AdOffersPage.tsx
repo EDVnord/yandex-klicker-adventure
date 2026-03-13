@@ -429,7 +429,7 @@ export default function AdOffersPage({
                 }}
               >
                 {!ready
-                  ? <><Icon name="Lock" size={13} /> Кулдаун {offer.cooldownLabel}</>
+                  ? <><Icon name="Clock" size={13} /> Ещё {formatCooldown(cd)}</>
                   : isAdBusy
                     ? <><Icon name="Loader2" size={14} className="animate-spin" /> Реклама...</>
                     : <><Icon name="Play" size={14} /> Смотреть рекламу</>}
