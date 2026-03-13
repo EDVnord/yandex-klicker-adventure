@@ -419,7 +419,7 @@ export default function AdOffersPage({
                     <div className="mt-1.5 w-full rounded-full overflow-hidden" style={{ height: 5, background: '#1C2333' }}>
                       <div style={{
                         height: '100%',
-                        width: `${((offer.cooldownSec - cd) / offer.cooldownSec) * 100}%`,
+                        width: `${Math.min(100, Math.max(0, (1 - cd / offer.cooldownSec) * 100))}%`,
                         background: offer.color,
                         borderRadius: 9999,
                         transition: 'width 1s linear',
