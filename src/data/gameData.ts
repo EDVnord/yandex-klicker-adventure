@@ -51,11 +51,10 @@ export const BOOSTS: Boost[] = [
     description: 'Автоматически кликает',
     emoji: '🤖',
     multiplier: 1,
-    duration: 60,
+    duration: 120,
     cost: 2000,
     color: '#FFB74D',
     adUnlock: false,
-    persistent: true,
   },
 ];
 

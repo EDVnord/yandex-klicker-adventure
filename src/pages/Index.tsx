@@ -255,8 +255,7 @@ export default function Index() {
         {tab === 'boosts' && (
           <BoostersPage coins={state.coins} adStatus={adStatus}
             getBoostTimeLeft={getBoostTimeLeft} buyBoost={buyBoost}
-            onShowRewardedAd={handleBoostAd}
-            purchasedBoosts={state.purchasedBoosts} />
+            onShowRewardedAd={handleBoostAd} />
         )}
         {tab === 'ads' && (
           <AdOffersPage

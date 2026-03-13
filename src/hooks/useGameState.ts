@@ -185,12 +185,12 @@ export function useGameState() {
    
   }, []);
 
-  // --- Автоклик: робот всегда активен после покупки, радуга — пока не истёк ---
+  // --- Автоклик: робот или радуга активны пока не истёк таймер ---
   useEffect(() => {
     autoClickRef.current = setInterval(() => {
       const now = Date.now();
       const s = stateRef.current;
-      const hasRobot = s.purchasedBoosts.includes('robot');
+      const hasRobot = s.activeBoosts.some(b => b.boostId === 'robot' && b.expiresAt > now);
       const hasRainbow = s.activeBoosts.some(b => b.boostId === 'rainbow' && b.expiresAt > now);
       if (hasRobot || hasRainbow) handleClickRef.current(true);
     }, 80);
@@ -201,13 +201,6 @@ export function useGameState() {
   const buyBoost = useCallback((boostId: string, cost: number, duration: number) => {
     setState(s => {
       if (s.coins < cost) return s;
-      const boost = BOOSTS.find(b => b.id === boostId);
-      // Persistent-буст (робот): просто записываем в purchasedBoosts, без activeBoosts
-      if (boost?.persistent) {
-        if (s.purchasedBoosts.includes(boostId)) return s; // уже куплен
-        return { ...s, coins: s.coins - cost, purchasedBoosts: [...s.purchasedBoosts, boostId] };
-      }
-      // Временный буст: добавляем/продлеваем в activeBoosts
       const now = Date.now();
       const existing = s.activeBoosts.find(b => b.boostId === boostId);
       const newBoosts = existing
