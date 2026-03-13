@@ -453,7 +453,6 @@ export default function AdOffersPage({
                 onClick={() => {
                   if (!ready || isAdBusy) return;
                   onShowRewardedAd(offer.id, offer.rewardType, offer.rewardValue);
-                  onClaim(offer.id, offer.rewardType, offer.rewardValue);
                 }}
               >
                 {!ready

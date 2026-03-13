@@ -54,6 +54,7 @@ export function useYandexGames() {
   useEffect(() => {
     if (!window.YaGames) {
       console.warn('[YaGames] SDK не загружен — работаем в dev-режиме');
+      setReady(true);
       return;
     }
     window.YaGames.init()
@@ -61,46 +62,47 @@ export function useYandexGames() {
         sdkRef.current = sdk;
         try {
           playerRef.current = await sdk.getPlayer({ scopes: false });
+          console.log('[YaGames] SDK + Player готов');
         } catch (e) {
           console.warn('[YaGames] Не удалось получить Player', e);
         }
         setReady(true);
-        console.log('[YaGames] SDK инициализирован');
       })
-      .catch(err => console.warn('[YaGames] Ошибка инициализации', err));
+      .catch(err => {
+        console.warn('[YaGames] Ошибка инициализации', err);
+        setReady(true);
+      });
   }, []);
 
-  /**
-   * Сохранить прогресс игрока в облако Яндекс.
-   * data — любой сериализуемый объект (состояние игры).
-   */
   const saveProgress = useCallback(async (data: Record<string, unknown>) => {
-    if (!playerRef.current) return;
+    if (!playerRef.current) {
+      console.log('[YaGames] saveProgress: нет player, пропускаем');
+      return;
+    }
     try {
       await playerRef.current.setData(data, true);
+      console.log('[YaGames] saveProgress: сохранено', Object.keys(data));
     } catch (e) {
-      console.warn('[YaGames] Ошибка сохранения прогресса', e);
+      console.warn('[YaGames] Ошибка сохранения', e);
     }
   }, []);
 
-  /**
-   * Загрузить прогресс игрока из облака Яндекс.
-   * Возвращает объект с данными или null если SDK не готов.
-   */
   const loadProgress = useCallback(async (): Promise<Record<string, unknown> | null> => {
-    if (!playerRef.current) return null;
+    if (!playerRef.current) {
+      console.log('[YaGames] loadProgress: нет player');
+      return null;
+    }
     try {
-      return await playerRef.current.getData();
+      const data = await playerRef.current.getData();
+      console.log('[YaGames] loadProgress: загружено', Object.keys(data));
+      return data;
     } catch (e) {
-      console.warn('[YaGames] Ошибка загрузки прогресса', e);
+      console.warn('[YaGames] Ошибка загрузки', e);
       return null;
     }
   }, []);
 
-  /**
-   * Показать Rewarded Video (реклама за награду).
-   */
-  const showRewardedAd = (onRewarded: () => void, onFail?: () => void) => {
+  const showRewardedAd = useCallback((onRewarded: () => void, onFail?: () => void) => {
     setAdStatus('loading');
 
     if (!sdkRef.current) {
@@ -108,7 +110,7 @@ export function useYandexGames() {
       setTimeout(() => {
         setAdStatus('rewarded');
         onRewarded();
-        setTimeout(() => setAdStatus('idle'), 1000);
+        setTimeout(() => setAdStatus('idle'), 500);
       }, 1500);
       return;
     }
@@ -129,12 +131,9 @@ export function useYandexGames() {
         },
       },
     });
-  };
+  }, []);
 
-  /**
-   * Показать полноэкранную рекламу (interstitial).
-   */
-  const showFullscreenAd = (onClose?: () => void) => {
+  const showFullscreenAd = useCallback((onClose?: () => void) => {
     if (!sdkRef.current) {
       setTimeout(() => onClose?.(), 500);
       return;
@@ -145,12 +144,9 @@ export function useYandexGames() {
         onError: (err) => { console.warn('[YaGames] Fullscreen ad error', err); onClose?.(); },
       },
     });
-  };
+  }, []);
 
-  /**
-   * Отправить счёт в таблицу лидеров Яндекс Игр.
-   */
-  const submitScore = async (score: number, leaderboardName = 'main') => {
+  const submitScore = useCallback(async (score: number, leaderboardName = 'main') => {
     if (!sdkRef.current) return;
     try {
       const lb = await sdkRef.current.getLeaderboards();
@@ -158,7 +154,7 @@ export function useYandexGames() {
     } catch (e) {
       console.warn('[YaGames] Ошибка отправки счёта', e);
     }
-  };
+  }, []);
 
   return { ready, adStatus, showRewardedAd, showFullscreenAd, submitScore, saveProgress, loadProgress };
 }

@@ -41,7 +41,6 @@ export default function Index() {
       achievements: s.achievements.map(a => ({ id: a.id, unlocked: a.unlocked })),
       activeBoosts: s.activeBoosts,
       adCooldowns: s.adCooldowns,
-      savedAt: Date.now(),
     });
   }, [saveProgress]);
 
@@ -72,26 +71,13 @@ export default function Index() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ready]);
 
-  // Сохранение в облако каждые 10с (бусты сохраняются мгновенно через onBoostsSave)
+  // Сохранение в облако: 3с дебаунс
   const saveRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   useEffect(() => {
     if (saveRef.current) clearTimeout(saveRef.current);
-    saveRef.current = setTimeout(() => {
-      saveProgress({
-        coins: state.coins,
-        totalClicks: state.totalClicks,
-        totalCoinsEarned: state.totalCoinsEarned,
-        playerName: state.playerName,
-        currentSkinId: state.currentSkinId,
-        unlockedSkins: state.unlockedSkins,
-        achievements: state.achievements.map(a => ({ id: a.id, unlocked: a.unlocked })),
-        activeBoosts: state.activeBoosts,
-        adCooldowns: state.adCooldowns,
-        savedAt: Date.now(),
-      });
-    }, 10_000);
+    saveRef.current = setTimeout(() => doSaveProgress(state), 3000);
     return () => { if (saveRef.current) clearTimeout(saveRef.current); };
-  }, [state, saveProgress]);
+  }, [state, doSaveProgress]);
 
   // Отправляем счёт в лидерборд (дебаунс 5с)
   useEffect(() => {
@@ -152,9 +138,7 @@ export default function Index() {
 
   /* Rewarded ad для бустеров */
   const handleBoostAd = (boostId: string, duration: number) => {
-    showRewardedAd(
-      () => unlockBoostAd(boostId, duration, doSaveProgress),
-    );
+    showRewardedAd(() => unlockBoostAd(boostId, duration));
   };
 
   /* Rewarded ad для скинов */
@@ -176,7 +160,6 @@ export default function Index() {
 
   const handleAdOffer = (offerId: string, rewardType: string, rewardValue: number) => {
     const cooldownMs = AD_COOLDOWNS_MS[offerId] ?? 5 * 60 * 1000;
-    setAdCooldown(offerId, cooldownMs);
     showRewardedAd(() => claimAdOffer(offerId, rewardType, rewardValue, cooldownMs));
   };
 
@@ -269,7 +252,7 @@ export default function Index() {
         {tab === 'boosts' && (
           <BoostersPage coins={state.coins} adStatus={adStatus}
             getBoostTimeLeft={getBoostTimeLeft}
-            buyBoost={(id, cost, dur) => buyBoost(id, cost, dur, doSaveProgress)}
+            buyBoost={(id, cost, dur) => buyBoost(id, cost, dur)}
             onShowRewardedAd={handleBoostAd} />
         )}
         {tab === 'ads' && (

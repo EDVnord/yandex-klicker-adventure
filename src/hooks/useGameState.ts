@@ -198,7 +198,7 @@ export function useGameState() {
   }, []);
 
   // --- Покупка буста ---
-  const buyBoost = useCallback((boostId: string, cost: number, duration: number, onSaved?: (s: GameState) => void) => {
+  const buyBoost = useCallback((boostId: string, cost: number, duration: number) => {
     setState(s => {
       if (s.coins < cost) return s;
       const now = Date.now();
@@ -208,13 +208,11 @@ export function useGameState() {
             ? { ...b, expiresAt: Math.max(b.expiresAt, now) + duration * 1000 }
             : b)
         : [...s.activeBoosts, { boostId, expiresAt: now + duration * 1000 }];
-      const newState = { ...s, coins: s.coins - cost, activeBoosts: newBoosts };
-      if (onSaved) setTimeout(() => onSaved(newState), 0);
-      return newState;
+      return { ...s, coins: s.coins - cost, activeBoosts: newBoosts };
     });
   }, []);
 
-  const unlockBoostAd = useCallback((boostId: string, duration: number, onSaved?: (s: GameState) => void) => {
+  const unlockBoostAd = useCallback((boostId: string, duration: number) => {
     setState(s => {
       const now = Date.now();
       const existing = s.activeBoosts.find(b => b.boostId === boostId);
@@ -223,9 +221,7 @@ export function useGameState() {
             ? { ...b, expiresAt: Math.max(b.expiresAt, now) + duration * 1000 }
             : b)
         : [...s.activeBoosts, { boostId, expiresAt: now + duration * 1000 }];
-      const newState = { ...s, activeBoosts: newBoosts };
-      if (onSaved) setTimeout(() => onSaved(newState), 0);
-      return newState;
+      return { ...s, activeBoosts: newBoosts };
     });
   }, []);
 
@@ -304,45 +300,22 @@ export function useGameState() {
     return Math.max(0, Math.ceil((cooldownEnds - Date.now()) / 1000));
   }, []);
 
-  const loadCloudState = useCallback((cloud: {
-    coins?: number;
-    totalClicks?: number;
-    totalCoinsEarned?: number;
-    playerName?: string;
-    currentSkinId?: string;
-    unlockedSkins?: string[];
-    adCooldowns?: Record<string, number>;
-    achievements?: { id: string; unlocked: boolean }[];
-    activeBoosts?: ActiveBoost[];
-    savedAt?: number;
-  }) => {
+  const loadCloudState = useCallback((cloud: Record<string, unknown>) => {
     const now = Date.now();
-
-    // Читаем savedAt из localStorage
-    let localSavedAt = 0;
-    try {
-      const raw = localStorage.getItem(STORAGE_KEY);
-      if (raw) localSavedAt = JSON.parse(raw).savedAt ?? 0;
-    } catch { /* ignore */ }
-
-    const cloudSavedAt = cloud.savedAt ?? 0;
-
-    // Если локальное сохранение новее облака — не трогаем state
-    if (localSavedAt > cloudSavedAt) return;
-
-    const cloudBoosts = (cloud.activeBoosts ?? []).filter((b: ActiveBoost) => b.expiresAt > now);
+    const cloudBoosts = ((cloud.activeBoosts ?? []) as ActiveBoost[]).filter(b => b.expiresAt > now);
+    const cloudCooldowns = sanitizeCooldowns((cloud.adCooldowns ?? {}) as Record<string, number>);
     setState(s => ({
       ...s,
-      coins:            cloud.coins            ?? s.coins,
-      totalClicks:      cloud.totalClicks      ?? s.totalClicks,
-      totalCoinsEarned: cloud.totalCoinsEarned ?? s.totalCoinsEarned,
-      playerName:       cloud.playerName       ?? s.playerName,
-      currentSkinId:    cloud.currentSkinId    ?? s.currentSkinId,
-      unlockedSkins:    Array.from(new Set([...s.unlockedSkins, ...(cloud.unlockedSkins ?? [])])),
-      adCooldowns:      sanitizeCooldowns({ ...s.adCooldowns, ...(cloud.adCooldowns ?? {}) }),
+      coins:            Math.max(s.coins,            (cloud.coins            as number) ?? 0),
+      totalClicks:      Math.max(s.totalClicks,      (cloud.totalClicks      as number) ?? 0),
+      totalCoinsEarned: Math.max(s.totalCoinsEarned, (cloud.totalCoinsEarned as number) ?? 0),
+      playerName:       (cloud.playerName    as string) ?? s.playerName,
+      currentSkinId:    (cloud.currentSkinId as string) ?? s.currentSkinId,
+      unlockedSkins:    Array.from(new Set([...s.unlockedSkins, ...((cloud.unlockedSkins as string[]) ?? [])])),
+      adCooldowns:      { ...s.adCooldowns, ...cloudCooldowns },
       activeBoosts:     cloudBoosts.length > 0 ? cloudBoosts : s.activeBoosts,
       achievements: s.achievements.map(a => {
-        const ca = cloud.achievements?.find(x => x.id === a.id);
+        const ca = ((cloud.achievements as {id:string;unlocked:boolean}[]) ?? []).find(x => x.id === a.id);
         return ca?.unlocked ? { ...a, unlocked: true } : a;
       }),
     }));
