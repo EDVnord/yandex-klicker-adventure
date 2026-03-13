@@ -344,11 +344,15 @@ export function useGameState() {
     setState({ ...defaultState, achievements: ACHIEVEMENTS.map(a => ({ ...a })) });
   }, []);
 
+  const cheatCoins = useCallback((amount: number) => {
+    setState(s => ({ ...s, coins: s.coins + amount, totalCoinsEarned: s.totalCoinsEarned + amount }));
+  }, []);
+
   return {
     state, handleClick, buyBoost, unlockBoostAd, setPlayerName,
     getActiveMultiplier, getBoostTimeLeft,
     selectSkin, buySkin, unlockSkinAd, loadCloudState,
     claimAdOffer, getAdCooldownLeft, setAdCooldown,
-    resetProgress,
+    resetProgress, cheatCoins,
   };
 }

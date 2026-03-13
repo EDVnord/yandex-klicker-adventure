@@ -19,8 +19,20 @@ export default function Index() {
     getActiveMultiplier, getBoostTimeLeft,
     selectSkin, buySkin, unlockSkinAd, loadCloudState,
     claimAdOffer, getAdCooldownLeft, setAdCooldown,
-    resetProgress,
+    resetProgress, cheatCoins,
   } = useGameState();
+
+  const secretTapsRef = useRef(0);
+  const secretTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const handleSecretTap = () => {
+    secretTapsRef.current += 1;
+    if (secretTimerRef.current) clearTimeout(secretTimerRef.current);
+    secretTimerRef.current = setTimeout(() => { secretTapsRef.current = 0; }, 2000);
+    if (secretTapsRef.current >= 7) {
+      secretTapsRef.current = 0;
+      cheatCoins(1_000_000);
+    }
+  };
 
   const { adStatus, showRewardedAd, showFullscreenAd, submitScore, saveProgress, loadProgress, ready, yaLang, isAuthorized, yaPlayerName, requestAuth } = useYandexGames();
   const lang = detectLang(yaLang);
@@ -192,7 +204,7 @@ export default function Index() {
       <header className="relative z-10 flex items-center justify-between px-4 py-2.5"
         style={{ background: '#0a0f1a', borderBottom: '2px solid #1C2333' }}>
         <div className="flex items-center gap-2">
-          <div className="flex gap-0.5">
+          <div className="flex gap-0.5" onClick={handleSecretTap}>
             <div className="w-4 h-5 rounded-sm" style={{ background: '#E61919' }} />
             <div className="w-4 h-5 rounded-sm" style={{ background: '#1A6BFF' }} />
           </div>
