@@ -69,7 +69,7 @@ export const ACHIEVEMENTS: Achievement[] = [
   { id: 'ten_k',        name: 'Машина кликов',      description: 'Сделай 10 000 кликов',         emoji: '🤖', requirement: 10_000, reward: 50_000, unlocked: false },
   { id: 'fifty_k',      name: 'Кликер-бог',         description: 'Сделай 50 000 кликов',         emoji: '⚡', requirement: 50_000, reward: 200_000, unlocked: false },
   { id: 'coins_1k',     name: 'Богач',              description: 'Заработай 1 000 монет',        emoji: '💰', requirement: 0,      reward: 500,    unlocked: false },
-  { id: 'coins_10k',    name: 'Монетный дождь',     description: 'Заработай 10 000 монет',       emoji: '🪙', requirement: 0,      reward: 2_000,  unlocked: false },
+  { id: 'coins_10k',    name: 'Монетный дождь',     description: 'Заработай 10 000 монет',       emoji: '💰', requirement: 0,      reward: 2_000,  unlocked: false },
   { id: 'coins_100k',   name: 'Миллионер',          description: 'Заработай 100 000 монет',      emoji: '💎', requirement: 0,      reward: 10_000, unlocked: false },
   { id: 'speed',        name: 'Молния!',            description: 'Достигни 10 кликов/сек',       emoji: '⚡', requirement: 0,      reward: 2_000,  unlocked: false },
   { id: 'speed_15',     name: 'Скоростной демон',   description: 'Достигни 15 кликов/сек',       emoji: '🌪️', requirement: 0,     reward: 5_000,  unlocked: false },

@@ -50,7 +50,7 @@ export const translations = {
     // Achievements
     ach_title: 'Достижения',
     ach_unlocked: '{n}/{total} ОТКРЫТО',
-    ach_reward: 'Награда: +{n} 🪙',
+    ach_reward: 'Награда: +{n} 💰',
     ach_toast_title: 'ДОСТИЖЕНИЕ!',
     // Rarity
     rarity_common: 'ОБЫЧНЫЙ',
@@ -103,7 +103,7 @@ export const translations = {
     offer_next: 'until next',
     ach_title: 'Achievements',
     ach_unlocked: '{n}/{total} UNLOCKED',
-    ach_reward: 'Reward: +{n} 🪙',
+    ach_reward: 'Reward: +{n} 💰',
     ach_toast_title: 'ACHIEVEMENT!',
     rarity_common: 'COMMON',
     rarity_rare: 'RARE',

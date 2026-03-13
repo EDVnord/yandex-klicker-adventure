@@ -16,7 +16,7 @@ export default {
     },
     extend: {
       fontFamily: {
-        game: ['Fredoka', 'cursive'],
+        game: ['Nunito', 'sans-serif'],
         body: ['Nunito', 'sans-serif'],
       },
       colors: {

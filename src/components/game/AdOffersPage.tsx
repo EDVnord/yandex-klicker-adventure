@@ -154,7 +154,7 @@ function SpinDrum({ spinning, winIndex, onDone }: {
               color: p.color,
               fontWeight: 900,
               fontSize: 17,
-              fontFamily: 'Fredoka One, sans-serif',
+              fontFamily: 'Nunito, sans-serif',
               letterSpacing: '0.5px',
             }}>
               {p.label}
@@ -180,7 +180,7 @@ function Jackpot({ show, onHide }: { show: boolean; onHide: () => void }) {
     left: `${Math.random() * 100}%`,
     delay: `${Math.random() * 0.8}s`,
     dur: `${0.8 + Math.random() * 1.2}s`,
-    emoji: ['🎉', '⭐', '💎', '🪙', '✨', '🌟'][Math.floor(Math.random() * 6)],
+    emoji: ['🎉', '⭐', '💎', '💰', '✨', '🌟'][Math.floor(Math.random() * 6)],
     size: 16 + Math.floor(Math.random() * 18),
   }));
 
