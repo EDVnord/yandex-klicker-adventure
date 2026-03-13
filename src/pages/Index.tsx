@@ -24,7 +24,7 @@ export default function Index() {
     state, handleClick, buyBoost, unlockBoostAd,
     getActiveMultiplier, getBoostTimeLeft,
     selectSkin, buySkin, unlockSkinAd, loadCloudState,
-    claimAdOffer, getAdCooldownLeft,
+    claimAdOffer, getAdCooldownLeft, setAdCooldown,
   } = useGameState();
 
   const { adStatus, showRewardedAd, showFullscreenAd, submitScore, saveProgress, loadProgress, ready } = useYandexGames();
@@ -158,6 +158,7 @@ export default function Index() {
 
   const handleAdOffer = (offerId: string, rewardType: string, rewardValue: number) => {
     const cooldownMs = AD_COOLDOWNS_MS[offerId] ?? 5 * 60 * 1000;
+    setAdCooldown(offerId, cooldownMs);
     showRewardedAd(() => claimAdOffer(offerId, rewardType, rewardValue, cooldownMs));
   };
 

@@ -288,6 +288,13 @@ export function useGameState() {
     });
   }, []);
 
+  const setAdCooldown = useCallback((offerId: string, cooldownMs: number) => {
+    setState(s => ({
+      ...s,
+      adCooldowns: { ...s.adCooldowns, [offerId]: Date.now() + cooldownMs },
+    }));
+  }, []);
+
   const getAdCooldownLeft = useCallback((offerId: string): number => {
     const cooldownEnds = stateRef.current.adCooldowns[offerId] ?? 0;
     return Math.max(0, Math.ceil((cooldownEnds - Date.now()) / 1000));
@@ -323,6 +330,6 @@ export function useGameState() {
     state, handleClick, buyBoost, unlockBoostAd, setPlayerName,
     getActiveMultiplier, getBoostTimeLeft,
     selectSkin, buySkin, unlockSkinAd, loadCloudState,
-    claimAdOffer, getAdCooldownLeft,
+    claimAdOffer, getAdCooldownLeft, setAdCooldown,
   };
 }
