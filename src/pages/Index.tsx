@@ -22,14 +22,37 @@ export default function Index() {
     resetProgress, cheatCoins,
   } = useGameState();
 
-  const secretTapsRef = useRef(0);
+  const secretStepRef = useRef<'logo' | 'coins'>('logo');
+  const secretLogoTapsRef = useRef(0);
+  const secretCoinsTapsRef = useRef(0);
   const secretTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const handleSecretTap = () => {
-    secretTapsRef.current += 1;
+
+  const resetSecret = () => {
+    secretStepRef.current = 'logo';
+    secretLogoTapsRef.current = 0;
+    secretCoinsTapsRef.current = 0;
+  };
+
+  const handleSecretLogo = () => {
+    if (secretStepRef.current !== 'logo') { resetSecret(); return; }
+    secretLogoTapsRef.current += 1;
     if (secretTimerRef.current) clearTimeout(secretTimerRef.current);
-    secretTimerRef.current = setTimeout(() => { secretTapsRef.current = 0; }, 2000);
-    if (secretTapsRef.current >= 7) {
-      secretTapsRef.current = 0;
+    secretTimerRef.current = setTimeout(resetSecret, 3000);
+    if (secretLogoTapsRef.current >= 8) {
+      secretStepRef.current = 'coins';
+      secretLogoTapsRef.current = 0;
+      if (secretTimerRef.current) clearTimeout(secretTimerRef.current);
+      secretTimerRef.current = setTimeout(resetSecret, 4000);
+    }
+  };
+
+  const handleSecretCoins = () => {
+    if (secretStepRef.current !== 'coins') return;
+    secretCoinsTapsRef.current += 1;
+    if (secretTimerRef.current) clearTimeout(secretTimerRef.current);
+    secretTimerRef.current = setTimeout(resetSecret, 4000);
+    if (secretCoinsTapsRef.current >= 12) {
+      resetSecret();
       cheatCoins(1_000_000);
     }
   };
@@ -204,7 +227,7 @@ export default function Index() {
       <header className="relative z-10 flex items-center justify-between px-4 py-2.5"
         style={{ background: '#0a0f1a', borderBottom: '2px solid #1C2333' }}>
         <div className="flex items-center gap-2">
-          <div className="flex gap-0.5" onClick={handleSecretTap}>
+          <div className="flex gap-0.5" onClick={handleSecretLogo}>
             <div className="w-4 h-5 rounded-sm" style={{ background: '#E61919' }} />
             <div className="w-4 h-5 rounded-sm" style={{ background: '#1A6BFF' }} />
           </div>
@@ -233,7 +256,8 @@ export default function Index() {
             )
           )}
           <div className="flex items-center gap-1.5 px-2 py-1.5 font-game text-sm"
-            style={{ background: '#1C2333', border: '2px solid #2D3A50', borderRadius: 4, maxWidth: 110 }}>
+            style={{ background: '#1C2333', border: '2px solid #2D3A50', borderRadius: 4, maxWidth: 110 }}
+            onClick={handleSecretCoins}>
             <div className="w-4 h-4 rounded-full flex-shrink-0 flex items-center justify-center text-[9px] font-black"
               style={{ background: '#FFD700', color: '#111' }}>R$</div>
             <span className="truncate" style={{ color: '#FFD700' }}>{(() => { const v = Math.floor(state.coins); if (v >= 1_000_000) return `${(v/1_000_000).toFixed(1)}М`; if (v >= 1_000) return `${(v/1_000).toFixed(1)}К`; return v.toString(); })()}</span>
