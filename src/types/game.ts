@@ -8,6 +8,7 @@ export interface Boost {
   cost: number;
   color: string;
   adUnlock: boolean; // can unlock via ad
+  adDuration?: number; // seconds via ad (if different from duration)
   persistent?: boolean; // сохраняется между сессиями после покупки
 }
 

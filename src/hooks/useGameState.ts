@@ -29,9 +29,9 @@ function loadState(): GameState {
       const saved = localStorage.getItem(key);
       if (!saved) continue;
       const parsed = JSON.parse(saved);
-      const purchasedBoosts: string[] = parsed.purchasedBoosts ?? [];
+      const now = Date.now();
       const activeBoosts = (parsed.activeBoosts || []).filter(
-        (b: ActiveBoost) => b.expiresAt > Date.now()
+        (b: ActiveBoost) => b.expiresAt > now
       );
       return {
         ...defaultState,
@@ -44,7 +44,7 @@ function loadState(): GameState {
         currentSkinId: parsed.currentSkinId ?? 'noob',
         unlockedSkins: parsed.unlockedSkins ?? ['noob'],
         adCooldowns: sanitizeCooldowns(parsed.adCooldowns ?? {}),
-        purchasedBoosts,
+        purchasedBoosts: [],
       };
     } catch (e) {
       console.warn('Failed to load save from', key, e);

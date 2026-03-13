@@ -52,9 +52,10 @@ export const BOOSTS: Boost[] = [
     emoji: '🤖',
     multiplier: 1,
     duration: 120,
+    adDuration: 30,
     cost: 2000,
     color: '#FFB74D',
-    adUnlock: false,
+    adUnlock: true,
   },
 ];
 

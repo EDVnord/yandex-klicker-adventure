@@ -72,7 +72,7 @@ export default function BoostersPage({ coins, adStatus, getBoostTimeLeft, buyBoo
                 <button
                   className="rblx-btn rblx-btn-blue flex-1 text-sm py-2.5"
                   style={{ opacity: isAdBusy ? 0.65 : 1 }}
-                  onClick={() => !isAdBusy && onShowRewardedAd(boost.id, boost.duration)}
+                  onClick={() => !isAdBusy && onShowRewardedAd(boost.id, boost.adDuration ?? boost.duration)}
                 >
                   {isAdBusy
                     ? <><Icon name="Loader2" size={14} className="animate-spin" /> Реклама...</>
