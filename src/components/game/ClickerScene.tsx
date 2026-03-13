@@ -16,9 +16,10 @@ interface Props {
   isAutoActive?: boolean;
   isRobotOwned?: boolean;
   autoCapped?: boolean;
+  onGoToShop?: () => void;
 }
 
-export default function ClickerScene({ coins, totalClicks, clicksPerSecond, multiplier, skin, achievements, onClick, isAutoActive = false, isRobotOwned = false, autoCapped = false }: Props) {
+export default function ClickerScene({ coins, totalClicks, clicksPerSecond, multiplier, skin, achievements, onClick, isAutoActive = false, isRobotOwned = false, autoCapped = false, onGoToShop }: Props) {
   const [particles, setParticles] = useState<CoinParticle[]>([]);
   const [isClicking, setIsClicking] = useState(false);
   const [autoPulse, setAutoPulse] = useState(false);
@@ -108,9 +109,16 @@ export default function ClickerScene({ coins, totalClicks, clicksPerSecond, mult
           </div>
         )}
         {isRobotOwned && autoCapped && (
-          <div className="w-full flex items-center justify-center gap-2 px-5 py-1.5 font-game text-sm"
+          <div className="w-full flex items-center justify-between gap-2 px-4 py-1.5 font-game text-sm"
             style={{ background: 'linear-gradient(90deg,#2D3A50,#3a4a60)', borderRadius: 4, boxShadow: '0 3px 0 #111', color: '#FFB74D', border: '1px solid #FFB74D44' }}>
-            ⏸ РОБОТ НА ПАУЗЕ — трать монеты, чтобы он снова заработал!
+            <span>⏸ РОБОТ НА ПАУЗЕ</span>
+            {onGoToShop && (
+              <button onClick={onGoToShop}
+                className="font-game text-xs px-3 py-1"
+                style={{ background: '#FFB74D', color: '#111', borderRadius: 3, boxShadow: '0 2px 0 #a35800' }}>
+                В МАГАЗИН
+              </button>
+            )}
           </div>
         )}
       </div>

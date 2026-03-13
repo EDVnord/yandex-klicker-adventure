@@ -219,13 +219,31 @@ export function useGameState() {
   useEffect(() => {
     autoClickRef.current = setInterval(() => {
       const now = Date.now();
-      const hasAutoBoost = stateRef.current.activeBoosts.some(
+      const s = stateRef.current;
+
+      // Перезапускаем истёкшие persistent-бусты прямо здесь, не ждём 1с тика
+      const expired = s.activeBoosts.filter(
+        b => b.expiresAt <= now && s.purchasedBoosts.includes(b.boostId)
+      );
+      if (expired.length > 0) {
+        setState(prev => ({
+          ...prev,
+          activeBoosts: prev.activeBoosts.map(b => {
+            if (b.expiresAt > now) return b;
+            if (!prev.purchasedBoosts.includes(b.boostId)) return b;
+            const boost = BOOSTS.find(bb => bb.id === b.boostId);
+            return boost ? { ...b, expiresAt: now + boost.duration * 1000 } : b;
+          }),
+        }));
+        return; // пропускаем клик в этом тике, дадим стейту обновиться
+      }
+
+      const hasAutoBoost = s.activeBoosts.some(
         b => (b.boostId === 'robot' || b.boostId === 'rainbow') && b.expiresAt > now
       );
       if (hasAutoBoost) handleClickRef.current(true);
-    }, 80); // ~12 кликов/сек
+    }, 80);
     return () => { if (autoClickRef.current) clearInterval(autoClickRef.current); };
-   
   }, []);
 
   // --- Покупка буста ---
