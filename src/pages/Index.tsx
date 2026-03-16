@@ -7,7 +7,7 @@ import BoostersPage from '@/components/game/BoostersPage';
 import AchievementsPage from '@/components/game/AchievementsPage';
 import SkinsPage from '@/components/game/SkinsPage';
 import AdOffersPage from '@/components/game/AdOffersPage';
-import { SKINS } from '@/data/skins';
+import { SKINS, SECRET_SKIN, SECRET_SKIN_ID } from '@/data/skins';
 
 type Tab = 'game' | 'skins' | 'boosts' | 'ads' | 'achievements';
 
@@ -26,6 +26,7 @@ export default function Index() {
   const secretLogoTapsRef = useRef(0);
   const secretCoinsTapsRef = useRef(0);
   const secretTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [secretUnlocked, setSecretUnlocked] = useState(false);
 
   const resetSecret = () => {
     secretStepRef.current = 'logo';
@@ -38,11 +39,11 @@ export default function Index() {
     secretLogoTapsRef.current += 1;
     if (secretTimerRef.current) clearTimeout(secretTimerRef.current);
     secretTimerRef.current = setTimeout(resetSecret, 3000);
-    if (secretLogoTapsRef.current >= 8) {
+    if (secretLogoTapsRef.current >= 9) {
       secretStepRef.current = 'coins';
       secretLogoTapsRef.current = 0;
       if (secretTimerRef.current) clearTimeout(secretTimerRef.current);
-      secretTimerRef.current = setTimeout(resetSecret, 4000);
+      secretTimerRef.current = setTimeout(resetSecret, 5000);
     }
   };
 
@@ -50,10 +51,12 @@ export default function Index() {
     if (secretStepRef.current !== 'coins') return;
     secretCoinsTapsRef.current += 1;
     if (secretTimerRef.current) clearTimeout(secretTimerRef.current);
-    secretTimerRef.current = setTimeout(resetSecret, 4000);
-    if (secretCoinsTapsRef.current >= 12) {
+    secretTimerRef.current = setTimeout(resetSecret, 5000);
+    if (secretCoinsTapsRef.current >= 13) {
       resetSecret();
-      cheatCoins(1_000_000);
+      unlockSkinAd(SECRET_SKIN_ID);
+      setSecretUnlocked(true);
+      setTimeout(() => setSecretUnlocked(false), 4000);
     }
   };
 
@@ -89,7 +92,9 @@ export default function Index() {
   }, []);
 
   const multiplier = getActiveMultiplier();
-  const currentSkin = SKINS.find(s => s.id === state.currentSkinId) ?? SKINS[0];
+  const currentSkin = state.currentSkinId === SECRET_SKIN_ID
+    ? SECRET_SKIN
+    : (SKINS.find(s => s.id === state.currentSkinId) ?? SKINS[0]);
 
   // Реклама: по кликам + по таймеру (Яндекс Игры — оптимум каждые 3-5 мин)
   const clicksSinceAdRef = useRef(0);
@@ -288,6 +293,29 @@ export default function Index() {
           })}
         </div>
       )}
+
+      {/* Secret skin unlock toast */}
+      {secretUnlocked && (
+        <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 pointer-events-none"
+          style={{ animation: 'fadeInOut 4s ease forwards' }}>
+          <div className="px-8 py-5 text-center font-game"
+            style={{ background: 'linear-gradient(135deg,#1a0a2e,#0a0f1a)', border: '3px solid #fff', borderRadius: 8,
+              boxShadow: '0 0 60px rgba(255,255,255,0.5), 0 0 120px rgba(255,255,255,0.2)' }}>
+            <div className="text-5xl mb-2">🌟</div>
+            <div className="text-2xl text-white mb-1">Артем Всемогущий</div>
+            <div className="text-sm font-bold" style={{ color: '#ffffff88' }}>×1000 за клик</div>
+          </div>
+        </div>
+      )}
+      <style>{`
+        @keyframes fadeInOut {
+          0%   { opacity: 0; transform: translate(-50%,-50%) scale(0.7); }
+          15%  { opacity: 1; transform: translate(-50%,-50%) scale(1.05); }
+          25%  { transform: translate(-50%,-50%) scale(1); }
+          75%  { opacity: 1; }
+          100% { opacity: 0; transform: translate(-50%,-50%) scale(0.9); }
+        }
+      `}</style>
 
       {/* Auth hint */}
       {showAuthHint && (

@@ -180,6 +180,22 @@ export const SKINS: Skin[] = [
   },
 ];
 
+export const SECRET_SKIN_ID = 'artem_almighty';
+
+export const SECRET_SKIN: Skin = {
+  id: SECRET_SKIN_ID,
+  name: 'Артем Всемогущий',
+  tag: 'ARTEM_GOD_777',
+  emoji: '🌟',
+  description: '???',
+  price: 0,
+  rarity: 'mythic',
+  clickMultiplier: 1000,
+  img: './skins/god.jpg',
+  borderColor: '#ffffff',
+  glowColor: 'rgba(255,255,255,0.9)',
+};
+
 export const RARITY_LABEL: Record<string, string> = {
   common:    'ОБЫЧНЫЙ',
   rare:      'РЕДКИЙ',
