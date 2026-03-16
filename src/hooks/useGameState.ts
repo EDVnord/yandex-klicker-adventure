@@ -276,8 +276,12 @@ export function useGameState() {
 
   const unlockSkinAd = useCallback((skinId: string) => {
     setState(s => {
-      if (s.unlockedSkins.includes(skinId)) return s;
-      return { ...s, unlockedSkins: [...s.unlockedSkins, skinId], currentSkinId: skinId };
+      const alreadyUnlocked = s.unlockedSkins.includes(skinId);
+      return {
+        ...s,
+        unlockedSkins: alreadyUnlocked ? s.unlockedSkins : [...s.unlockedSkins, skinId],
+        currentSkinId: skinId,
+      };
     });
   }, []);
 
