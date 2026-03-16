@@ -191,7 +191,7 @@ export const SECRET_SKIN: Skin = {
   price: 0,
   rarity: 'mythic',
   clickMultiplier: 1000,
-  img: 'https://cdn.poehali.dev/projects/8908f6bc-a84f-4d41-836a-c95d7da5738b/files/241704e7-707b-4184-9082-9633e33bad8d.jpg',
+  img: './skins/artem.jpg',
   borderColor: '#ffffff',
   glowColor: 'rgba(255,255,255,0.9)',
 };
