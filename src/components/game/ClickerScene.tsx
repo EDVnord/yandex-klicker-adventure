@@ -28,6 +28,25 @@ export default function ClickerScene({ lang, coins, totalClicks, clicksPerSecond
   const containerRef = useRef<HTMLDivElement>(null);
   const isSecret = skin.id === SECRET_SKIN_ID;
 
+  const SKIN_SYMBOLS: Record<string, string[]> = {
+    noob:    ['?', '!', 'lol', 'gg', 'noob', '...'],
+    alien:   ['👽', 'UFO', '∞', '◈', '⊕', '✦'],
+    ninja:   ['*', '|', '/', '\\', '+', 'x'],
+    cowboy:  ['*', 'o', '~', '-', '+', '.'],
+    pirate:  ['*', 'X', 'o', '+', '~', '-'],
+    vip:     ['$', '*', 'o', '+', '-', '.'],
+    cyborg:  ['0', '1', '+', '-', '|', '/'],
+    witch:   ['*', '+', 'o', '~', '-', '.'],
+    samurai: ['|', '/', '\\', '-', '+', '*'],
+    hero:    ['*', '+', 'o', '-', '~', '.'],
+    dragon:  ['*', 'o', '+', '~', '-', '.'],
+    god:     ['*', '+', 'o', '~', '-', '.'],
+  };
+
+  const skinSymbols = isSecret
+    ? ['✦', '★', '⚡', '🌟', '✨']
+    : (SKIN_SYMBOLS[skin.id] ?? ['*', '+', 'o', '-', '~', '.']);
+
   const formatCoins = (n: number) => {
     const v = Math.floor(n);
     if (v >= 1_000_000) return `${(v / 1_000_000).toFixed(1)}М`;
@@ -83,28 +102,38 @@ export default function ClickerScene({ lang, coins, totalClicks, clicksPerSecond
   return (
     <div className="flex flex-col items-center gap-4 px-4" style={{ position: 'relative' }}>
 
-      {/* Secret skin — divine background */}
-      {isSecret && (
-        <div className="fixed inset-0 pointer-events-none" style={{ zIndex: 0 }}>
+      {/* Skin ambient background symbols */}
+      <div className="fixed inset-0 pointer-events-none" style={{ zIndex: 0, overflow: 'hidden' }}>
+        {isSecret && (
           <div style={{
             position: 'absolute', inset: 0,
             background: 'radial-gradient(ellipse at 50% 40%, rgba(255,215,0,0.12) 0%, rgba(255,255,255,0.04) 40%, transparent 70%)',
             animation: 'divinePulse 2.5s ease-in-out infinite',
           }} />
-          {[...Array(18)].map((_, i) => (
-            <div key={i} className="artem-star" style={{
-              position: 'absolute',
-              left: `${5 + (i * 53 % 90)}%`,
-              top: `${5 + (i * 37 % 85)}%`,
-              fontSize: `${10 + (i % 4) * 5}px`,
-              animationDelay: `${(i * 0.37) % 3}s`,
-              animationDuration: `${2 + (i % 3) * 0.8}s`,
-            }}>
-              {['✦', '★', '⚡', '🌟', '✨'][i % 5]}
-            </div>
-          ))}
-        </div>
-      )}
+        )}
+        {[...Array(16)].map((_, i) => (
+          <div key={`${skin.id}-${i}`} style={{
+            position: 'absolute',
+            left: `${4 + (i * 57 % 88)}%`,
+            top: `${4 + (i * 41 % 86)}%`,
+            fontSize: isSecret ? `${12 + (i % 4) * 5}px` : `${11 + (i % 3) * 4}px`,
+            color: skin.borderColor,
+            opacity: isSecret ? 0.7 : 0.25,
+            fontWeight: 900,
+            fontFamily: 'monospace',
+            lineHeight: 1,
+            animationName: 'skinSymbolFloat',
+            animationDuration: `${2.2 + (i % 5) * 0.6}s`,
+            animationDelay: `${(i * 0.31) % 3}s`,
+            animationTimingFunction: 'ease-in-out',
+            animationIterationCount: 'infinite',
+            animationDirection: i % 2 === 0 ? 'alternate' : 'alternate-reverse',
+            animationFillMode: 'both',
+          }}>
+            {skinSymbols[i % skinSymbols.length]}
+          </div>
+        ))}
+      </div>
 
       {/* Stats */}
       <div className="w-full max-w-sm grid grid-cols-3 gap-2">
@@ -281,13 +310,9 @@ export default function ClickerScene({ lang, coins, totalClicks, clicksPerSecond
           0%, 100% { box-shadow: 0 0 30px rgba(255,215,0,0.5), 0 0 60px rgba(255,215,0,0.2), inset 0 0 12px rgba(255,215,0,0.1); }
           50%       { box-shadow: 0 0 50px rgba(255,215,0,0.8), 0 0 100px rgba(255,215,0,0.35), inset 0 0 24px rgba(255,215,0,0.2); }
         }
-        .artem-star {
-          animation: artemStarFloat var(--dur, 2s) ease-in-out infinite alternate;
-          opacity: 0.7;
-        }
-        @keyframes artemStarFloat {
-          from { transform: translateY(0px) scale(1); opacity: 0.4; }
-          to   { transform: translateY(-14px) scale(1.15); opacity: 0.9; }
+        @keyframes skinSymbolFloat {
+          from { transform: translateY(0px) scale(1); }
+          to   { transform: translateY(-16px) scale(1.12); }
         }
       `}</style>
     </div>
