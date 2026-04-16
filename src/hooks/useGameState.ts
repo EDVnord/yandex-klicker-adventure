@@ -339,13 +339,17 @@ export function useGameState() {
     const now = Date.now();
     const cloudBoosts = ((cloud.activeBoosts ?? []) as ActiveBoost[]).filter(b => b.expiresAt > now);
     const cloudCooldowns = sanitizeCooldowns((cloud.adCooldowns ?? {}) as Record<string, number>);
+    // Определяем чьи данные свежее — облако или localStorage
+    const localSavedAt = (() => { try { const raw = localStorage.getItem(STORAGE_KEY); return raw ? (JSON.parse(raw).savedAt ?? 0) : 0; } catch { return 0; } })();
+    const cloudSavedAt = (cloud.savedAt as number) ?? 0;
+    const localIsNewer = localSavedAt >= cloudSavedAt;
     setState(s => ({
       ...s,
       coins:            Math.max(s.coins,            (cloud.coins            as number) ?? 0),
       totalClicks:      Math.max(s.totalClicks,      (cloud.totalClicks      as number) ?? 0),
       totalCoinsEarned: Math.max(s.totalCoinsEarned, (cloud.totalCoinsEarned as number) ?? 0),
       playerName:       (cloud.playerName    as string) ?? s.playerName,
-      currentSkinId:    (cloud.currentSkinId as string) ?? s.currentSkinId,
+      currentSkinId:    localIsNewer ? s.currentSkinId : ((cloud.currentSkinId as string) ?? s.currentSkinId),
       unlockedSkins:    Array.from(new Set([...s.unlockedSkins, ...((cloud.unlockedSkins as string[]) ?? [])])),
       adCooldowns:      { ...s.adCooldowns, ...cloudCooldowns },
       activeBoosts:     cloudBoosts.length > 0 ? cloudBoosts : s.activeBoosts,
