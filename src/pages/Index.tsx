@@ -353,7 +353,7 @@ export default function Index() {
       )}
 
       {/* Main content */}
-      <main className="flex-1 relative z-10 overflow-y-auto" style={{ paddingBottom: 72 }}>
+      <main className="flex-1 relative z-10 overflow-y-auto" style={{ paddingBottom: 72, overscrollBehavior: 'contain' }}>
         {tab === 'game' && (
           <div className="py-5">
             <ClickerScene coins={state.coins} totalClicks={state.totalClicks}
