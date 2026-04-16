@@ -37,7 +37,7 @@ export default function AchievementToast({ lang, achievements, onHappyTime }: Pr
           <div className="text-[10px] font-black tracking-widest mb-0.5" style={{ color: '#FFD700' }}>
             {t(lang, 'ach_toast_title')}
           </div>
-          <div className="font-game text-sm text-white leading-none">{current.name}</div>
+          <div className="font-game text-sm text-white leading-none">{t(lang, `ach_${current.id}_name` as Parameters<typeof t>[1])}</div>
           <div className="text-[11px] font-bold mt-0.5" style={{ color: '#4a5768' }}>{t(lang, 'ach_reward', { n: current.reward })}</div>
         </div>
       </div>
