@@ -18,8 +18,8 @@ export default function Index() {
     state, handleClick, buyBoost, unlockBoostAd,
     getActiveMultiplier, getBoostTimeLeft,
     selectSkin, buySkin, unlockSkinAd, loadCloudState,
-    claimAdOffer, getAdCooldownLeft, setAdCooldown,
-    resetProgress, cheatCoins,
+    claimAdOffer, getAdCooldownLeft,
+    resetProgress,
   } = useGameState();
 
   const { adStatus, showRewardedAd, showFullscreenAd, submitScore, saveProgress, loadProgress, ready, yaLang, isAuthorized, yaPlayerName, requestAuth, gameplayStart, gameplayStop, happyTime } = useYandexGames();
