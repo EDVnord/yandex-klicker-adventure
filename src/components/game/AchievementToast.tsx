@@ -2,9 +2,9 @@ import { useEffect, useState } from 'react';
 import type { Achievement } from '@/types/game';
 import { type Lang, t } from '@/i18n';
 
-interface Props { lang: Lang; achievements: Achievement[]; }
+interface Props { lang: Lang; achievements: Achievement[]; onHappyTime?: () => void; }
 
-export default function AchievementToast({ lang, achievements }: Props) {
+export default function AchievementToast({ lang, achievements, onHappyTime }: Props) {
   const [shown, setShown] = useState<Set<string>>(() =>
     new Set(achievements.filter(a => a.unlocked).map(a => a.id))
   );
@@ -15,9 +15,10 @@ export default function AchievementToast({ lang, achievements }: Props) {
     if (newlyUnlocked && !current) {
       setShown(s => new Set([...s, newlyUnlocked.id]));
       setCurrent(newlyUnlocked);
+      onHappyTime?.();
       setTimeout(() => setCurrent(null), 3200);
     }
-  }, [achievements, shown, current]);
+  }, [achievements, shown, current, onHappyTime]);
 
   if (!current) return null;
 

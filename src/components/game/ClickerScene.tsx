@@ -18,9 +18,10 @@ interface Props {
   onClick: () => void;
   isAutoActive?: boolean;
   robotTimeLeft?: number;
+  onHappyTime?: () => void;
 }
 
-export default function ClickerScene({ lang, coins, totalClicks, clicksPerSecond, multiplier, skin, achievements, onClick, isAutoActive = false, robotTimeLeft = 0 }: Props) {
+export default function ClickerScene({ lang, coins, totalClicks, clicksPerSecond, multiplier, skin, achievements, onClick, isAutoActive = false, robotTimeLeft = 0, onHappyTime }: Props) {
   const [particles, setParticles] = useState<CoinParticle[]>([]);
   const [isClicking, setIsClicking] = useState(false);
   const [autoPulse, setAutoPulse] = useState(false);
@@ -283,10 +284,10 @@ export default function ClickerScene({ lang, coins, totalClicks, clicksPerSecond
       <div className="flex items-center gap-2 mt-0.5">
         <div className="w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-black"
           style={{ background: '#FFD700', color: '#111' }}>R$</div>
-        <span className="font-game text-base" style={{ color: '#FFD700' }}>{formatCoins(coins)} монет</span>
+        <span className="font-game text-base" style={{ color: '#FFD700' }}>{formatCoins(coins)} {t(lang, 'stat_coins').toLowerCase()}</span>
       </div>
 
-      <AchievementToast lang={lang} achievements={achievements} />
+      <AchievementToast lang={lang} achievements={achievements} onHappyTime={onHappyTime} />
 
       <style>{`
         @keyframes autoFloat {

@@ -38,6 +38,7 @@ interface YaSDK {
       start: () => void;
       stop: () => void;
     };
+    HappyTime?: () => void;
   };
   getLeaderboards: () => Promise<YaLeaderboards>;
   getPlayer: (opts?: { scopes?: boolean }) => Promise<YaPlayer>;
@@ -111,6 +112,10 @@ export function useYandexGames() {
 
   const gameplayStop = useCallback(() => {
     sdkRef.current?.features.GameplayAPI?.stop();
+  }, []);
+
+  const happyTime = useCallback(() => {
+    sdkRef.current?.features.HappyTime?.();
   }, []);
 
   const requestAuth = useCallback(async () => {
@@ -218,5 +223,5 @@ export function useYandexGames() {
     }
   }, []);
 
-  return { ready, adStatus, yaLang, isAuthorized, yaPlayerName, requestAuth, showRewardedAd, showFullscreenAd, submitScore, saveProgress, loadProgress, gameplayStart, gameplayStop };
+  return { ready, adStatus, yaLang, isAuthorized, yaPlayerName, requestAuth, showRewardedAd, showFullscreenAd, submitScore, saveProgress, loadProgress, gameplayStart, gameplayStop, happyTime };
 }

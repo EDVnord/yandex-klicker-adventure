@@ -22,6 +22,9 @@ export default function Index() {
     resetProgress, cheatCoins,
   } = useGameState();
 
+  const { adStatus, showRewardedAd, showFullscreenAd, submitScore, saveProgress, loadProgress, ready, yaLang, isAuthorized, yaPlayerName, requestAuth, gameplayStart, gameplayStop, happyTime } = useYandexGames();
+  const lang = detectLang(yaLang);
+
   const secretStepRef = useRef<'logo' | 'coins'>('logo');
   const secretLogoTapsRef = useRef(0);
   const secretCoinsTapsRef = useRef(0);
@@ -56,12 +59,10 @@ export default function Index() {
       resetSecret();
       unlockSkinAd(SECRET_SKIN_ID);
       setSecretUnlocked(true);
+      happyTime();
       setTimeout(() => setSecretUnlocked(false), 4000);
     }
   };
-
-  const { adStatus, showRewardedAd, showFullscreenAd, submitScore, saveProgress, loadProgress, ready, yaLang, isAuthorized, yaPlayerName, requestAuth, gameplayStart, gameplayStop } = useYandexGames();
-  const lang = detectLang(yaLang);
 
   const TABS = [
     { id: 'game' as Tab,         label: t(lang, 'nav_game'),         emoji: '🎮' },
@@ -361,7 +362,8 @@ export default function Index() {
               isAutoActive={
                 state.activeBoosts.some(b => (b.boostId === 'robot' || b.boostId === 'rainbow') && b.expiresAt > Date.now())
               }
-              robotTimeLeft={getBoostTimeLeft('robot')} lang={lang} />
+              robotTimeLeft={getBoostTimeLeft('robot')} lang={lang}
+              onHappyTime={happyTime} />
           </div>
         )}
         {tab === 'skins' && (
