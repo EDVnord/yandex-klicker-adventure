@@ -31,14 +31,14 @@ function weightedRandom() {
   return 0;
 }
 
-function formatCooldown(sec: number) {
+function formatCooldown(sec: number, lang: import('@/i18n').Lang) {
   if (sec <= 0) return '';
   const h = Math.floor(sec / 3600);
   const m = Math.floor((sec % 3600) / 60);
   const s = sec % 60;
-  if (h > 0) return `${h}ч ${m}м`;
-  if (m > 0) return `${m}м ${s}с`;
-  return `${s}с`;
+  if (h > 0) return t(lang, 'cd_hours', { h, m });
+  if (m > 0) return t(lang, 'cd_minutes', { m, s });
+  return t(lang, 'cd_seconds', { s });
 }
 
 const ITEM_H = 80;
@@ -349,7 +349,7 @@ export default function AdOffersPage({
           <div className="mt-3 mb-1">
             <div className="flex items-center justify-between text-xs font-bold mb-1" style={{ color: '#a855f7' }}>
               <span><Icon name="Clock" size={12} /> {t(lang, 'spin_next')}</span>
-              <span>{formatCooldown(spinCooldown)}</span>
+              <span>{formatCooldown(spinCooldown, lang)}</span>
             </div>
             <div className="w-full rounded-full overflow-hidden" style={{ height: 6, background: '#1C2333' }}>
               <div style={{
@@ -402,7 +402,7 @@ export default function AdOffersPage({
                 {!ready && (
                   <>
                     <div className="flex items-center gap-1 text-xs font-bold" style={{ color: offer.color }}>
-                      <Icon name="Clock" size={11} /> {formatCooldown(cd)}
+                      <Icon name="Clock" size={11} /> {formatCooldown(cd, lang)}
                     </div>
                     <div className="mt-1 w-full rounded-full overflow-hidden" style={{ height: 4, background: '#1C2333' }}>
                       <div style={{
@@ -424,7 +424,7 @@ export default function AdOffersPage({
                 }}
               >
                 {!ready
-                  ? formatCooldown(cd)
+                  ? formatCooldown(cd, lang)
                   : isAdBusy
                     ? <Icon name="Loader2" size={13} className="animate-spin" />
                     : <><Icon name="Play" size={13} /> {t(lang, 'offer_watch')}</>}

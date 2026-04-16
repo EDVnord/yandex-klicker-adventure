@@ -49,12 +49,12 @@ export default function ClickerScene({ lang, coins, totalClicks, clicksPerSecond
 
   const formatCoins = (n: number) => {
     const v = Math.floor(n);
-    if (v >= 1_000_000) return `${(v / 1_000_000).toFixed(1)}М`;
-    if (v >= 1_000)     return `${(v / 1_000).toFixed(1)}К`;
+    if (v >= 1_000_000) return `${(v / 1_000_000).toFixed(1)}M`;
+    if (v >= 1_000)     return `${(v / 1_000).toFixed(1)}K`;
     return v.toString();
   };
 
-  const formatTime = (s: number) => s >= 60 ? `${Math.floor(s / 60)}м ${s % 60}с` : `${s}с`;
+  const formatTime = (s: number) => s >= 60 ? t(lang, 'cd_minutes', { m: Math.floor(s / 60), s: s % 60 }) : t(lang, 'cd_seconds', { s });
 
   // Пульсация для автоклика — визуальная раз в 600мс, не дёргает анимацию
   useEffect(() => {

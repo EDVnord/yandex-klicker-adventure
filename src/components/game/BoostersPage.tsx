@@ -14,7 +14,7 @@ interface Props {
 export default function BoostersPage({ lang, coins, adStatus, getBoostTimeLeft, buyBoost, onShowRewardedAd }: Props) {
   const isAdBusy = adStatus === 'loading' || adStatus === 'showing';
 
-  const formatTime = (s: number) => s >= 60 ? `${Math.floor(s / 60)}м ${s % 60}с` : `${s}с`;
+  const formatTime = (s: number) => s >= 60 ? t(lang, 'cd_minutes', { m: Math.floor(s / 60), s: s % 60 }) : t(lang, 'cd_seconds', { s });
 
   const BOOST_COLOR: Record<string, string> = {
     turbo: '#FFD700', mega: '#FF6BC8', rainbow: '#4FC3F7', star: '#00B06F', robot: '#FFB74D',
@@ -32,7 +32,7 @@ export default function BoostersPage({ lang, coins, adStatus, getBoostTimeLeft, 
           style={{ background: '#0F1923', border: '2px solid #2D3A50', borderRadius: 4 }}>
           <div className="w-4 h-4 rounded-full flex items-center justify-center text-[9px] font-black"
             style={{ background: '#FFD700', color: '#111' }}>R$</div>
-          <span style={{ color: '#FFD700' }}>{Math.floor(coins).toLocaleString('ru')}</span>
+          <span style={{ color: '#FFD700' }}>{Math.floor(coins).toLocaleString()}</span>
         </div>
       </div>
 
@@ -85,7 +85,7 @@ export default function BoostersPage({ lang, coins, adStatus, getBoostTimeLeft, 
                       onClick={() => canBuy && buyBoost(boost.id, boost.cost, boost.duration)}
                     >
                       {!canBuy && <Icon name="Lock" size={12} />}
-                      💰 {boost.cost.toLocaleString('ru')}
+                      💰 {boost.cost.toLocaleString()}
                     </button>
                   )}
                 </div>

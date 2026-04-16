@@ -233,7 +233,7 @@ export default function Index() {
               <div className="flex items-center gap-1.5 px-2 py-1 text-xs font-bold"
                 style={{ background: 'rgba(105,240,174,0.1)', border: '1px solid #69F0AE44', borderRadius: 4, color: '#69F0AE' }}>
                 <span>☁️</span>
-                <span className="hidden sm:inline">{yaPlayerName || 'Сохранено'}</span>
+                <span className="hidden sm:inline">{yaPlayerName || t(lang, 'header_saved')}</span>
               </div>
             ) : (
               <button
@@ -241,7 +241,7 @@ export default function Index() {
                 className="flex items-center gap-1.5 px-2 py-1 text-xs font-bold"
                 style={{ background: 'rgba(26,107,255,0.15)', border: '1px solid #1A6BFF88', borderRadius: 4, color: '#1A6BFF' }}>
                 <span>🔑</span>
-                <span>Войти</span>
+                <span>{t(lang, 'header_login')}</span>
               </button>
             )
           )}
@@ -250,7 +250,7 @@ export default function Index() {
             onClick={handleSecretCoins}>
             <div className="w-4 h-4 rounded-full flex-shrink-0 flex items-center justify-center text-[9px] font-black"
               style={{ background: '#FFD700', color: '#111' }}>R$</div>
-            <span className="truncate" style={{ color: '#FFD700' }}>{(() => { const v = Math.floor(state.coins); if (v >= 1_000_000) return `${(v/1_000_000).toFixed(1)}М`; if (v >= 1_000) return `${(v/1_000).toFixed(1)}К`; return v.toString(); })()}</span>
+            <span className="truncate" style={{ color: '#FFD700' }}>{(() => { const v = Math.floor(state.coins); if (v >= 1_000_000) return `${(v/1_000_000).toFixed(1)}M`; if (v >= 1_000) return `${(v/1_000).toFixed(1)}K`; return v.toString(); })()}</span>
           </div>
         </div>
       </header>
@@ -262,7 +262,7 @@ export default function Index() {
           {state.activeBoosts.map(ab => {
             const timeLeft = getBoostTimeLeft(ab.boostId);
             if (timeLeft <= 0) return null;
-            const fmt = (s: number) => s >= 60 ? `${Math.floor(s / 60)}м ${s % 60}с` : `${s}с`;
+            const fmt = (s: number) => s >= 60 ? t(lang, 'cd_minutes', { m: Math.floor(s / 60), s: s % 60 }) : t(lang, 'cd_seconds', { s });
             const emojis: Record<string,string> = { turbo:'⚡', mega:'🚀', rainbow:'🌈', star:'⭐', robot:'🤖' };
             const isRobot = ab.boostId === 'robot';
             return (
@@ -284,8 +284,8 @@ export default function Index() {
             style={{ background: 'linear-gradient(135deg,#1a0a2e,#0a0f1a)', border: '3px solid #fff', borderRadius: 8,
               boxShadow: '0 0 60px rgba(255,255,255,0.5), 0 0 120px rgba(255,255,255,0.2)' }}>
             <div className="text-5xl mb-2">🌟</div>
-            <div className="text-2xl text-white mb-1">Артем Всемогущий</div>
-            <div className="text-sm font-bold" style={{ color: '#ffffff88' }}>×1000 за клик</div>
+            <div className="text-2xl text-white mb-1">{t(lang, 'secret_name')}</div>
+            <div className="text-sm font-bold" style={{ color: '#ffffff88' }}>{t(lang, 'secret_sub')}</div>
           </div>
         </div>
       )}

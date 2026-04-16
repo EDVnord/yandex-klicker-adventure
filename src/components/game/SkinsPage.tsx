@@ -32,7 +32,7 @@ export default function SkinsPage({ lang, coins, currentSkinId, unlockedSkins, o
           style={{ background: '#0F1923', border: '2px solid #2D3A50', borderRadius: 4 }}>
           <div className="w-4 h-4 rounded-full flex items-center justify-center text-[9px] font-black"
             style={{ background: '#FFD700', color: '#111' }}>R$</div>
-          <span style={{ color: '#FFD700' }}>{Math.floor(coins).toLocaleString('ru')}</span>
+          <span style={{ color: '#FFD700' }}>{Math.floor(coins).toLocaleString()}</span>
         </div>
       </div>
 
@@ -120,7 +120,7 @@ export default function SkinsPage({ lang, coins, currentSkinId, unlockedSkins, o
                   onClick={() => canAfford && handleBuy(skin.id, skin.price)}
                 >
                   {!canAfford && <Icon name="Lock" size={10} />}
-                  💰 {skin.price >= 1000 ? `${(skin.price/1000).toFixed(0)}к` : skin.price}
+                  💰 {skin.price >= 1000 ? `${(skin.price/1000).toFixed(0)}K` : skin.price}
                 </button>
               )}
             </div>

@@ -89,9 +89,16 @@ export const translations = {
     rarity_epic: 'ЭПИЧЕСКИЙ',
     rarity_legendary: 'ЛЕГЕНДАРНЫЙ',
     rarity_mythic: 'МИФИЧЕСКИЙ',
-    // Cooldown
+    // Cooldown / time units
+    cd_hours: '{h}ч {m}м',
     cd_minutes: '{m}м {s}с',
     cd_seconds: '{s}с',
+    // Header
+    header_saved: 'Сохранено',
+    header_login: 'Войти',
+    // Secret skin toast
+    secret_name: 'Артем Всемогущий',
+    secret_sub: '×1000 за клик',
     // About
     about_title: 'НубоКлик',
     about_subtitle: 'О ИГРЕ',
@@ -274,8 +281,13 @@ export const translations = {
     rarity_epic: 'EPIC',
     rarity_legendary: 'LEGENDARY',
     rarity_mythic: 'MYTHIC',
+    cd_hours: '{h}h {m}m',
     cd_minutes: '{m}m {s}s',
     cd_seconds: '{s}s',
+    header_saved: 'Saved',
+    header_login: 'Log in',
+    secret_name: 'Artem Almighty',
+    secret_sub: '×1000 per click',
     about_title: 'NubClick',
     about_subtitle: 'ABOUT',
     about_how_title: '🎮 HOW TO PLAY?',
