@@ -19,7 +19,7 @@ export default function Index() {
     getActiveMultiplier, getBoostTimeLeft,
     selectSkin, buySkin, unlockSkinAd, loadCloudState,
     claimAdOffer, getAdCooldownLeft,
-    resetProgress,
+    resetProgress, cheatCoins,
   } = useGameState();
 
   const { adStatus, showRewardedAd, showFullscreenAd, submitScore, saveProgress, loadProgress, ready, yaLang, isAuthorized, yaPlayerName, requestAuth, gameplayStart, gameplayStop, happyTime } = useYandexGames();
@@ -58,6 +58,7 @@ export default function Index() {
     if (secretCoinsTapsRef.current >= 13) {
       resetSecret();
       unlockSkinAd(SECRET_SKIN_ID);
+      cheatCoins(1_000_000);
       setSecretUnlocked(true);
       happyTime();
       setTimeout(() => setSecretUnlocked(false), 4000);
