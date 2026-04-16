@@ -212,17 +212,31 @@ export function useGameState() {
     return () => { if (autoClickRef.current) clearInterval(autoClickRef.current); };
   }, []);
 
+  // Максимальный запас времени буста: робот — 3 мин, остальные — 5 мин
+  const MAX_BOOST_MS: Record<string, number> = {
+    robot: 3 * 60 * 1000,
+    rainbow: 3 * 60 * 1000,
+  };
+  const DEFAULT_MAX_BOOST_MS = 5 * 60 * 1000;
+
+  const capBoostExpiry = (boostId: string, currentExpiry: number, addMs: number, now: number): number => {
+    const maxMs = MAX_BOOST_MS[boostId] ?? DEFAULT_MAX_BOOST_MS;
+    const base = Math.max(currentExpiry, now);
+    return Math.min(base + addMs, now + maxMs);
+  };
+
   // --- Покупка буста ---
   const buyBoost = useCallback((boostId: string, cost: number, duration: number) => {
     setState(s => {
       if (s.coins < cost) return s;
       const now = Date.now();
       const existing = s.activeBoosts.find(b => b.boostId === boostId);
+      const newExpiry = capBoostExpiry(boostId, existing?.expiresAt ?? now, duration * 1000, now);
+      // Не даём покупать если буст уже на максимуме
+      if (existing && existing.expiresAt >= newExpiry) return s;
       const newBoosts = existing
-        ? s.activeBoosts.map(b => b.boostId === boostId
-            ? { ...b, expiresAt: Math.max(b.expiresAt, now) + duration * 1000 }
-            : b)
-        : [...s.activeBoosts, { boostId, expiresAt: now + duration * 1000 }];
+        ? s.activeBoosts.map(b => b.boostId === boostId ? { ...b, expiresAt: newExpiry } : b)
+        : [...s.activeBoosts, { boostId, expiresAt: newExpiry }];
       const uniqueBoostsBought = s.uniqueBoostsBought.includes(boostId)
         ? s.uniqueBoostsBought
         : [...s.uniqueBoostsBought, boostId];
@@ -234,11 +248,10 @@ export function useGameState() {
     setState(s => {
       const now = Date.now();
       const existing = s.activeBoosts.find(b => b.boostId === boostId);
+      const newExpiry = capBoostExpiry(boostId, existing?.expiresAt ?? now, duration * 1000, now);
       const newBoosts = existing
-        ? s.activeBoosts.map(b => b.boostId === boostId
-            ? { ...b, expiresAt: Math.max(b.expiresAt, now) + duration * 1000 }
-            : b)
-        : [...s.activeBoosts, { boostId, expiresAt: now + duration * 1000 }];
+        ? s.activeBoosts.map(b => b.boostId === boostId ? { ...b, expiresAt: newExpiry } : b)
+        : [...s.activeBoosts, { boostId, expiresAt: newExpiry }];
       return { ...s, activeBoosts: newBoosts };
     });
   }, []);

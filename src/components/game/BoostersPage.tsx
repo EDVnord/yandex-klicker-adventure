@@ -11,6 +11,12 @@ interface Props {
   onShowRewardedAd: (boostId: string, duration: number) => void;
 }
 
+const BOOST_MAX_SEC: Record<string, number> = {
+  robot: 3 * 60,
+  rainbow: 3 * 60,
+};
+const DEFAULT_MAX_SEC = 5 * 60;
+
 export default function BoostersPage({ lang, coins, adStatus, getBoostTimeLeft, buyBoost, onShowRewardedAd }: Props) {
   const isAdBusy = adStatus === 'loading' || adStatus === 'showing';
 
@@ -39,7 +45,9 @@ export default function BoostersPage({ lang, coins, adStatus, getBoostTimeLeft, 
       {BOOSTS.map(boost => {
         const timeLeft = getBoostTimeLeft(boost.id);
         const isActive = timeLeft > 0;
-        const canBuy = coins >= boost.cost && boost.cost > 0;
+        const maxSec = BOOST_MAX_SEC[boost.id] ?? DEFAULT_MAX_SEC;
+        const isMaxed = timeLeft >= maxSec;
+        const canBuy = coins >= boost.cost && boost.cost > 0 && !isMaxed;
         const color = BOOST_COLOR[boost.id] ?? '#fff';
 
         return (
@@ -70,12 +78,14 @@ export default function BoostersPage({ lang, coins, adStatus, getBoostTimeLeft, 
                   {boost.adUnlock && (
                     <button
                       className="rblx-btn rblx-btn-blue text-xs py-1.5 px-2.5"
-                      style={{ opacity: isAdBusy ? 0.65 : 1 }}
-                      onClick={() => !isAdBusy && onShowRewardedAd(boost.id, boost.adDuration ?? boost.duration)}
+                      style={{ opacity: (isAdBusy || isMaxed) ? 0.5 : 1 }}
+                      onClick={() => !isAdBusy && !isMaxed && onShowRewardedAd(boost.id, boost.adDuration ?? boost.duration)}
                     >
                       {isAdBusy
                         ? <Icon name="Loader2" size={13} className="animate-spin" />
-                        : <><Icon name="Play" size={13} /> {t(lang, 'btn_watch_ad')}</>
+                        : isMaxed
+                          ? <><Icon name="CheckCircle" size={13} /> MAX</>
+                          : <><Icon name="Play" size={13} /> {t(lang, 'btn_watch_ad')}</>
                       }
                     </button>
                   )}
@@ -84,8 +94,10 @@ export default function BoostersPage({ lang, coins, adStatus, getBoostTimeLeft, 
                       className={`rblx-btn text-xs py-1.5 px-2.5 ${canBuy ? 'rblx-btn-yellow' : 'rblx-btn-gray'}`}
                       onClick={() => canBuy && buyBoost(boost.id, boost.cost, boost.duration)}
                     >
-                      {!canBuy && <Icon name="Lock" size={12} />}
-                      💰 {boost.cost.toLocaleString()}
+                      {isMaxed
+                        ? <><Icon name="CheckCircle" size={12} /> MAX</>
+                        : <>{!canBuy && <Icon name="Lock" size={12} />} 💰 {boost.cost.toLocaleString()}</>
+                      }
                     </button>
                   )}
                 </div>
