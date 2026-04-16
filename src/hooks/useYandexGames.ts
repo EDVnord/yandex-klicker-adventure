@@ -30,6 +30,15 @@ interface YaSDK {
       };
     }) => void;
   };
+  features: {
+    LoadingAPI?: {
+      ready: () => void;
+    };
+    GameplayAPI?: {
+      start: () => void;
+      stop: () => void;
+    };
+  };
   getLeaderboards: () => Promise<YaLeaderboards>;
   getPlayer: (opts?: { scopes?: boolean }) => Promise<YaPlayer>;
   auth: {
@@ -87,6 +96,7 @@ export function useYandexGames() {
         const lang = sdk.environment?.i18n?.lang;
         if (lang) setYaLang(lang);
         await tryGetPlayer(sdk);
+        sdk.features.LoadingAPI?.ready();
         setReady(true);
       })
       .catch(err => {
@@ -94,6 +104,14 @@ export function useYandexGames() {
         setReady(true);
       });
   }, [tryGetPlayer]);
+
+  const gameplayStart = useCallback(() => {
+    sdkRef.current?.features.GameplayAPI?.start();
+  }, []);
+
+  const gameplayStop = useCallback(() => {
+    sdkRef.current?.features.GameplayAPI?.stop();
+  }, []);
 
   const requestAuth = useCallback(async () => {
     if (!sdkRef.current) return;
@@ -146,6 +164,7 @@ export function useYandexGames() {
       return;
     }
 
+    sdkRef.current.features.GameplayAPI?.stop();
     sdkRef.current.adv.showRewardedVideo({
       callbacks: {
         onOpen: () => setAdStatus('showing'),
@@ -153,9 +172,13 @@ export function useYandexGames() {
           setAdStatus('rewarded');
           onRewarded();
         },
-        onClose: () => setTimeout(() => setAdStatus('idle'), 500),
+        onClose: () => {
+          sdkRef.current?.features.GameplayAPI?.start();
+          setTimeout(() => setAdStatus('idle'), 500);
+        },
         onError: (err) => {
           console.warn('[YaGames] Rewarded ad error', err);
+          sdkRef.current?.features.GameplayAPI?.start();
           setAdStatus('error');
           onFail?.();
           setTimeout(() => setAdStatus('idle'), 1500);
@@ -169,10 +192,18 @@ export function useYandexGames() {
       setTimeout(() => onClose?.(), 500);
       return;
     }
+    sdkRef.current.features.GameplayAPI?.stop();
     sdkRef.current.adv.showFullscreenAdv({
       callbacks: {
-        onClose: () => { onClose?.(); },
-        onError: (err) => { console.warn('[YaGames] Fullscreen ad error', err); onClose?.(); },
+        onClose: () => {
+          sdkRef.current?.features.GameplayAPI?.start();
+          onClose?.();
+        },
+        onError: (err) => {
+          console.warn('[YaGames] Fullscreen ad error', err);
+          sdkRef.current?.features.GameplayAPI?.start();
+          onClose?.();
+        },
       },
     });
   }, []);
@@ -187,5 +218,5 @@ export function useYandexGames() {
     }
   }, []);
 
-  return { ready, adStatus, yaLang, isAuthorized, yaPlayerName, requestAuth, showRewardedAd, showFullscreenAd, submitScore, saveProgress, loadProgress };
+  return { ready, adStatus, yaLang, isAuthorized, yaPlayerName, requestAuth, showRewardedAd, showFullscreenAd, submitScore, saveProgress, loadProgress, gameplayStart, gameplayStop };
 }

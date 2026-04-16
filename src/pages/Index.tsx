@@ -60,7 +60,7 @@ export default function Index() {
     }
   };
 
-  const { adStatus, showRewardedAd, showFullscreenAd, submitScore, saveProgress, loadProgress, ready, yaLang, isAuthorized, yaPlayerName, requestAuth } = useYandexGames();
+  const { adStatus, showRewardedAd, showFullscreenAd, submitScore, saveProgress, loadProgress, ready, yaLang, isAuthorized, yaPlayerName, requestAuth, gameplayStart, gameplayStop } = useYandexGames();
   const lang = detectLang(yaLang);
 
   const TABS = [
@@ -113,7 +113,7 @@ export default function Index() {
     return () => clearTimeout(t);
   }, [ready, isAuthorized]);
 
-  // Загружаем облачный прогресс, когда SDK готов
+  // Загружаем облачный прогресс, когда SDK готов + сигнал начала геймплея
   useEffect(() => {
     if (!ready) return;
     (async () => {
@@ -121,6 +121,7 @@ export default function Index() {
       if (!cloud) return;
       loadCloudState(cloud as Parameters<typeof loadCloudState>[0]);
     })();
+    gameplayStart();
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ready]);
 
@@ -158,6 +159,9 @@ export default function Index() {
   // Логическая пауза — fullscreen при смене вкладки, не чаще раза в 3 мин
   const handleTabChange = (newTab: Tab) => {
     if (newTab === tab) return;
+    // Геймплей: уходим с игры — стоп, возвращаемся — старт
+    if (tab === 'game' && newTab !== 'game') gameplayStop();
+    if (tab !== 'game' && newTab === 'game') gameplayStart();
     setTab(newTab);
     if (adCooldownRef.current) return;
     const sinceLastAd = Date.now() - lastAdTimeRef.current;
