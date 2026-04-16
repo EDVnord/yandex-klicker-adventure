@@ -11,12 +11,33 @@
           var style = window.getComputedStyle(el);
           var overflow = style.overflow + style.overflowY;
           if (overflow.indexOf('scroll') !== -1 || overflow.indexOf('auto') !== -1) {
+            var touch = e.touches[0];
+            var startY = el._touchStartY || touch.clientY;
+            var dy = touch.clientY - startY;
+            var atTop = el.scrollTop <= 0;
+            var atBottom = el.scrollTop + el.clientHeight >= el.scrollHeight - 1;
+            if ((atTop && dy > 0) || (atBottom && dy < 0)) {
+              e.preventDefault();
+              return;
+            }
             return;
           }
           el = el.parentElement;
         }
         e.preventDefault();
       }, { passive: false });
+      document.addEventListener('touchstart', function(e) {
+        var el = e.target;
+        while (el && el !== document.body) {
+          var style = window.getComputedStyle(el);
+          var overflow = style.overflow + style.overflowY;
+          if (overflow.indexOf('scroll') !== -1 || overflow.indexOf('auto') !== -1) {
+            el._touchStartY = e.touches[0].clientY;
+            return;
+          }
+          el = el.parentElement;
+        }
+      }, { passive: true });
     </script>
     <title>НубоКлик — нажимай и побеждай!</title>
     <meta name="description" content="НубоКлик — весёлая кликер-игра в стиле Roblox для детей! Нажимай, собирай монеты, покупай бустеры!"/>
