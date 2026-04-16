@@ -210,7 +210,7 @@ export default function Index() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col" style={{ background: '#0F1923' }}>
+    <div className="h-screen flex flex-col overflow-hidden" style={{ background: '#0F1923' }}>
 
       {/* Pixel-grid bg */}
       <div className="fixed inset-0 pointer-events-none" style={{
@@ -353,7 +353,7 @@ export default function Index() {
       )}
 
       {/* Main content */}
-      <main className="flex-1 relative z-10 overflow-y-auto" style={{ paddingBottom: 72, overscrollBehavior: 'contain' }}>
+      <main className="flex-1 relative z-10 overflow-y-auto" style={{ paddingBottom: 72, overscrollBehavior: 'contain', WebkitOverflowScrolling: 'touch' }}>
         {tab === 'game' && (
           <div className="py-5">
             <ClickerScene coins={state.coins} totalClicks={state.totalClicks}
