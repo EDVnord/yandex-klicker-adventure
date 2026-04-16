@@ -96,9 +96,6 @@ export default function Index() {
     ? SECRET_SKIN
     : (SKINS.find(s => s.id === state.currentSkinId) ?? SKINS[0]);
 
-  // Реклама: по кликам + по таймеру (Яндекс Игры — оптимум каждые 3-5 мин)
-  const clicksSinceAdRef = useRef(0);
-  const nextAdThresholdRef = useRef(180 + Math.floor(Math.random() * 120)); // 180–300 кликов (~1 мин при норм темпе)
   const adCooldownRef = useRef(false);
   const lastAdTimeRef = useRef(Date.now());
 
@@ -141,19 +138,7 @@ export default function Index() {
     return () => clearTimeout(t);
   }, [state.totalClicks, submitScore]);
 
-  // Полноэкранная реклама при первом запуске (задержка 5с — дать игроку освоиться)
-  useEffect(() => {
-    const shown = sessionStorage.getItem('intro_ad_shown');
-    if (!shown) {
-      sessionStorage.setItem('intro_ad_shown', '1');
-      setTimeout(() => showFullscreenAd(() => {
-        lastAdTimeRef.current = Date.now();
-      }), 5000);
-    }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  // Таймерная реклама — каждые 4 мин для медленных/AFK игроков
+  // Таймерная реклама — каждые 4 мин для AFK игроков (показывается при смене вкладки)
   useEffect(() => {
     const t = setInterval(() => {
       if (adCooldownRef.current) return;
@@ -161,8 +146,6 @@ export default function Index() {
       if (sinceLastAd >= 4 * 60 * 1000) {
         adCooldownRef.current = true;
         lastAdTimeRef.current = Date.now();
-        clicksSinceAdRef.current = 0;
-        nextAdThresholdRef.current = 180 + Math.floor(Math.random() * 120);
         showFullscreenAd(() => {
           setTimeout(() => { adCooldownRef.current = false; }, 15_000);
         });
@@ -172,24 +155,23 @@ export default function Index() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const showInterstitial = () => {
-    adCooldownRef.current = true;
-    lastAdTimeRef.current = Date.now();
-    clicksSinceAdRef.current = 0;
-    nextAdThresholdRef.current = 180 + Math.floor(Math.random() * 120);
-    showFullscreenAd(() => {
-      setTimeout(() => { adCooldownRef.current = false; }, 15_000);
-    });
+  // Логическая пауза — fullscreen при смене вкладки, не чаще раза в 3 мин
+  const handleTabChange = (newTab: Tab) => {
+    if (newTab === tab) return;
+    setTab(newTab);
+    if (adCooldownRef.current) return;
+    const sinceLastAd = Date.now() - lastAdTimeRef.current;
+    if (sinceLastAd >= 3 * 60 * 1000) {
+      adCooldownRef.current = true;
+      lastAdTimeRef.current = Date.now();
+      showFullscreenAd(() => {
+        setTimeout(() => { adCooldownRef.current = false; }, 15_000);
+      });
+    }
   };
 
-  // Обёртка клика — показываем рекламу каждые ~180-300 кликов (≈1 мин игры)
   const handleClickWithAd = () => {
     handleClick();
-    if (adCooldownRef.current) return;
-    clicksSinceAdRef.current += 1;
-    if (clicksSinceAdRef.current >= nextAdThresholdRef.current) {
-      showInterstitial();
-    }
   };
 
   /* Rewarded ad для бустеров */
@@ -417,7 +399,7 @@ export default function Index() {
       <nav className="fixed bottom-0 left-0 right-0 z-20 flex items-center justify-around py-2 px-1"
         style={{ background: '#0a0f1a', borderTop: '2px solid #1C2333' }}>
         {TABS.map(tb => (
-          <button key={tb.id} className={`nav-btn ${tab === tb.id ? 'active' : ''}`} onClick={() => setTab(tb.id)}>
+          <button key={tb.id} className={`nav-btn ${tab === tb.id ? 'active' : ''}`} onClick={() => handleTabChange(tb.id)}>
             <span className="text-xl leading-none">{tb.emoji}</span>
             <span>{tb.label}</span>
           </button>
