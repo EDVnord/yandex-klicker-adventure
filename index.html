@@ -2,7 +2,11 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8"/>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+    <style>html,body{overflow:hidden;overscroll-behavior:none;touch-action:none;}</style>
+    <script>
+      document.addEventListener('touchmove', function(e){ e.preventDefault(); }, { passive: false });
+    </script>
     <title>НубоКлик — нажимай и побеждай!</title>
     <meta name="description" content="НубоКлик — весёлая кликер-игра в стиле Roblox для детей! Нажимай, собирай монеты, покупай бустеры!"/>
     <!-- Yandex Games SDK -->

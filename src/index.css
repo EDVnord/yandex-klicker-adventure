@@ -62,15 +62,22 @@
     font-style: normal !important;
     font-synthesis: none;
   }
+  html {
+    overflow: hidden;
+    height: 100%;
+    overscroll-behavior: none;
+  }
   body {
     @apply bg-background text-foreground;
     font-family: "Nunito", sans-serif;
     font-style: normal !important;
     font-synthesis: none;
     -webkit-font-smoothing: antialiased;
-    overflow-x: hidden;
+    overflow: hidden;
+    height: 100%;
     background: #0f1923;
     overscroll-behavior: none;
+    touch-action: pan-x pan-y;
   }
 }
 
