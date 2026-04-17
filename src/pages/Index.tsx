@@ -8,6 +8,7 @@ import AchievementsPage from '@/components/game/AchievementsPage';
 import SkinsPage from '@/components/game/SkinsPage';
 import AdOffersPage from '@/components/game/AdOffersPage';
 import LeaderboardPage from '@/components/game/LeaderboardPage';
+import AntiCheatChallenge from '@/components/game/AntiCheatChallenge';
 import { SKINS, SECRET_SKIN, SECRET_SKIN_ID } from '@/data/skins';
 
 type Tab = 'game' | 'skins' | 'boosts' | 'ads' | 'achievements' | 'leaderboard';
@@ -24,10 +25,32 @@ export default function Index() {
     claimDailyBonus, getDailyBonusInfo,
     getOfflineEarnings, claimOfflineEarnings,
     setLeaderboardRank, getRankOfflineMultiplier,
+    registerCheatCallback, setCheatBlocked, applyCheatPenalty,
   } = useGameState();
+
+  const [showChallenge, setShowChallenge] = useState(false);
 
   const { adStatus, showRewardedAd, showFullscreenAd, submitScore, getLeaderboardEntries, saveProgress, loadProgress, ready, yaLang, isAuthorized, yaPlayerName, requestAuth, gameplayStart, gameplayStop, happyTime } = useYandexGames();
   const lang = detectLang(yaLang);
+
+  // --- Anti-cheat: регистрируем колбэк один раз ---
+  useEffect(() => {
+    registerCheatCallback(() => {
+      setShowChallenge(true);
+      setCheatBlocked(true);
+    });
+  }, [registerCheatCallback, setCheatBlocked]);
+
+  const handleChallengeSuccess = useCallback(() => {
+    setShowChallenge(false);
+    setCheatBlocked(false);
+  }, [setCheatBlocked]);
+
+  const handleChallengeFail = useCallback(() => {
+    setShowChallenge(false);
+    setCheatBlocked(false);
+    applyCheatPenalty();
+  }, [setCheatBlocked, applyCheatPenalty]);
 
   const secretStepRef = useRef<'logo' | 'coins'>('logo');
   const secretLogoTapsRef = useRef(0);
@@ -371,6 +394,15 @@ export default function Index() {
             </div>
           </div>
         </div>
+      )}
+
+      {/* Anti-cheat challenge */}
+      {showChallenge && (
+        <AntiCheatChallenge
+          lang={lang}
+          onSuccess={handleChallengeSuccess}
+          onFail={handleChallengeFail}
+        />
       )}
 
       {/* Offline earnings modal */}

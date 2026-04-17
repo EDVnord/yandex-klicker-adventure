@@ -114,6 +114,24 @@ export function useGameState() {
   const clickTimestamps = useRef<number[]>([]);
   const autoClickRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
+  // --- Anti-cheat ---
+  // Храним последние 20 интервалов между кликами (мс)
+  const clickIntervalsRef = useRef<number[]>([]);
+  const lastClickTimeRef = useRef<number>(0);
+  // Сколько секунд подряд CPS > 20
+  const highCpsStreakRef = useRef<number>(0);
+  // Колбэк срабатывания (устанавливается из Index)
+  const onCheatDetectedRef = useRef<(() => void) | null>(null);
+  const cheatBlockedRef = useRef<boolean>(false); // блокируем клики во время вызова
+
+  const registerCheatCallback = useCallback((cb: () => void) => {
+    onCheatDetectedRef.current = cb;
+  }, []);
+
+  const setCheatBlocked = useCallback((blocked: boolean) => {
+    cheatBlockedRef.current = blocked;
+  }, []);
+
   // --- Сохранение: немедленно при каждом изменении (debounce 300ms) ---
   const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   useEffect(() => {
@@ -122,15 +140,26 @@ export function useGameState() {
     return () => { if (saveTimerRef.current) clearTimeout(saveTimerRef.current); };
   }, [state]);
 
-  // --- CPS счётчик ---
+  // --- CPS счётчик + anti-cheat по CPS ---
   useEffect(() => {
     const interval = setInterval(() => {
       const now = Date.now();
       clickTimestamps.current = clickTimestamps.current.filter(t => now - t < 1000);
-      setState(s => {
-        const cps = clickTimestamps.current.length;
-        return s.clicksPerSecond === cps ? s : { ...s, clicksPerSecond: cps };
-      });
+      const cps = clickTimestamps.current.length;
+      setState(s => s.clicksPerSecond === cps ? s : { ...s, clicksPerSecond: cps });
+
+      // Если CPS > 20 — накапливаем streak (проверяем каждые 200мс → 5 тиков = 1 сек)
+      if (cps > 20) {
+        highCpsStreakRef.current += 1;
+        // 15 тиков по 200мс = 3 секунды подряд свыше 20 CPS
+        if (highCpsStreakRef.current >= 15) {
+          highCpsStreakRef.current = 0;
+          clickIntervalsRef.current = [];
+          onCheatDetectedRef.current?.();
+        }
+      } else {
+        highCpsStreakRef.current = 0;
+      }
     }, 200);
     return () => clearInterval(interval);
   }, []);
@@ -149,7 +178,31 @@ export function useGameState() {
 
   // --- Клик (через ref чтобы интервал всегда вызывал актуальную версию) ---
   const handleClickImpl = (isAuto: boolean) => {
-    if (!isAuto) clickTimestamps.current.push(Date.now());
+    if (cheatBlockedRef.current) return;
+    if (!isAuto) {
+      const now = Date.now();
+      clickTimestamps.current.push(now);
+
+      // Считаем интервал от предыдущего клика
+      if (lastClickTimeRef.current > 0) {
+        const interval = now - lastClickTimeRef.current;
+        clickIntervalsRef.current.push(interval);
+        if (clickIntervalsRef.current.length > 20) clickIntervalsRef.current.shift();
+
+        // Проверка на одинаковые интервалы: последние 10 с отклонением < 8мс
+        if (clickIntervalsRef.current.length >= 10) {
+          const last10 = clickIntervalsRef.current.slice(-10);
+          const avg = last10.reduce((a, b) => a + b, 0) / last10.length;
+          const maxDev = Math.max(...last10.map(v => Math.abs(v - avg)));
+          if (avg < 60 && maxDev < 8) {
+            // Машинная точность — явный кликер
+            onCheatDetectedRef.current?.();
+            clickIntervalsRef.current = [];
+          }
+        }
+      }
+      lastClickTimeRef.current = now;
+    }
     setState(s => {
       const skinMult = s.currentSkinId === SECRET_SKIN.id
         ? SECRET_SKIN.clickMultiplier
@@ -383,6 +436,19 @@ export function useGameState() {
     setState(s => ({ ...s, coins: s.coins + amount, totalCoinsEarned: s.totalCoinsEarned + amount }));
   }, []);
 
+  // Штраф за читерство — сжигаем монеты накликанные за ~30 сек при макс CPS
+  const applyCheatPenalty = useCallback(() => {
+    setState(s => {
+      const penalty = Math.floor(s.coinsPerClick * 20 * 30); // 20 CPS * 30 сек * базовый заработок
+      const burned = Math.min(s.coins, penalty);
+      return burned > 0 ? { ...s, coins: s.coins - burned } : s;
+    });
+    // Сбрасываем буферы
+    clickIntervalsRef.current = [];
+    highCpsStreakRef.current = 0;
+    lastClickTimeRef.current = 0;
+  }, []);
+
   const setLeaderboardRank = useCallback((rank: number) => {
     setState(s => s.leaderboardRank === rank ? s : { ...s, leaderboardRank: rank });
   }, []);
@@ -480,5 +546,6 @@ export function useGameState() {
     claimDailyBonus, getDailyBonusInfo,
     getOfflineEarnings, claimOfflineEarnings,
     setLeaderboardRank, getRankOfflineMultiplier,
+    registerCheatCallback, setCheatBlocked, applyCheatPenalty,
   };
 }
