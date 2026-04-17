@@ -49,4 +49,7 @@ export interface GameState {
   purchasedBoosts: string[]; // id постоянных бустов, купленных навсегда
   noBoostClicks: number; // клики без активных бустов
   uniqueBoostsBought: string[]; // уникальные купленные бусты
+  dailyStreak: number; // текущая серия дней
+  lastDailyClaimDate: string; // 'YYYY-MM-DD' последнего получения
+  lastOnlineAt: number; // timestamp последнего сохранения для offline-дохода
 }

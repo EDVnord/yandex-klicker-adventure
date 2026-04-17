@@ -1,6 +1,14 @@
 import { useState, useRef, useEffect } from 'react';
 import Icon from '@/components/ui/icon';
 import { type Lang, t } from '@/i18n';
+import DailyBonus from './DailyBonus';
+
+interface DailyBonusInfo {
+  canClaim: boolean;
+  streak: number;
+  nextDay: number;
+  reward: number;
+}
 
 interface Props {
   lang: Lang;
@@ -10,15 +18,17 @@ interface Props {
   getAdCooldownLeft: (offerId: string) => number;
   onClaim: (offerId: string, rewardType: string, rewardValue: number) => void;
   onShowRewardedAd: (offerId: string, rewardType: string, rewardValue: number, onAdComplete?: () => void) => void;
+  dailyBonusInfo: DailyBonusInfo;
+  onClaimDailyBonus: () => void;
 }
 
 const SPIN_PRIZES = [
-  { emoji: '💰', labelKey: null,        label: '2 000',  type: 'coins', value: 2_000,  weight: 35, color: '#FFD700' },
-  { emoji: '⚡',  labelKey: 'spin_turbo' as const, label: '',       type: 'turbo', value: 60,     weight: 25, color: '#FFD700' },
-  { emoji: '💰', labelKey: null,        label: '5 000',  type: 'coins', value: 5_000,  weight: 20, color: '#4FC3F7' },
-  { emoji: '🚀', labelKey: 'spin_mega' as const,  label: '',        type: 'mega',  value: 30,     weight: 12, color: '#FF6BC8' },
-  { emoji: '💰', labelKey: null,        label: '10 000', type: 'coins', value: 10_000, weight: 6,  color: '#a855f7' },
-  { emoji: '⭐',  labelKey: 'spin_star' as const,  label: '',        type: 'star',  value: 20,     weight: 2,  color: '#69F0AE' },
+  { emoji: '💰', labelKey: null,        label: '300',   type: 'coins', value: 300,   weight: 35, color: '#FFD700' },
+  { emoji: '⚡',  labelKey: 'spin_turbo' as const, label: '',      type: 'turbo', value: 20,    weight: 25, color: '#FFD700' },
+  { emoji: '💰', labelKey: null,        label: '800',   type: 'coins', value: 800,   weight: 20, color: '#4FC3F7' },
+  { emoji: '🚀', labelKey: 'spin_mega' as const,  label: '',       type: 'mega',  value: 15,    weight: 12, color: '#FF6BC8' },
+  { emoji: '💰', labelKey: null,        label: '2 000', type: 'coins', value: 2_000, weight: 6,  color: '#a855f7' },
+  { emoji: '⭐',  labelKey: 'spin_star' as const,  label: '',       type: 'star',  value: 15,    weight: 2,  color: '#69F0AE' },
 ];
 
 function weightedRandom() {
@@ -244,6 +254,7 @@ function Jackpot({ show, onHide, lang: jackpotLang }: { show: boolean; onHide: (
 
 export default function AdOffersPage({
   lang, coins, adStatus, getAdCooldownLeft, onClaim, onShowRewardedAd,
+  dailyBonusInfo, onClaimDailyBonus,
 }: Props) {
   const isAdBusy = adStatus === 'loading' || adStatus === 'showing';
 
@@ -283,10 +294,10 @@ export default function AdOffersPage({
   };
 
   const OFFERS = [
-    { id: 'coins_bonus', emoji: '💰', title: t(lang, 'offer_coins_title'), description: t(lang, 'offer_coins_desc'), rewardType: 'coins', rewardValue: 5_000, cooldownSec: 60, color: '#FFD700' },
-    { id: 'turbo',       emoji: '⚡', title: t(lang, 'offer_turbo_title'), description: t(lang, 'offer_turbo_desc'), rewardType: 'boost', rewardValue: 60,   cooldownSec: 60, color: '#FFD700' },
-    { id: 'mega',        emoji: '🚀', title: t(lang, 'offer_mega_title'),  description: t(lang, 'offer_mega_desc'),  rewardType: 'boost', rewardValue: 30,   cooldownSec: 60, color: '#FF6BC8' },
-    { id: 'star',        emoji: '⭐', title: t(lang, 'offer_star_title'),  description: t(lang, 'offer_star_desc'),  rewardType: 'boost', rewardValue: 20,   cooldownSec: 60, color: '#69F0AE' },
+    { id: 'coins_bonus', emoji: '💰', title: t(lang, 'offer_coins_title'), description: t(lang, 'offer_coins_desc'), rewardType: 'coins', rewardValue: 500,  cooldownSec: 4 * 3600, color: '#FFD700' },
+    { id: 'turbo',       emoji: '⚡', title: t(lang, 'offer_turbo_title'), description: t(lang, 'offer_turbo_desc'), rewardType: 'boost', rewardValue: 20,   cooldownSec: 2 * 3600, color: '#FFD700' },
+    { id: 'mega',        emoji: '🚀', title: t(lang, 'offer_mega_title'),  description: t(lang, 'offer_mega_desc'),  rewardType: 'boost', rewardValue: 15,   cooldownSec: 2 * 3600, color: '#FF6BC8' },
+    { id: 'star',        emoji: '⭐', title: t(lang, 'offer_star_title'),  description: t(lang, 'offer_star_desc'),  rewardType: 'boost', rewardValue: 15,   cooldownSec: 1 * 3600, color: '#69F0AE' },
   ];
 
   const [, setTick] = useState(0);
@@ -314,6 +325,8 @@ export default function AdOffersPage({
           <span style={{ color: '#FFD700' }}>{Math.floor(coins).toLocaleString()}</span>
         </div>
       </div>
+
+      <DailyBonus lang={lang} info={dailyBonusInfo} onClaim={onClaimDailyBonus} />
 
       {/* Удачный спин */}
       <div className="rblx-panel" style={{ borderTopColor: '#a855f7', borderTopWidth: 3 }}>

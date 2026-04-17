@@ -20,6 +20,8 @@ export default function Index() {
     selectSkin, buySkin, unlockSkinAd, loadCloudState,
     claimAdOffer, getAdCooldownLeft,
     resetProgress, cheatCoins,
+    claimDailyBonus, getDailyBonusInfo,
+    getOfflineEarnings, claimOfflineEarnings,
   } = useGameState();
 
   const { adStatus, showRewardedAd, showFullscreenAd, submitScore, saveProgress, loadProgress, ready, yaLang, isAuthorized, yaPlayerName, requestAuth, gameplayStart, gameplayStop, happyTime } = useYandexGames();
@@ -84,6 +86,9 @@ export default function Index() {
       achievements: s.achievements.map(a => ({ id: a.id, unlocked: a.unlocked })),
       activeBoosts: s.activeBoosts,
       adCooldowns: s.adCooldowns,
+      dailyStreak: s.dailyStreak,
+      lastDailyClaimDate: s.lastDailyClaimDate,
+      lastOnlineAt: s.lastOnlineAt,
     });
   }, [saveProgress]);
 
@@ -100,6 +105,17 @@ export default function Index() {
 
   const adCooldownRef = useRef(false);
   const lastAdTimeRef = useRef(Date.now());
+
+  // Offline earnings modal
+  const [offlineModal, setOfflineModal] = useState<{ amount: number } | null>(null);
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      const earned = getOfflineEarnings();
+      if (earned > 0) setOfflineModal({ amount: earned });
+    }, 1500);
+    return () => clearTimeout(timer);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Подсказка про авторизацию — показываем один раз через 10с если не авторизован
   const [showAuthHint, setShowAuthHint] = useState(false);
@@ -195,11 +211,11 @@ export default function Index() {
 
   /* Rewarded ad для бонусной страницы */
   const AD_COOLDOWNS_MS: Record<string, number> = {
-    lucky_spin:   2 * 60 * 1000,
-    coins_bonus:  1 * 60 * 1000,
-    turbo:        1 * 60 * 1000,
-    mega:         1 * 60 * 1000,
-    star:         1 * 60 * 1000,
+    lucky_spin:   4 * 60 * 60 * 1000,
+    coins_bonus:  4 * 60 * 60 * 1000,
+    turbo:        2 * 60 * 60 * 1000,
+    mega:         2 * 60 * 60 * 1000,
+    star:         1 * 60 * 60 * 1000,
   };
 
   const handleAdOffer = (offerId: string, rewardType: string, rewardValue: number, onAdComplete?: () => void) => {
@@ -341,6 +357,33 @@ export default function Index() {
         </div>
       )}
 
+      {/* Offline earnings modal */}
+      {offlineModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center px-4"
+          style={{ background: 'rgba(0,0,0,0.8)' }}>
+          <div className="rblx-panel w-full max-w-sm text-center" style={{ borderTopColor: '#69F0AE', borderTopWidth: 3 }}>
+            <div className="text-4xl mb-2">💤</div>
+            <div className="font-game text-xl text-white mb-1">{t(lang, 'offline_title')}</div>
+            <div className="font-game text-2xl mb-4" style={{ color: '#69F0AE' }}>
+              {t(lang, 'offline_earned', { n: offlineModal.amount.toLocaleString() })}
+            </div>
+            <div className="flex gap-2">
+              <button className="rblx-btn rblx-btn-gray flex-1 py-2.5 font-game text-sm"
+                onClick={() => { claimOfflineEarnings(); setOfflineModal(null); }}>
+                {t(lang, 'offline_claim_free')}
+              </button>
+              <button className="rblx-btn rblx-btn-blue flex-1 py-2.5 font-game text-sm"
+                onClick={() => {
+                  showRewardedAd(() => { claimOfflineEarnings(2); });
+                  setOfflineModal(null);
+                }}>
+                📺 {t(lang, 'offline_claim_ad')} ×2
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Ad status overlay */}
       {(adStatus === 'loading' || adStatus === 'showing') && (
         <div className="fixed inset-0 z-50 flex items-center justify-center"
@@ -393,6 +436,8 @@ export default function Index() {
             onClaim={claimAdOffer}
             onShowRewardedAd={handleAdOffer}
             lang={lang}
+            dailyBonusInfo={getDailyBonusInfo()}
+            onClaimDailyBonus={claimDailyBonus}
           />
         )}
         {tab === 'achievements' && (

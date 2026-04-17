@@ -9,7 +9,7 @@ const defaultState: GameState = {
   coins: 0,
   totalClicks: 0,
   clicksPerSecond: 0,
-  coinsPerClick: 5,
+  coinsPerClick: 1,
   playerName: 'Игрок',
   achievements: ACHIEVEMENTS.map(a => ({ ...a })),
   activeBoosts: [],
@@ -20,6 +20,9 @@ const defaultState: GameState = {
   purchasedBoosts: [],
   noBoostClicks: 0,
   uniqueBoostsBought: [],
+  dailyStreak: 0,
+  lastDailyClaimDate: '',
+  lastOnlineAt: 0,
 };
 
 
@@ -47,6 +50,9 @@ function loadState(): GameState {
         unlockedSkins: parsed.unlockedSkins ?? ['noob'],
         adCooldowns: sanitizeCooldowns(parsed.adCooldowns ?? {}),
         purchasedBoosts: [],
+        dailyStreak: parsed.dailyStreak ?? 0,
+        lastDailyClaimDate: parsed.lastDailyClaimDate ?? '',
+        lastOnlineAt: parsed.lastOnlineAt ?? 0,
       };
     } catch (e) {
       console.warn('Failed to load save from', key, e);
@@ -64,11 +70,11 @@ function saveState(s: GameState) {
 }
 
 const MAX_COOLDOWNS_MS: Record<string, number> = {
-  lucky_spin:  2 * 60 * 1000,
-  coins_bonus: 1 * 60 * 1000,
-  turbo:       1 * 60 * 1000,
-  mega:        1 * 60 * 1000,
-  star:        1 * 60 * 1000,
+  lucky_spin:  4 * 60 * 60 * 1000,
+  coins_bonus: 4 * 60 * 60 * 1000,
+  turbo:       2 * 60 * 60 * 1000,
+  mega:        2 * 60 * 60 * 1000,
+  star:        1 * 60 * 60 * 1000,
 };
 
 function sanitizeCooldowns(raw: Record<string, number>): Record<string, number> {
@@ -208,16 +214,16 @@ export function useGameState() {
       const hasRobot = s.activeBoosts.some(b => b.boostId === 'robot' && b.expiresAt > now);
       const hasRainbow = s.activeBoosts.some(b => b.boostId === 'rainbow' && b.expiresAt > now);
       if (hasRobot || hasRainbow) handleClickRef.current(true);
-    }, 80);
+    }, 600);
     return () => { if (autoClickRef.current) clearInterval(autoClickRef.current); };
   }, []);
 
   // Максимальный запас времени буста: робот — 3 мин, остальные — 5 мин
   const MAX_BOOST_MS: Record<string, number> = {
-    robot: 3 * 60 * 1000,
-    rainbow: 3 * 60 * 1000,
+    robot: 60 * 1000,
+    rainbow: 60 * 1000,
   };
-  const DEFAULT_MAX_BOOST_MS = 5 * 60 * 1000;
+  const DEFAULT_MAX_BOOST_MS = 90 * 1000;
 
   const capBoostExpiry = (boostId: string, currentExpiry: number, addMs: number, now: number): number => {
     const maxMs = MAX_BOOST_MS[boostId] ?? DEFAULT_MAX_BOOST_MS;
@@ -357,6 +363,9 @@ export function useGameState() {
         const ca = ((cloud.achievements as {id:string;unlocked:boolean}[]) ?? []).find(x => x.id === a.id);
         return ca?.unlocked ? { ...a, unlocked: true } : a;
       }),
+      dailyStreak:         Math.max(s.dailyStreak, (cloud.dailyStreak as number) ?? 0),
+      lastDailyClaimDate:  (cloud.lastDailyClaimDate as string) || s.lastDailyClaimDate,
+      lastOnlineAt:        Math.max(s.lastOnlineAt, (cloud.lastOnlineAt as number) ?? 0),
     }));
   }, []);
 
@@ -371,11 +380,87 @@ export function useGameState() {
     setState(s => ({ ...s, coins: s.coins + amount, totalCoinsEarned: s.totalCoinsEarned + amount }));
   }, []);
 
+  // Offline-доход: 1 монета/сек пока офлайн, макс 8 часов, забрать через рекламу
+  const OFFLINE_CPS = 1;
+  const OFFLINE_MAX_SEC = 8 * 3600;
+
+  const getOfflineEarnings = useCallback((): number => {
+    const s = stateRef.current;
+    if (!s.lastOnlineAt) return 0;
+    const offlineSec = Math.floor((Date.now() - s.lastOnlineAt) / 1000);
+    const capped = Math.min(offlineSec, OFFLINE_MAX_SEC);
+    if (capped < 60) return 0; // менее минуты — не показываем
+    return capped * OFFLINE_CPS;
+  }, []);
+
+  const claimOfflineEarnings = useCallback((multiplier = 1) => {
+    const earnings = getOfflineEarnings() * multiplier;
+    if (earnings <= 0) return 0;
+    setState(s => ({
+      ...s,
+      coins: s.coins + earnings,
+      totalCoinsEarned: s.totalCoinsEarned + earnings,
+      lastOnlineAt: Date.now(),
+    }));
+    return earnings;
+  }, [getOfflineEarnings]);
+
+  // Обновляем lastOnlineAt каждую минуту пока онлайн
+  useEffect(() => {
+    setState(s => ({ ...s, lastOnlineAt: Date.now() }));
+    const iv = setInterval(() => {
+      setState(s => ({ ...s, lastOnlineAt: Date.now() }));
+    }, 60_000);
+    return () => clearInterval(iv);
+  }, []);
+
+  // Награда за день N (1-7): base × day, день 7 — бонус x3
+  const DAILY_BASE = 50;
+  const getDailyReward = (day: number) => {
+    const d = Math.min(Math.max(day, 1), 7);
+    return d === 7 ? DAILY_BASE * d * 3 : DAILY_BASE * d;
+  };
+
+  const getTodayDate = () => new Date().toISOString().slice(0, 10);
+
+  const getDailyBonusInfo = useCallback(() => {
+    const s = stateRef.current;
+    const today = getTodayDate();
+    const yesterday = new Date(Date.now() - 86400000).toISOString().slice(0, 10);
+    const canClaim = s.lastDailyClaimDate !== today;
+    const streak = s.lastDailyClaimDate === yesterday ? s.dailyStreak : (s.lastDailyClaimDate === today ? s.dailyStreak : 0);
+    const nextDay = Math.min((streak % 7) + 1, 7);
+    const reward = getDailyReward(canClaim ? nextDay : nextDay);
+    return { canClaim, streak, nextDay, reward };
+   
+  }, []);
+
+  const claimDailyBonus = useCallback(() => {
+    const today = getTodayDate();
+    setState(s => {
+      if (s.lastDailyClaimDate === today) return s;
+      const yesterday = new Date(Date.now() - 86400000).toISOString().slice(0, 10);
+      const newStreak = s.lastDailyClaimDate === yesterday ? s.dailyStreak + 1 : 1;
+      const capped = Math.min(newStreak, 7);
+      const reward = getDailyReward(capped);
+      return {
+        ...s,
+        coins: s.coins + reward,
+        totalCoinsEarned: s.totalCoinsEarned + reward,
+        dailyStreak: capped,
+        lastDailyClaimDate: today,
+      };
+    });
+   
+  }, []);
+
   return {
     state, handleClick, buyBoost, unlockBoostAd, setPlayerName,
     getActiveMultiplier, getBoostTimeLeft,
     selectSkin, buySkin, unlockSkinAd, loadCloudState,
     claimAdOffer, getAdCooldownLeft, setAdCooldown,
     resetProgress, cheatCoins,
+    claimDailyBonus, getDailyBonusInfo,
+    getOfflineEarnings, claimOfflineEarnings,
   };
 }
