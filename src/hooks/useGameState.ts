@@ -23,6 +23,7 @@ const defaultState: GameState = {
   dailyStreak: 0,
   lastDailyClaimDate: '',
   lastOnlineAt: 0,
+  leaderboardRank: 0,
 };
 
 
@@ -53,6 +54,7 @@ function loadState(): GameState {
         dailyStreak: parsed.dailyStreak ?? 0,
         lastDailyClaimDate: parsed.lastDailyClaimDate ?? '',
         lastOnlineAt: parsed.lastOnlineAt ?? 0,
+        leaderboardRank: parsed.leaderboardRank ?? 0,
       };
     } catch (e) {
       console.warn('Failed to load save from', key, e);
@@ -366,6 +368,7 @@ export function useGameState() {
       dailyStreak:         Math.max(s.dailyStreak, (cloud.dailyStreak as number) ?? 0),
       lastDailyClaimDate:  (cloud.lastDailyClaimDate as string) || s.lastDailyClaimDate,
       lastOnlineAt:        Math.max(s.lastOnlineAt, (cloud.lastOnlineAt as number) ?? 0),
+      leaderboardRank:     (cloud.leaderboardRank as number) ?? s.leaderboardRank,
     }));
   }, []);
 
@@ -380,18 +383,32 @@ export function useGameState() {
     setState(s => ({ ...s, coins: s.coins + amount, totalCoinsEarned: s.totalCoinsEarned + amount }));
   }, []);
 
+  const setLeaderboardRank = useCallback((rank: number) => {
+    setState(s => s.leaderboardRank === rank ? s : { ...s, leaderboardRank: rank });
+  }, []);
+
   // Offline-доход: 1 монета/сек пока офлайн, макс 8 часов, забрать через рекламу
   const OFFLINE_CPS = 1;
   const OFFLINE_MAX_SEC = 8 * 3600;
+
+  // Множитель offline-дохода по рангу в лидерборде
+  const getRankOfflineMultiplier = useCallback((rank: number): number => {
+    if (rank === 1) return 2;
+    if (rank === 2) return 1.75;
+    if (rank === 3) return 1.5;
+    if (rank >= 4 && rank <= 10) return 1.25;
+    return 1;
+  }, []);
 
   const getOfflineEarnings = useCallback((): number => {
     const s = stateRef.current;
     if (!s.lastOnlineAt) return 0;
     const offlineSec = Math.floor((Date.now() - s.lastOnlineAt) / 1000);
     const capped = Math.min(offlineSec, OFFLINE_MAX_SEC);
-    if (capped < 60) return 0; // менее минуты — не показываем
-    return capped * OFFLINE_CPS;
-  }, []);
+    if (capped < 60) return 0;
+    const rankMult = getRankOfflineMultiplier(s.leaderboardRank);
+    return Math.floor(capped * OFFLINE_CPS * rankMult);
+  }, [getRankOfflineMultiplier]);
 
   const claimOfflineEarnings = useCallback((multiplier = 1) => {
     const earnings = getOfflineEarnings() * multiplier;
@@ -462,5 +479,6 @@ export function useGameState() {
     resetProgress, cheatCoins,
     claimDailyBonus, getDailyBonusInfo,
     getOfflineEarnings, claimOfflineEarnings,
+    setLeaderboardRank, getRankOfflineMultiplier,
   };
 }

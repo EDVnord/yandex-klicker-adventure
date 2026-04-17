@@ -23,6 +23,7 @@ export default function Index() {
     resetProgress, cheatCoins, setPlayerName,
     claimDailyBonus, getDailyBonusInfo,
     getOfflineEarnings, claimOfflineEarnings,
+    setLeaderboardRank, getRankOfflineMultiplier,
   } = useGameState();
 
   const { adStatus, showRewardedAd, showFullscreenAd, submitScore, getLeaderboardEntries, saveProgress, loadProgress, ready, yaLang, isAuthorized, yaPlayerName, requestAuth, gameplayStart, gameplayStop, happyTime } = useYandexGames();
@@ -91,6 +92,7 @@ export default function Index() {
       dailyStreak: s.dailyStreak,
       lastDailyClaimDate: s.lastDailyClaimDate,
       lastOnlineAt: s.lastOnlineAt,
+      leaderboardRank: s.leaderboardRank,
     });
   }, [saveProgress]);
 
@@ -268,6 +270,18 @@ export default function Index() {
                 <span>{t(lang, 'header_login')}</span>
               </button>
             )
+          )}
+          {state.leaderboardRank > 0 && state.leaderboardRank <= 10 && (
+            <div className="flex items-center gap-1 px-2 py-1 font-game text-xs"
+              style={{
+                background: state.leaderboardRank === 1 ? 'rgba(255,215,0,0.15)' : state.leaderboardRank === 2 ? 'rgba(192,192,192,0.15)' : state.leaderboardRank === 3 ? 'rgba(205,127,50,0.15)' : 'rgba(26,107,255,0.1)',
+                border: `1px solid ${state.leaderboardRank === 1 ? '#FFD70066' : state.leaderboardRank === 2 ? '#C0C0C066' : state.leaderboardRank === 3 ? '#CD7F3266' : '#1A6BFF44'}`,
+                borderRadius: 4,
+                color: state.leaderboardRank === 1 ? '#FFD700' : state.leaderboardRank === 2 ? '#C0C0C0' : state.leaderboardRank === 3 ? '#CD7F32' : '#4d9fff',
+              }}>
+              <span>{state.leaderboardRank === 1 ? '👑' : state.leaderboardRank === 2 ? '🥈' : state.leaderboardRank === 3 ? '🥉' : '🏅'}</span>
+              <span>#{state.leaderboardRank}</span>
+            </div>
           )}
           <div className="flex items-center gap-1.5 px-2 py-1.5 font-game text-sm"
             style={{ background: '#1C2333', border: '2px solid #2D3A50', borderRadius: 4, maxWidth: 110 }}
@@ -447,8 +461,11 @@ export default function Index() {
             lang={lang}
             playerName={state.playerName}
             totalClicks={state.totalClicks}
+            leaderboardRank={state.leaderboardRank}
             setPlayerName={setPlayerName}
             getLeaderboardEntries={getLeaderboardEntries}
+            onRankUpdate={setLeaderboardRank}
+            getRankOfflineMultiplier={getRankOfflineMultiplier}
             isAuthorized={isAuthorized}
             onRequestAuth={requestAuth}
           />

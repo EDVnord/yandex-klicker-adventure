@@ -52,4 +52,5 @@ export interface GameState {
   dailyStreak: number; // текущая серия дней
   lastDailyClaimDate: string; // 'YYYY-MM-DD' последнего получения
   lastOnlineAt: number; // timestamp последнего сохранения для offline-дохода
+  leaderboardRank: number; // 0 = не в топе, иначе реальное место
 }
