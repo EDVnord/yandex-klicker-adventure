@@ -7,9 +7,10 @@ import BoostersPage from '@/components/game/BoostersPage';
 import AchievementsPage from '@/components/game/AchievementsPage';
 import SkinsPage from '@/components/game/SkinsPage';
 import AdOffersPage from '@/components/game/AdOffersPage';
+import LeaderboardPage from '@/components/game/LeaderboardPage';
 import { SKINS, SECRET_SKIN, SECRET_SKIN_ID } from '@/data/skins';
 
-type Tab = 'game' | 'skins' | 'boosts' | 'ads' | 'achievements';
+type Tab = 'game' | 'skins' | 'boosts' | 'ads' | 'achievements' | 'leaderboard';
 
 export default function Index() {
   const [tab, setTab] = useState<Tab>('game');
@@ -19,12 +20,12 @@ export default function Index() {
     getActiveMultiplier, getBoostTimeLeft,
     selectSkin, buySkin, unlockSkinAd, loadCloudState,
     claimAdOffer, getAdCooldownLeft,
-    resetProgress, cheatCoins,
+    resetProgress, cheatCoins, setPlayerName,
     claimDailyBonus, getDailyBonusInfo,
     getOfflineEarnings, claimOfflineEarnings,
   } = useGameState();
 
-  const { adStatus, showRewardedAd, showFullscreenAd, submitScore, saveProgress, loadProgress, ready, yaLang, isAuthorized, yaPlayerName, requestAuth, gameplayStart, gameplayStop, happyTime } = useYandexGames();
+  const { adStatus, showRewardedAd, showFullscreenAd, submitScore, getLeaderboardEntries, saveProgress, loadProgress, ready, yaLang, isAuthorized, yaPlayerName, requestAuth, gameplayStart, gameplayStop, happyTime } = useYandexGames();
   const lang = detectLang(yaLang);
 
   const secretStepRef = useRef<'logo' | 'coins'>('logo');
@@ -72,7 +73,8 @@ export default function Index() {
     { id: 'skins' as Tab,        label: t(lang, 'nav_skins'),        emoji: '👗' },
     { id: 'boosts' as Tab,       label: t(lang, 'nav_shop'),         emoji: '🛒' },
     { id: 'ads' as Tab,          label: t(lang, 'nav_bonuses'),      emoji: '📺' },
-    { id: 'achievements' as Tab, label: t(lang, 'nav_achievements'), emoji: '🏆' },
+    { id: 'leaderboard' as Tab,  label: t(lang, 'nav_leaderboard'),  emoji: '🏆' },
+    { id: 'achievements' as Tab, label: t(lang, 'nav_achievements'), emoji: '🎖️' },
   ];
 
   const doSaveProgress = useCallback((s: typeof state) => {
@@ -211,11 +213,11 @@ export default function Index() {
 
   /* Rewarded ad для бонусной страницы */
   const AD_COOLDOWNS_MS: Record<string, number> = {
-    lucky_spin:   4 * 60 * 60 * 1000,
-    coins_bonus:  4 * 60 * 60 * 1000,
-    turbo:        2 * 60 * 60 * 1000,
-    mega:         2 * 60 * 60 * 1000,
-    star:         1 * 60 * 60 * 1000,
+    lucky_spin:   60 * 60 * 1000,
+    coins_bonus:  60 * 60 * 1000,
+    turbo:        60 * 60 * 1000,
+    mega:         60 * 60 * 1000,
+    star:         60 * 60 * 1000,
   };
 
   const handleAdOffer = (offerId: string, rewardType: string, rewardValue: number, onAdComplete?: () => void) => {
@@ -438,6 +440,17 @@ export default function Index() {
             lang={lang}
             dailyBonusInfo={getDailyBonusInfo()}
             onClaimDailyBonus={claimDailyBonus}
+          />
+        )}
+        {tab === 'leaderboard' && (
+          <LeaderboardPage
+            lang={lang}
+            playerName={state.playerName}
+            totalClicks={state.totalClicks}
+            setPlayerName={setPlayerName}
+            getLeaderboardEntries={getLeaderboardEntries}
+            isAuthorized={isAuthorized}
+            onRequestAuth={requestAuth}
           />
         )}
         {tab === 'achievements' && (

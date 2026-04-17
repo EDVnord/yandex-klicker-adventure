@@ -13,10 +13,10 @@ interface Props {
   onClaim: () => void;
 }
 
-const DAILY_BASE = 50;
+const DAILY_REWARDS = [500, 800, 1_200, 1_800, 2_500, 3_500, 5_000];
 const getDailyReward = (day: number) => {
   const d = Math.min(Math.max(day, 1), 7);
-  return d === 7 ? DAILY_BASE * d * 3 : DAILY_BASE * d;
+  return DAILY_REWARDS[d - 1];
 };
 
 const DAY_EMOJIS = ['🌱', '🔥', '⚡', '💫', '🚀', '💎', '👑'];

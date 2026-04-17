@@ -294,10 +294,10 @@ export default function AdOffersPage({
   };
 
   const OFFERS = [
-    { id: 'coins_bonus', emoji: '💰', title: t(lang, 'offer_coins_title'), description: t(lang, 'offer_coins_desc'), rewardType: 'coins', rewardValue: 500,  cooldownSec: 4 * 3600, color: '#FFD700' },
-    { id: 'turbo',       emoji: '⚡', title: t(lang, 'offer_turbo_title'), description: t(lang, 'offer_turbo_desc'), rewardType: 'boost', rewardValue: 20,   cooldownSec: 2 * 3600, color: '#FFD700' },
-    { id: 'mega',        emoji: '🚀', title: t(lang, 'offer_mega_title'),  description: t(lang, 'offer_mega_desc'),  rewardType: 'boost', rewardValue: 15,   cooldownSec: 2 * 3600, color: '#FF6BC8' },
-    { id: 'star',        emoji: '⭐', title: t(lang, 'offer_star_title'),  description: t(lang, 'offer_star_desc'),  rewardType: 'boost', rewardValue: 15,   cooldownSec: 1 * 3600, color: '#69F0AE' },
+    { id: 'coins_bonus', emoji: '💰', title: t(lang, 'offer_coins_title'), description: t(lang, 'offer_coins_desc'), rewardType: 'coins', rewardValue: 500,  cooldownSec: 3600, color: '#FFD700' },
+    { id: 'turbo',       emoji: '⚡', title: t(lang, 'offer_turbo_title'), description: t(lang, 'offer_turbo_desc'), rewardType: 'boost', rewardValue: 60,   cooldownSec: 3600, color: '#FFD700' },
+    { id: 'mega',        emoji: '🚀', title: t(lang, 'offer_mega_title'),  description: t(lang, 'offer_mega_desc'),  rewardType: 'boost', rewardValue: 45,   cooldownSec: 3600, color: '#FF6BC8' },
+    { id: 'star',        emoji: '⭐', title: t(lang, 'offer_star_title'),  description: t(lang, 'offer_star_desc'),  rewardType: 'boost', rewardValue: 30,   cooldownSec: 3600, color: '#69F0AE' },
   ];
 
   const [, setTick] = useState(0);

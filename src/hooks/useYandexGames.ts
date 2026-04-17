@@ -47,9 +47,21 @@ interface YaSDK {
   };
 }
 
+interface YaLbEntry {
+  rank: number;
+  score: number;
+  player: {
+    publicName: string;
+    scopePermissions?: { public_name?: string };
+    getAvatarSrc?: (size: string) => string;
+  };
+  formattedScore: string;
+}
+
 interface YaLeaderboards {
   setLeaderboardScore: (name: string, score: number) => Promise<void>;
-  getLeaderboardPlayerEntry: (name: string) => Promise<unknown>;
+  getLeaderboardPlayerEntry: (name: string) => Promise<YaLbEntry>;
+  getLeaderboardEntries: (name: string, opts?: { quantityTop?: number; includeUser?: boolean; quantityAround?: number }) => Promise<{ entries: YaLbEntry[] }>;
 }
 
 interface YaPlayer {
@@ -223,5 +235,34 @@ export function useYandexGames() {
     }
   }, []);
 
-  return { ready, adStatus, yaLang, isAuthorized, yaPlayerName, requestAuth, showRewardedAd, showFullscreenAd, submitScore, saveProgress, loadProgress, gameplayStart, gameplayStop, happyTime };
+  const getLeaderboardEntries = useCallback(async (leaderboardName = 'main') => {
+    if (!sdkRef.current) {
+      // DEV-заглушка
+      return [
+        { rank: 1, name: 'КиберЛис 🦊', score: 980_000 },
+        { rank: 2, name: 'МегаКот 🐱',  score: 720_000 },
+        { rank: 3, name: 'РобоБобёр',   score: 540_000 },
+        { rank: 4, name: 'НинзяКролик', score: 310_000 },
+        { rank: 5, name: 'ТурбоПёс 🐶', score: 205_000 },
+      ];
+    }
+    try {
+      const lb = await sdkRef.current.getLeaderboards();
+      const result = await lb.getLeaderboardEntries(leaderboardName, {
+        quantityTop: 10,
+        includeUser: true,
+        quantityAround: 3,
+      });
+      return result.entries.map(e => ({
+        rank: e.rank,
+        name: e.player.publicName || '???',
+        score: e.score,
+      }));
+    } catch (e) {
+      console.warn('[YaGames] Ошибка загрузки лидерборда', e);
+      return [];
+    }
+  }, []);
+
+  return { ready, adStatus, yaLang, isAuthorized, yaPlayerName, requestAuth, showRewardedAd, showFullscreenAd, submitScore, getLeaderboardEntries, saveProgress, loadProgress, gameplayStart, gameplayStop, happyTime };
 }

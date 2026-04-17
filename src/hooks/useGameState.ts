@@ -70,11 +70,11 @@ function saveState(s: GameState) {
 }
 
 const MAX_COOLDOWNS_MS: Record<string, number> = {
-  lucky_spin:  4 * 60 * 60 * 1000,
-  coins_bonus: 4 * 60 * 60 * 1000,
-  turbo:       2 * 60 * 60 * 1000,
-  mega:        2 * 60 * 60 * 1000,
-  star:        1 * 60 * 60 * 1000,
+  lucky_spin:  60 * 60 * 1000,
+  coins_bonus: 60 * 60 * 1000,
+  turbo:       60 * 60 * 1000,
+  mega:        60 * 60 * 1000,
+  star:        60 * 60 * 1000,
 };
 
 function sanitizeCooldowns(raw: Record<string, number>): Record<string, number> {
@@ -220,10 +220,10 @@ export function useGameState() {
 
   // Максимальный запас времени буста: робот — 3 мин, остальные — 5 мин
   const MAX_BOOST_MS: Record<string, number> = {
-    robot: 60 * 1000,
-    rainbow: 60 * 1000,
+    robot:   5 * 60 * 1000,
+    rainbow: 5 * 60 * 1000,
   };
-  const DEFAULT_MAX_BOOST_MS = 90 * 1000;
+  const DEFAULT_MAX_BOOST_MS = 10 * 60 * 1000;
 
   const capBoostExpiry = (boostId: string, currentExpiry: number, addMs: number, now: number): number => {
     const maxMs = MAX_BOOST_MS[boostId] ?? DEFAULT_MAX_BOOST_MS;
@@ -414,11 +414,11 @@ export function useGameState() {
     return () => clearInterval(iv);
   }, []);
 
-  // Награда за день N (1-7): base × day, день 7 — бонус x3
-  const DAILY_BASE = 50;
+  // Награда за день N (1-7): растёт от 500 до 5000, 7й день — джекпот
+  const DAILY_REWARDS = [500, 800, 1_200, 1_800, 2_500, 3_500, 5_000];
   const getDailyReward = (day: number) => {
     const d = Math.min(Math.max(day, 1), 7);
-    return d === 7 ? DAILY_BASE * d * 3 : DAILY_BASE * d;
+    return DAILY_REWARDS[d - 1];
   };
 
   const getTodayDate = () => new Date().toISOString().slice(0, 10);
