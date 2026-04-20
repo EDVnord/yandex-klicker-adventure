@@ -111,7 +111,9 @@ export default function LeaderboardPage({
     const me = data.find(e => e.isCurrentPlayer) ?? null;
     setMyEntry(me);
     if (me) onRankUpdate(me.rank);
-    setEntries(data.filter(e => !e.isCurrentPlayer || e.rank <= 10).slice(0, 12));
+    // В таблицу топ-10 не включаем себя если мы вне топа (чтобы не нарушать порядок)
+    const top10 = data.filter(e => e.rank <= 10);
+    setEntries(top10);
     setLoading(false);
   }, [getLeaderboardEntries, onRankUpdate]);
 
@@ -290,6 +292,22 @@ export default function LeaderboardPage({
           </div>
         )}
       </div>
+
+      {/* Место вне топ-10 */}
+      {myEntry && myEntry.rank > 10 && (
+        <div className="rblx-panel flex items-center gap-3" style={{ borderTopColor: '#2D3A50', borderTopWidth: 2 }}>
+          <Avatar src={myEntry.avatar} name={myEntry.name} size={40} />
+          <div className="flex-1">
+            <div className="font-game text-sm text-white">
+              {t(lang, 'lb_out_of_top', { rank: myEntry.rank })}
+            </div>
+            <div className="text-xs font-bold mt-0.5" style={{ color: '#4a5768' }}>
+              {t(lang, 'lb_out_of_top_sub')} • {formatScore(myEntry.score)} {t(lang, 'lb_clicks')}
+            </div>
+          </div>
+          <div className="font-game text-2xl" style={{ color: '#2D3A50' }}>#{myEntry.rank}</div>
+        </div>
+      )}
 
       {/* Бонусы за места */}
       <div className="rblx-panel" style={{ borderTopColor: '#2D3A50', borderTopWidth: 2 }}>
