@@ -54,6 +54,7 @@ interface YaLbEntry {
     publicName: string;
     scopePermissions?: { public_name?: string };
     getAvatarSrc?: (size: string) => string;
+    uniqueID?: string;
   };
   formattedScore: string;
 }
@@ -236,14 +237,14 @@ export function useYandexGames() {
   }, []);
 
   const getLeaderboardEntries = useCallback(async (leaderboardName = 'main') => {
+    const myUid = playerRef.current?.getUniqueID() ?? '';
     if (!sdkRef.current) {
-      // DEV-заглушка
       return [
-        { rank: 1, name: 'КиберЛис 🦊', score: 980_000 },
-        { rank: 2, name: 'МегаКот 🐱',  score: 720_000 },
-        { rank: 3, name: 'РобоБобёр',   score: 540_000 },
-        { rank: 4, name: 'НинзяКролик', score: 310_000 },
-        { rank: 5, name: 'ТурбоПёс 🐶', score: 205_000 },
+        { rank: 1, name: 'КиберЛис 🦊', score: 980_000, avatar: '', isCurrentPlayer: false },
+        { rank: 2, name: 'МегаКот 🐱',  score: 720_000, avatar: '', isCurrentPlayer: false },
+        { rank: 3, name: 'РобоБобёр',   score: 540_000, avatar: '', isCurrentPlayer: false },
+        { rank: 4, name: 'НинзяКролик', score: 310_000, avatar: '', isCurrentPlayer: false },
+        { rank: 5, name: 'ТурбоПёс 🐶', score: 205_000, avatar: '', isCurrentPlayer: true },
       ];
     }
     try {
@@ -255,14 +256,16 @@ export function useYandexGames() {
       });
       return result.entries.map(e => ({
         rank: e.rank,
-        name: e.player.publicName || '???',
+        name: e.player.publicName || (yaLang === 'ru' ? 'Аноним' : 'Anonymous'),
         score: e.score,
+        avatar: e.player.getAvatarSrc?.('small') ?? '',
+        isCurrentPlayer: !!myUid && e.player.uniqueID === myUid,
       }));
     } catch (e) {
       console.warn('[YaGames] Ошибка загрузки лидерборда', e);
       return [];
     }
-  }, []);
+  }, [yaLang]);
 
   return { ready, adStatus, yaLang, isAuthorized, yaPlayerName, requestAuth, showRewardedAd, showFullscreenAd, submitScore, getLeaderboardEntries, saveProgress, loadProgress, gameplayStart, gameplayStop, happyTime };
 }
