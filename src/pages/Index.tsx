@@ -257,7 +257,7 @@ export default function Index() {
           </div>
           <span className="font-game text-xl text-white tracking-wide">{t(lang, 'game_title')}</span>
           {/* Current skin badge */}
-          <span className="text-lg ml-1">{currentSkin.emoji}</span>
+          <span className="text-lg ml-1" style={{ fontFamily: 'Apple Color Emoji, Segoe UI Emoji, Noto Color Emoji, sans-serif' }}>{currentSkin.emoji}</span>
         </div>
 
         <div className="flex items-center gap-2">

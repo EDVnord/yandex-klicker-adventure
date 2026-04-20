@@ -16,8 +16,8 @@ export default {
     },
     extend: {
       fontFamily: {
-        game: ['Nunito', 'sans-serif'],
-        body: ['Nunito', 'sans-serif'],
+        game: ['Nunito', 'Apple Color Emoji', 'Segoe UI Emoji', 'Noto Color Emoji', 'sans-serif'],
+        body: ['Nunito', 'Apple Color Emoji', 'Segoe UI Emoji', 'Noto Color Emoji', 'sans-serif'],
       },
       colors: {
         border: 'hsl(var(--border))',

@@ -270,7 +270,7 @@ export default function ClickerScene({ lang, coins, totalClicks, clicksPerSecond
             borderRadius: 4,
             color: skin.borderColor,
           }}>
-          {skin.emoji} ×{skin.clickMultiplier} {t(lang, 'per_click')}
+          <span style={{ fontFamily: 'Apple Color Emoji, Segoe UI Emoji, Noto Color Emoji, sans-serif' }}>{skin.emoji}</span> ×{skin.clickMultiplier} {t(lang, 'per_click')}
         </div>
       )}
 
