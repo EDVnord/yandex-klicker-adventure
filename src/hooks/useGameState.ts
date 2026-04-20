@@ -10,7 +10,7 @@ const defaultState: GameState = {
   totalClicks: 0,
   clicksPerSecond: 0,
   coinsPerClick: 1,
-  playerName: 'Игрок',
+  playerName: 'Player',
   achievements: ACHIEVEMENTS.map(a => ({ ...a })),
   activeBoosts: [],
   totalCoinsEarned: 0,
@@ -47,6 +47,7 @@ function loadState(): GameState {
           return savedA ? { ...a, unlocked: savedA.unlocked } : { ...a };
         }),
         activeBoosts,
+        playerName: (parsed.playerName === 'Игрок' || !parsed.playerName) ? 'Player' : parsed.playerName,
         currentSkinId: parsed.currentSkinId ?? 'noob',
         unlockedSkins: parsed.unlockedSkins ?? ['noob'],
         adCooldowns: sanitizeCooldowns(parsed.adCooldowns ?? {}),
