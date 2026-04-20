@@ -228,6 +228,7 @@ export default function ClickerScene({ lang, coins, totalClicks, clicksPerSecond
               style={{ width: '100%', height: '100%', objectFit: 'cover', pointerEvents: 'none', userSelect: 'none' }}
               draggable={false}
               onContextMenu={e => e.preventDefault()}
+              onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }}
             />
           </div>
           {/* Name tag */}

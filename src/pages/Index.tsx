@@ -184,22 +184,7 @@ export default function Index() {
     return () => clearTimeout(t);
   }, [state.totalClicks, submitScore]);
 
-  // Таймерная реклама — каждые 4 мин для AFK игроков (показывается при смене вкладки)
-  useEffect(() => {
-    const t = setInterval(() => {
-      if (adCooldownRef.current) return;
-      const sinceLastAd = Date.now() - lastAdTimeRef.current;
-      if (sinceLastAd >= 4 * 60 * 1000) {
-        adCooldownRef.current = true;
-        lastAdTimeRef.current = Date.now();
-        showFullscreenAd(() => {
-          setTimeout(() => { adCooldownRef.current = false; }, 15_000);
-        });
-      }
-    }, 30_000);
-    return () => clearInterval(t);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+
 
   // Логическая пауза — fullscreen при смене вкладки, не чаще раза в 3 мин
   const handleTabChange = (newTab: Tab) => {

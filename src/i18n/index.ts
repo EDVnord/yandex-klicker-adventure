@@ -223,7 +223,7 @@ export const translations = {
     nav_shop: 'Shop',
     nav_bonuses: 'Bonuses',
     nav_achievements: 'Awards',
-    game_title: 'NuboKlick',
+    game_title: 'NuboClick',
     ad_loading: 'Loading ad...',
     ad_hint: 'Watch to the end to get your bonus!',
     stat_coins: 'COINS',

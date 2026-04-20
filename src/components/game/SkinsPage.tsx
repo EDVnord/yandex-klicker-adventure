@@ -77,6 +77,7 @@ export default function SkinsPage({ lang, coins, currentSkinId, unlockedSkins, o
                   style={{ width: '100%', height: '100%', objectFit: 'cover', pointerEvents: 'none', userSelect: 'none' }}
                   draggable={false}
                   onContextMenu={e => e.preventDefault()}
+                  onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }}
                 />
                 {!unlocked && (
                   <div className="absolute inset-0 flex items-center justify-center"
