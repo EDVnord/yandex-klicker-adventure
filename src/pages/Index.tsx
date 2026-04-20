@@ -223,7 +223,7 @@ export default function Index() {
 
   /* Rewarded ad для бонусной страницы */
   const AD_COOLDOWNS_MS: Record<string, number> = {
-    lucky_spin:   60 * 60 * 1000,
+    lucky_spin:   0,
     coins_bonus:  60 * 60 * 1000,
     turbo:        60 * 60 * 1000,
     mega:         60 * 60 * 1000,

@@ -258,7 +258,6 @@ export default function AdOffersPage({
 }: Props) {
   const isAdBusy = adStatus === 'loading' || adStatus === 'showing';
 
-  const spinCooldown = getAdCooldownLeft('lucky_spin');
   const [spinning, setSpinning] = useState(false);
   const [winIndex, setWinIndex] = useState(0);
   const [winPrize, setWinPrize] = useState<typeof SPIN_PRIZES[number] | null>(null);
@@ -268,7 +267,7 @@ export default function AdOffersPage({
   const pendingPrize = useRef(SPIN_PRIZES[0]);
 
   const handleSpin = () => {
-    if (spinning || spinCooldown > 0 || isAdBusy) return;
+    if (spinning || isAdBusy) return;
     const idx = weightedRandom();
     pendingIdx.current = idx;
     pendingPrize.current = SPIN_PRIZES[idx];
@@ -358,43 +357,19 @@ export default function AdOffersPage({
           </div>
         )}
 
-        {spinCooldown > 0 && (
-          <div className="mt-3 mb-1">
-            <div className="flex items-center justify-between text-xs font-bold mb-1" style={{ color: '#a855f7' }}>
-              <span><Icon name="Clock" size={12} /> {t(lang, 'spin_next')}</span>
-              <span>{formatCooldown(spinCooldown, lang)}</span>
-            </div>
-            <div className="w-full rounded-full overflow-hidden" style={{ height: 6, background: '#1C2333' }}>
-              <div style={{
-                height: '100%',
-                width: `${Math.min(100, Math.max(2, (spinCooldown / 120) * 100))}%`,
-                background: 'linear-gradient(90deg, #7c3aed88, #a855f7)',
-                borderRadius: 9999,
-                transition: 'width 1s linear',
-                boxShadow: '0 0 8px #a855f766',
-              }} />
-            </div>
-          </div>
-        )}
         <div className="mt-2">
-          {spinCooldown > 0 ? (
-            <button className="rblx-btn rblx-btn-gray w-full py-3 font-game" disabled>
-              {t(lang, 'spin_charging')}
-            </button>
-          ) : (
-            <button
-              className="rblx-btn rblx-btn-blue w-full py-3 font-game text-base"
-              style={{ opacity: spinning || isAdBusy ? 0.65 : 1 }}
-              onClick={handleSpin}
-              disabled={spinning || isAdBusy}
-            >
-              {spinning
-                ? <><Icon name="Loader2" size={15} className="animate-spin" /> {t(lang, 'spin_spinning')}</>
-                : isAdBusy
-                  ? <><Icon name="Loader2" size={15} className="animate-spin" /> {t(lang, 'btn_ad_busy')}</>
-                  : <><Icon name="Play" size={15} /> {t(lang, 'spin_btn')}</>}
-            </button>
-          )}
+          <button
+            className="rblx-btn rblx-btn-blue w-full py-3 font-game text-base"
+            style={{ opacity: spinning || isAdBusy ? 0.65 : 1 }}
+            onClick={handleSpin}
+            disabled={spinning || isAdBusy}
+          >
+            {spinning
+              ? <><Icon name="Loader2" size={15} className="animate-spin" /> {t(lang, 'spin_spinning')}</>
+              : isAdBusy
+                ? <><Icon name="Loader2" size={15} className="animate-spin" /> {t(lang, 'btn_ad_busy')}</>
+                : <><Icon name="Play" size={15} /> {t(lang, 'spin_btn')}</>}
+          </button>
         </div>
       </div>
 
